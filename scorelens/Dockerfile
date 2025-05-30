@@ -24,7 +24,7 @@ WORKDIR /app
 # Copy the jar file into the container at /app.jar
 #COPY target/scorelens-0.0.1-SNAPSHOT.jar app.jar
 COPY --from=build /app/target/scorelens-0.0.1-SNAPSHOT.jar scorelens.war
-COPY --from=build /app/uploads/lab /app/uploads/lab
+#COPY --from=build /app/uploads/lab /app/uploads/lab
 #COPY --from=build /app/ArialUnicodeMSBold.ttf /app/
 # Expose port 8080 (change if your app uses another port)
 EXPOSE 8080
