@@ -17,21 +17,21 @@ public class StaffNotiId implements Serializable {
     @Column(name = "staffID", nullable = false, length = 50)
     private String staffID;
 
-    @Column(name = "notiID", nullable = false, length = 50)
-    private String notiID;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        StaffNotiId entity = (StaffNotiId) o;
-        return Objects.equals(this.notiID, entity.notiID) &&
-                Objects.equals(this.staffID, entity.staffID);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(notiID, staffID);
-    }
+//    @Column(name = "notiID", nullable = false, length = 50)
+//    private String notiID;
+//
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+//        StaffNotiId entity = (StaffNotiId) o;
+//        return Objects.equals(this.notiID, entity.notiID) &&
+//                Objects.equals(this.staffID, entity.staffID);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(notiID, staffID);
+//    }
 
 }

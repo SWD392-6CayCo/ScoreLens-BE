@@ -16,19 +16,19 @@ public class TablePool {
     @Column(name = "tableID", nullable = false)
     private Integer id;
 
-    @Column(name = "type", length = 50)
-    private String type;
-
-    @Column(name = "name", length = 100)
-    private String name;
-
-    @Column(name = "status", length = 50)
-    private String status;
-
-    @Column(name = "isActive")
-    private Boolean isActive;
-
-    @OneToMany(mappedBy = "tableID")
-    private Set<MatchPool> matchPools = new LinkedHashSet<>();
+//    @Column(name = "type", length = 50)
+//    private String type;
+//
+//    @Column(name = "name", length = 100)
+//    private String name;
+//
+//    @Column(name = "status", length = 50)
+//    private String status;
+//
+//    @Column(name = "isActive")
+//    private Boolean isActive;
+//
+//    @OneToMany(mappedBy = "tableID")
+//    private Set<MatchPool> matchPools = new LinkedHashSet<>();
 
 }

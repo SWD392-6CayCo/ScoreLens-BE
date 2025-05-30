@@ -1,4 +1,4 @@
-package com.scorelens.Security;
+package com.scorelens.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

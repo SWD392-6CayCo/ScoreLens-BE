@@ -17,23 +17,23 @@ public class Team {
     @Column(name = "teamID", nullable = false)
     private Integer id;
 
-    @Column(name = "name", length = 100)
-    private String name;
-
-    @Column(name = "totalScore")
-    private Integer totalScore;
-
-    @Column(name = "status", length = 50)
-    private String status;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matchID")
-    private MatchPool matchID;
-
-    @Column(name = "createAt")
-    private Instant createAt;
-
-    @OneToMany(mappedBy = "teamID")
-    private Set<Player> players = new LinkedHashSet<>();
+//    @Column(name = "name", length = 100)
+//    private String name;
+//
+//    @Column(name = "totalScore")
+//    private Integer totalScore;
+//
+//    @Column(name = "status", length = 50)
+//    private String status;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "matchID")
+//    private MatchPool matchID;
+//
+//    @Column(name = "createAt")
+//    private Instant createAt;
+//
+//    @OneToMany(mappedBy = "teamID")
+//    private Set<Player> players = new LinkedHashSet<>();
 
 }

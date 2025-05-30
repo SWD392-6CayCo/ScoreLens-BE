@@ -40,16 +40,16 @@ public class Customer {
     @Column(name = "type", length = 50)
     private String type;
 
-    @ManyToMany
-    @JoinTable(name = "CustomerNoti",
-            joinColumns = @JoinColumn(name = "customerID"),
-            inverseJoinColumns = @JoinColumn(name = "notiID"))
-    private Set<Notification> notifications = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "createByCustomer")
-    private Set<MatchPool> matchPools = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "customerID")
-    private Set<Player> players = new LinkedHashSet<>();
+//    @ManyToMany
+//    @JoinTable(name = "CustomerNoti",
+//            joinColumns = @JoinColumn(name = "customerID"),
+//            inverseJoinColumns = @JoinColumn(name = "notiID"))
+//    private Set<Notification> notifications = new LinkedHashSet<>();
+//
+//    @OneToMany(mappedBy = "createByCustomer")
+//    private Set<MatchPool> matchPools = new LinkedHashSet<>();
+//
+//    @OneToMany(mappedBy = "customerID")
+//    private Set<Player> players = new LinkedHashSet<>();
 
 }

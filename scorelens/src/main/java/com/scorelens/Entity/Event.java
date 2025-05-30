@@ -15,30 +15,30 @@ public class Event {
     @Column(name = "eventID", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matchID")
-    private MatchPool matchID;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "playerID")
-    private Player playerID;
-
-    @Column(name = "scoreValue")
-    private Boolean scoreValue;
-
-    @Column(name = "timeStamp")
-    private Instant timeStamp;
-
-    @Column(name = "imageURL")
-    private String imageURL;
-
-    @Column(name = "capturedByAI", length = 50)
-    private String capturedByAI;
-
-    @Column(name = "isFoul")
-    private Boolean isFoul;
-
-    @Column(name = "message")
-    private String message;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "matchID")
+//    private MatchPool matchID;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "playerID")
+//    private Player playerID;
+//
+//    @Column(name = "scoreValue")
+//    private Boolean scoreValue;
+//
+//    @Column(name = "timeStamp")
+//    private Instant timeStamp;
+//
+//    @Column(name = "imageURL")
+//    private String imageURL;
+//
+//    @Column(name = "capturedByAI", length = 50)
+//    private String capturedByAI;
+//
+//    @Column(name = "isFoul")
+//    private Boolean isFoul;
+//
+//    @Column(name = "message")
+//    private String message;
 
 }
