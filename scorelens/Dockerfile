@@ -1,6 +1,9 @@
 # Use a lightweight OpenJDK image as base
 FROM openjdk:22-jdk-slim
 
+# Set working directory inside container
+WORKDIR /app
+
 # Copy the jar file into the container at /app.jar
 COPY target/scorelens-0.0.1-SNAPSHOT.jar app.jar
 
