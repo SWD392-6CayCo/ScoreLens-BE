@@ -30,4 +30,9 @@ public class CustomerController {
         return customerService.findAll();
     }
 
+    @GetMapping("/api/hello")
+    public String hello() {
+        return "Hello World";
+    }
+
 }

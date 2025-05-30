@@ -3,6 +3,9 @@ server:
   servlet:
     context-path: /scorelens
 spring:
+  web:
+    resources:
+      add-mappings: true
   config:
     import:
   jpa:
@@ -13,4 +16,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 

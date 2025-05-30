@@ -1,6 +1,5 @@
 package com.scorelens;
 
-import com.scorelens.Client.GgSecretManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
