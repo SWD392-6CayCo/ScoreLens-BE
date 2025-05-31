@@ -7,25 +7,29 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/customers")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomerController {
 
+    @Autowired
     CustomerService customerService;
 
-    @GetMapping
+    @GetMapping("/all")
     List<Customer> getCustomers() {
         return customerService.findAll();
     }
@@ -34,5 +38,21 @@ public class CustomerController {
     public String hello() {
         return "Hello World";
     }
+
+    @GetMapping("/test")
+    public Customer testCustomer() {
+        Customer c = new Customer();
+        c.setCustomerID("C001");
+        c.setName("Mike");
+        c.setEmail("mike@gmail.com");
+        c.setPassword("123456");
+        c.setRole("VIP");
+        c.setDob(new Date(2000, 1, 1));
+        c.setCreateAt(new Date(2000, 1, 1));
+        c.setStatus("Active");
+        c.setType("VIP");
+        return c;
+    }
+
 
 }

@@ -1,19 +1,23 @@
 package com.scorelens.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 @Entity
+@Data
+@Table(name="customer")
 public class Customer {
     @Id
-    @Column(name = "customerID", nullable = false, length = 50)
+    @Column(name = "customerid", nullable = false, length = 50)
     private String customerID;
 
     @Column(name = "name", length = 100)
@@ -28,11 +32,13 @@ public class Customer {
     @Column(name = "role", length = 50)
     private String role;
 
-    @Column(name = "dob")
-    private LocalDate dob;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "dob", nullable = true)
+    private Date dob;
 
-    @Column(name = "createAt")
-    private LocalDate createAt;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "create_at", nullable = true)
+    private Date createAt;
 
     @Column(name = "status", length = 50)
     private String status;
@@ -40,16 +46,5 @@ public class Customer {
     @Column(name = "type", length = 50)
     private String type;
 
-//    @ManyToMany
-//    @JoinTable(name = "CustomerNoti",
-//            joinColumns = @JoinColumn(name = "customerID"),
-//            inverseJoinColumns = @JoinColumn(name = "notiID"))
-//    private Set<Notification> notifications = new LinkedHashSet<>();
-//
-//    @OneToMany(mappedBy = "createByCustomer")
-//    private Set<MatchPool> matchPools = new LinkedHashSet<>();
-//
-//    @OneToMany(mappedBy = "customerID")
-//    private Set<Player> players = new LinkedHashSet<>();
 
 }
