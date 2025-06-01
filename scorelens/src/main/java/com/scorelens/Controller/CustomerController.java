@@ -34,10 +34,20 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseObject> getCustomerById(@PathVariable String id) {
-        return customerService.findById(id)
-                .map(customer -> ResponseEntity.ok(new ResponseObject(200, "Customer found", customer)))
-                .orElse(ResponseEntity.status(404).body(new ResponseObject(404, "Customer not found", null)));
+    public ResponseObject getCustomerById(@PathVariable String id) {
+        Optional<Customer> customer = customerService.findById(id);
+        if (customer.isPresent()) {
+            return ResponseObject.builder()
+                    .status(1000)
+                    .message("Customer found")
+                    .data(customer)
+                    .build();
+        }
+        return ResponseObject.builder()
+                .status(404)
+                .message("Customer not found")
+                .data(null)
+                .build();
     }
 
     @PostMapping
@@ -46,7 +56,7 @@ public class CustomerController {
         return ResponseEntity.ok(new ResponseObject(201, "Customer created", newCustomer));
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<ResponseObject> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
         Customer updatedCustomer = customerService.update(id, customer);
         if (updatedCustomer == null) {
@@ -55,7 +65,7 @@ public class CustomerController {
         return ResponseEntity.ok(new ResponseObject(200, "Customer updated", updatedCustomer));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<ResponseObject> deleteCustomer(@PathVariable String id) {
         boolean deleted = customerService.deleteById(id);
         if (deleted) {
