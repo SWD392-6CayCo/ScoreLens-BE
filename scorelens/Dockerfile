@@ -1,4 +1,4 @@
-ROM maven:3-openjdk-22 AS build
+FROM maven:3-openjdk-17 AS build
 WORKDIR /app
 COPY /scorelens/pom.xml .
 COPY /scorelens/src src
@@ -16,7 +16,7 @@ RUN ls -l /app/target
 
 
 # Use a lightweight OpenJDK image as base
-FROM openjdk:22-jdk-slim
+FROM openjdk:17-jdk-slim
 
 # Set working directory inside container
 WORKDIR /app
