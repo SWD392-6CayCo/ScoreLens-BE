@@ -1,6 +1,9 @@
 package com.scorelens.Service;
 
+import com.scorelens.DTOs.Request.CustomerRequestDto;
 import com.scorelens.Entity.Customer;
+import com.scorelens.Exception.AppException;
+import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Repository.CustomerRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +25,11 @@ public class CustomerService {
     public List<Customer> findAll() {return customerRepo.findAll();}
 
     public Optional<Customer> findById(String id) {return customerRepo.findById(id);}
+
     public Customer save(Customer customer) {
         return customerRepo.save(customer);
     }
+
     public boolean deleteById(String id) {
         if(customerRepo.existsById(id)) {
             customerRepo.deleteById(id);
@@ -32,6 +37,8 @@ public class CustomerService {
         }
         return false;
     }
+
+    //-------------------------------- UPDATE ---------------------------------
     public Customer update(String id, Customer newCustomer) {
         return customerRepo.findById(id)
                 .map(existingCustomer -> {
@@ -49,4 +56,16 @@ public class CustomerService {
                 .orElse(null);
     }
 
+    //-------------------------------- CREATE ---------------------------------
+    public Customer createCustomer(CustomerRequestDto request){
+        if(customerRepo.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXSITED);
+        }
+        if(customerRepo.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new AppException(ErrorCode.PHONE_EXISTED);
+        }
+
+//        request.
+        return null;
+    }
 }
