@@ -30,7 +30,6 @@ public class Customer {
     @Column(name = "password", length = 100)
     private String password;
 
-
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "dob", nullable = true)
     private Date dob;
@@ -48,8 +47,4 @@ public class Customer {
 
     @Column(name = "status", length = 10)
     private String status;
-
-
-
-
 }
