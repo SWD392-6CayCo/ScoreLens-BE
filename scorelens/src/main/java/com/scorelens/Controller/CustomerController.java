@@ -39,20 +39,5 @@ public class CustomerController {
         return "Hello World";
     }
 
-    @GetMapping("/test")
-    public Customer testCustomer() {
-        Customer c = new Customer();
-        c.setCustomerID("C001");
-        c.setName("Mike");
-        c.setEmail("mike@gmail.com");
-        c.setPassword("123456");
-        c.setRole("VIP");
-        c.setDob(new Date(2000, 1, 1));
-        c.setCreateAt(new Date(2000, 1, 1));
-        c.setStatus("Active");
-        c.setType("VIP");
-        return c;
-    }
-
 
 }

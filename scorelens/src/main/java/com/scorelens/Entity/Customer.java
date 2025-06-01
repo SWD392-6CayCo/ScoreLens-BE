@@ -10,14 +10,12 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@Getter
-@Setter
-@Entity
 @Data
+@Entity
 @Table(name="customer")
 public class Customer {
     @Id
-    @Column(name = "customerid", nullable = false, length = 50)
+    @Column(name = "customerID", nullable = false, length = 50)
     private String customerID;
 
     @Column(name = "name", length = 100)
@@ -26,25 +24,32 @@ public class Customer {
     @Column(name = "email", length = 100)
     private String email;
 
+    @Column(name = "phoneNumber", length = 100)
+    private String phoneNumber;
+
     @Column(name = "password", length = 100)
     private String password;
 
-    @Column(name = "role", length = 50)
-    private String role;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "dob", nullable = true)
     private Date dob;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "create_at", nullable = true)
+    @Column(name = "createAt", nullable = true)
     private Date createAt;
 
-    @Column(name = "status", length = 50)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "updateAt", nullable = true)
+    private Date updateAt;
+
+    @Column(name = "type", length = 10)
+    private String type;
+
+    @Column(name = "status", length = 10)
     private String status;
 
-    @Column(name = "type", length = 50)
-    private String type;
+
 
 
 }
