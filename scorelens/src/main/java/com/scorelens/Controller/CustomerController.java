@@ -3,6 +3,7 @@ package com.scorelens.Controller;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.CustomerService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,12 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
+@Tag(name = "Customer", description = "Quản lý mấy khứa khách hàng")
 @RestController
 @RequestMapping("/customers")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -28,9 +28,40 @@ public class CustomerController {
     CustomerService customerService;
 
     @GetMapping("/all")
-    List<Customer> getCustomers() {
-        return customerService.findAll();
+    public ResponseEntity<ResponseObject> getAllCustomers() {
+        List<Customer> customers = customerService.findAll();
+        return ResponseEntity.ok(new ResponseObject(200, "Get all customers successfully", customers));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseObject> getCustomerById(@PathVariable String id) {
+        return customerService.findById(id)
+                .map(customer -> ResponseEntity.ok(new ResponseObject(200, "Customer found", customer)))
+                .orElse(ResponseEntity.status(404).body(new ResponseObject(404, "Customer not found", null)));
+    }
+
+    @PostMapping
+    public ResponseEntity<ResponseObject> createCustomer(@RequestBody Customer customer) {
+        Customer newCustomer = customerService.save(customer);
+        return ResponseEntity.ok(new ResponseObject(201, "Customer created", newCustomer));
+    }
+
+    @PutMapping
+    public ResponseEntity<ResponseObject> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
+        Customer updatedCustomer = customerService.update(id, customer);
+        if (updatedCustomer == null) {
+            return ResponseEntity.status(404).body(new ResponseObject(404, "Customer not found", null));
+        }
+        return ResponseEntity.ok(new ResponseObject(200, "Customer updated", updatedCustomer));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<ResponseObject> deleteCustomer(@PathVariable String id) {
+        boolean deleted = customerService.deleteById(id);
+        if (deleted) {
+            return ResponseEntity.ok(new ResponseObject(200, "Customer deleted", null));
+        }
+        return ResponseEntity.status(404).body(new ResponseObject(404, "Customer not found", null));
+    }
 
 }

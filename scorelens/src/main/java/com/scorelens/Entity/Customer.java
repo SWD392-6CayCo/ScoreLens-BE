@@ -1,14 +1,12 @@
 package com.scorelens.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -30,17 +28,20 @@ public class Customer {
     @Column(name = "password", length = 100)
     private String password;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Schema(type = "string", pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Column(name = "dob", nullable = true)
-    private Date dob;
+    private LocalDate dob;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Schema(type = "string", pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Column(name = "createAt", nullable = true)
-    private Date createAt;
+    private LocalDate createAt;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Schema(type = "string", pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "dd-MM-yyyy")
     @Column(name = "updateAt", nullable = true)
-    private Date updateAt;
+    private LocalDate updateAt;
 
     @Column(name = "type", length = 10)
     private String type;

@@ -10,9 +10,7 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI openAPI() {
-
-        return new OpenAPI().info(new Info().title("Scorelens-Api").version("1.0"));
-
+        return new OpenAPI().info(new Info().title("Scorelens - ベトナムのビリヤードは世界一").version("1.0"));
     }
 
 }
