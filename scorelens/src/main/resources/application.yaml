@@ -7,6 +7,7 @@ spring:
     url: "jdbc:mysql://${DB_USERNAME}:${DB_HOST}:${DB_PORT}/${DB_NAME}?ssl-mode=REQUIRED"
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   web:
     resources:
       add-mappings: true
