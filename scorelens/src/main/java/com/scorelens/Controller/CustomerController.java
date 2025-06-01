@@ -32,10 +32,6 @@ public class CustomerController {
         return customerService.findAll();
     }
 
-    Customer getById() {
-
-    }
-
     @GetMapping("/api/hello")
     public String hello() {
         return "Hello World";
