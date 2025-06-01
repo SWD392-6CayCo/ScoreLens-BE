@@ -1,4 +1,4 @@
-ROM maven:3-openjdk-22 AS build
+FROM maven:3-openjdk-22 AS build
 WORKDIR /app
 COPY /scorelens/pom.xml .
 COPY /scorelens/src src
