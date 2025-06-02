@@ -46,7 +46,7 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
 
     <dependencies>
 
-<!--        google secret manager-->
+        <!--        google secret manager-->
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-secretmanager</artifactId>
@@ -57,7 +57,7 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
         </dependency>
 
 
-<!--        openApi-->
+        <!--        openApi-->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -102,7 +102,14 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>1.5.5.Final</version>
+            <version>1.6.3</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.6.3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

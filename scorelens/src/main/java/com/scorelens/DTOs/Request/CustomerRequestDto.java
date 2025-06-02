@@ -1,5 +1,9 @@
 package com.scorelens.DTOs.Request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.scorelens.Constants.RegexConstants;
+import com.scorelens.Constants.ValidationMessages;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -13,16 +17,27 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class CustomerRequestDto implements Serializable {
+
     private final String name;
-    @Email(message = "Email must be a valid Vietnamese domain (e.g., @gmail.com, @yahoo.com.vn)", regexp = "^[a-zA-Z0-9._%+-]+@(gmail\\\\.com|yahoo\\\\.com\\\\.vn|outlook\\\\.com\\\\.vn|hocmai\\\\.vn|fpt\\\\.edu\\\\.vn|vnpt\\\\.vn)$")
+
+    @Pattern(
+            regexp = RegexConstants.VIETNAMESE_EMAIL,
+            message = ValidationMessages.EMAIL_DOMAIN
+    )
     private final String email;
-    @Pattern(message = "Phone number must start with 0 and contain 8 or 10 digits", regexp = "^0\\\\d{7}(\\\\d{2})?$")
+
+    @Pattern(
+            regexp = RegexConstants.VIETNAMESE_PHONE,
+            message = ValidationMessages.PHONE_FORMAT
+    )
     private final String phoneNumber;
-    @NotNull(message = "Password can not be null")
-    @Size(message = "Password at least 6 characters", min = 6)
-    @NotEmpty(message = "Password can not be empty")
-    @NotBlank(message = "Password can not be left blank")
+
+    @NotBlank(message = ValidationMessages.PASSWORD_REQUIRED)
+    @Size(min = 6, message = ValidationMessages.PASSWORD_LENGTH)
     private final String password;
-    @FutureOrPresent(message = "Thời gian sinh chỉ được phép ở trong quá khứ")
+
+    @Past(message = ValidationMessages.DOB_PAST)
+    @Schema(type = "string", pattern = "dd-MM-yyyy")//Hiển thị format dd-MM-yyyy trên swagger
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate dob;
 }

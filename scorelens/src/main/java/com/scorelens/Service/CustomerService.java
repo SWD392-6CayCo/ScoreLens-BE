@@ -4,13 +4,19 @@ import com.scorelens.DTOs.Request.CustomerRequestDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
+import com.scorelens.Mapper.CustomerMapper;
 import com.scorelens.Repository.CustomerRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +27,9 @@ public class CustomerService {
 
     @Autowired
     CustomerRepo customerRepo;
+
+    @Autowired
+    CustomerMapper customerMapper;
 
     public List<Customer> findAll() {return customerRepo.findAll();}
 
@@ -64,8 +73,16 @@ public class CustomerService {
         if(customerRepo.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
+        //Bắt IllegalArgumentException
+        Customer customer = customerMapper.toEntity(request);
+        customer.setCreateAt(LocalDate.now());
+        customer.setStatus("active");
+        customer.setType("normal");
+        //upload ảnh...
 
-//        request.
-        return null;
+        //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        customer.setPassword(passwordEncoder.encode(request.getPassword()));
+        return customerRepo.save(customer);
     }
 }
