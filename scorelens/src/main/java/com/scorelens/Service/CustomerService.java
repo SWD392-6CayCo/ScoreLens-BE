@@ -74,6 +74,7 @@ public class CustomerService {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
         //Bắt IllegalArgumentException
+
         Customer customer = customerMapper.toEntity(request);
         customer.setCreateAt(LocalDate.now());
         customer.setStatus("active");

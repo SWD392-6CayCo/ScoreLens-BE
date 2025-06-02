@@ -25,13 +25,30 @@ public class GlobalHandlingException {//Runtime exception
                 .build());
     }
 
-
-
     //validation
+//    @ExceptionHandler(value = MethodArgumentNotValidException.class)
+//    ResponseEntity<ResponseObject> HandlingValidation(MethodArgumentNotValidException exception) {
+//        String enumKey = exception.getFieldError().getDefaultMessage();
+//        ErrorCode errorCode = ErrorCode.valueOf(enumKey);
+//        return ResponseEntity.badRequest().body(ResponseObject.builder()
+//                .status(errorCode.getCode())
+//                .message(errorCode.getMessage())
+//                .build());
+//    }
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ResponseObject> HandlingValidation(MethodArgumentNotValidException exception) {
-        String enumKey = exception.getFieldError().getDefaultMessage();
-        ErrorCode errorCode = ErrorCode.valueOf(enumKey);
+        String messageKey = exception.getFieldError().getDefaultMessage();
+        ErrorCode errorCode = null;
+
+        try {
+            errorCode = ErrorCode.valueOf(messageKey); // Nếu là key enum
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ResponseObject.builder()
+                    .status(400)
+                    .message(messageKey) // Hiển thị luôn message gốc
+                    .build());
+        }
+
         return ResponseEntity.badRequest().body(ResponseObject.builder()
                 .status(errorCode.getCode())
                 .message(errorCode.getMessage())

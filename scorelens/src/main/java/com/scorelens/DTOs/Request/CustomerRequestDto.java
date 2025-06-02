@@ -3,6 +3,7 @@ package com.scorelens.DTOs.Request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Constants.RegexConstants;
 import com.scorelens.Constants.ValidationMessages;
+import com.scorelens.Exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
