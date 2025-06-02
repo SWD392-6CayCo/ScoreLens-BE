@@ -1,6 +1,7 @@
 package com.scorelens.Service;
 
 import com.scorelens.DTOs.Request.CustomerRequestDto;
+import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
@@ -31,9 +32,14 @@ public class CustomerService {
     @Autowired
     CustomerMapper customerMapper;
 
-    public List<Customer> findAll() {return customerRepo.findAll();}
+    public List<CustomerResponseDto> findAll() {
+        return customerMapper.toResponseDtoList(customerRepo.findAll());
+    }
 
-    public Optional<Customer> findById(String id) {return customerRepo.findById(id);}
+    public CustomerResponseDto findById(String id) {
+        CustomerResponseDto responseDto = customerMapper.toResponseDto(customerRepo.findById(id).get());
+        return responseDto;
+    }
 
     public Customer save(Customer customer) {
         return customerRepo.save(customer);
@@ -48,34 +54,44 @@ public class CustomerService {
     }
 
     //-------------------------------- UPDATE ---------------------------------
-    public Customer update(String id, Customer newCustomer) {
-        return customerRepo.findById(id)
-                .map(existingCustomer -> {
-                    existingCustomer.setName(newCustomer.getName());
-                    existingCustomer.setEmail(newCustomer.getEmail());
-                    existingCustomer.setPhoneNumber(newCustomer.getPhoneNumber());
-                    existingCustomer.setPassword(newCustomer.getPassword());
-                    existingCustomer.setDob(newCustomer.getDob());
-                    existingCustomer.setCreateAt(newCustomer.getCreateAt());
-                    existingCustomer.setUpdateAt(newCustomer.getUpdateAt());
-                    existingCustomer.setType(newCustomer.getType());
-                    existingCustomer.setStatus(newCustomer.getStatus());
-                    return customerRepo.save(existingCustomer);
-                })
-                .orElse(null);
+    public Customer update(String id, CustomerRequestDto requestDto) {
+        //Lấy ra Customer cần update
+        Customer customer = customerRepo.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST)
+        );
+
+        if(customerRepo.existsByEmail(requestDto.getEmail()) && !customer.getEmail().equals(requestDto.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXSITED);
+        }
+        if(customerRepo.existsByPhoneNumber(requestDto.getPhoneNumber()) && !customer.getPhoneNumber().equals(requestDto.getPhoneNumber())) {
+            throw new AppException(ErrorCode.PHONE_EXISTED);
+        }
+
+        // Mã hóa password
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+
+        //Map dto sang entity
+        customerMapper.toEntity(customer,requestDto);
+
+        return customerRepo.save(customer);
     }
 
     //-------------------------------- CREATE ---------------------------------
     public Customer createCustomer(CustomerRequestDto request){
+        //Kiểm tra xem Email và PhoneNumber đã đc sử dụng hay chưa-------
         if(customerRepo.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXSITED);
         }
         if(customerRepo.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
-        //Bắt IllegalArgumentException
+        //----------------------------------------------------------------
 
+        //Map từ dto sang Entity
         Customer customer = customerMapper.toEntity(request);
+
+        //set các giá trị còn lại của customer
         customer.setCreateAt(LocalDate.now());
         customer.setStatus("active");
         customer.setType("normal");
@@ -84,6 +100,7 @@ public class CustomerService {
         //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
+
         return customerRepo.save(customer);
     }
 }

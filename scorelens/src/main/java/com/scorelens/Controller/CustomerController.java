@@ -1,8 +1,10 @@
 package com.scorelens.Controller;
 
 import com.scorelens.DTOs.Request.CustomerRequestDto;
+import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.ResponseObject;
+import com.scorelens.Repository.CustomerRepo;
 import com.scorelens.Service.CustomerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,18 +33,36 @@ public class CustomerController {
 
     //    ---------------------------------------- GET ----------------------------------------
     @GetMapping("/all")
-    public ResponseEntity<ResponseObject> getAllCustomers() {
-        List<Customer> customers = customerService.findAll();
-        return ResponseEntity.ok(new ResponseObject(200, "Get all customers successfully", customers));
+    public ResponseObject getAllCustomers() {
+        List<CustomerResponseDto> customers = customerService.findAll();
+        if(customers.isEmpty()) {
+            return ResponseObject.builder()
+                    .status(404)
+                    .data(null)
+                    .message("Empty customer list")
+                    .build();
+        }
+        return ResponseObject.builder()
+                .status(1000)
+                .data(customers)
+                .message("Get all customers successfully")
+                .build();
     }
 
     @GetMapping("/{id}")
     public ResponseObject getCustomerById(@PathVariable String id) {
-        Optional<Customer> customer = customerService.findById(id);
-        if (customer.isPresent()) {
-            return ResponseObject.builder().status(1000).message("Customer found").data(customer).build();
+        CustomerResponseDto responseDto = customerService.findById(id);
+        if (responseDto != null) {
+            return ResponseObject.builder()
+                    .status(1000)
+                    .message("Customer found")
+                    .data(responseDto).build();
         }
-        return ResponseObject.builder().status(404).message("Customer not found").data(null).build();
+        return ResponseObject.builder()
+                .status(404)
+                .message("Customer not found")
+                .data(null)
+                .build();
     }
     //    ---------------------------------------------------------------------------------------------
 
@@ -60,12 +80,20 @@ public class CustomerController {
 
     //    ---------------------------------------- UPDATE/PUT ----------------------------------------
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseObject> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
-        Customer updatedCustomer = customerService.update(id, customer);
+    public ResponseObject updateCustomer(@PathVariable String id, @RequestBody CustomerRequestDto requestDto) {
+        Customer updatedCustomer = customerService.update(id, requestDto);
         if (updatedCustomer == null) {
-            return ResponseEntity.status(404).body(new ResponseObject(404, "Customer not found", null));
+            return ResponseObject.builder()
+                    .status(404)
+                    .data(null)
+                    .message("Customer not found")
+                    .build();
         }
-        return ResponseEntity.ok(new ResponseObject(200, "Customer updated", updatedCustomer));
+        return ResponseObject.builder()
+                .status(1000)
+                .data(updatedCustomer)
+                .message("Customer updated successfully")
+                .build();
     }
     //    -----------------------------------------------------------------------------------------------
 

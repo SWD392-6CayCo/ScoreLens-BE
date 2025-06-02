@@ -13,7 +13,7 @@ public enum ErrorCode {
     //-------------------------- USER -----------------------------------
     EMAIL_EXSITED(1001, "This email is already in use"),
     PHONE_EXISTED(1003, "Phone number is already in use"),
-//    PASS_LENGTH(1004,ValidationMessages.PASSWORD_LENGTH),
+    USER_NOT_EXIST(1005, "User Not Found"),
     ;
     private int code;
     private String message;

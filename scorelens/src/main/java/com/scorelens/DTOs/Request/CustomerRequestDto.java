@@ -35,7 +35,7 @@ public class CustomerRequestDto implements Serializable {
 
     @NotBlank(message = ValidationMessages.PASSWORD_REQUIRED)
     @Size(min = 6, message = ValidationMessages.PASSWORD_LENGTH)
-    private final String password;
+    private String password;
 
     @Past(message = ValidationMessages.DOB_PAST)
     @Schema(type = "string", pattern = "dd-MM-yyyy")//Hiển thị format dd-MM-yyyy trên swagger
