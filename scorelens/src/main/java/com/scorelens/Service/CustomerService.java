@@ -3,6 +3,7 @@ package com.scorelens.Service;
 import com.scorelens.DTOs.Request.CustomerRequestDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.Customer;
+import com.scorelens.Enums.StatusType;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.CustomerMapper;
@@ -94,7 +95,7 @@ public class CustomerService {
 
         //set các giá trị còn lại của customer
         customer.setCreateAt(LocalDate.now());
-        customer.setStatus("active");
+        customer.setStatus(StatusType.active);
         customer.setType("normal");
         //upload ảnh...
 
@@ -109,10 +110,10 @@ public class CustomerService {
         boolean check = true;
         Customer c = customerRepo.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXIST));
-        if (!status.equalsIgnoreCase("active") && !status.equalsIgnoreCase("inactive")) {
+        if (!status.equalsIgnoreCase(StatusType.active.toString()) && !status.equalsIgnoreCase(StatusType.inactive.toString())) {
             throw new AppException(ErrorCode.INVALID_STATUS); // Optional: bạn có thể thêm enum hoặc custom error code
         }
-        c.setStatus(status.toLowerCase());
+        c.setStatus(StatusType.valueOf(status));
         customerRepo.save(c);
 
         return check;

@@ -1,6 +1,7 @@
 package com.scorelens.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.scorelens.Enums.StatusType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -50,6 +51,7 @@ public class Customer {
     @Column(name = "type", length = 10)
     private String type;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
-    private String status;
+    private StatusType status;
 }
