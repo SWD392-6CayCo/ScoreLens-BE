@@ -37,7 +37,8 @@ public class CustomerService {
     }
 
     public CustomerResponseDto findById(String id) {
-        CustomerResponseDto responseDto = customerMapper.toResponseDto(customerRepo.findById(id).get());
+        Optional<Customer> optionalCus = customerRepo.findById(id);
+        CustomerResponseDto responseDto = customerMapper.toResponseDto(optionalCus.get());
         return responseDto;
     }
 
@@ -102,5 +103,18 @@ public class CustomerService {
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return customerRepo.save(customer);
+    }
+
+    public boolean updateCustomerStatus(String id, String status) {
+        boolean check = true;
+        Customer c = customerRepo.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST));
+        if (!status.equalsIgnoreCase("active") && !status.equalsIgnoreCase("inactive")) {
+            throw new AppException(ErrorCode.INVALID_STATUS); // Optional: bạn có thể thêm enum hoặc custom error code
+        }
+        c.setStatus(status.toLowerCase());
+        customerRepo.save(c);
+
+        return check;
     }
 }

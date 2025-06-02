@@ -97,6 +97,25 @@ public class CustomerController {
     }
     //    -----------------------------------------------------------------------------------------------
 
+    //    ---------------------------------------- UPDATE STATUS (BAN/UNBAN) ----------------------------------------
+    @PutMapping("/{id}/status")
+    public ResponseObject updateCustomerStatus(@PathVariable String id, @RequestParam String status) {
+        boolean updated = customerService.updateCustomerStatus(id, status);
+        if(updated) {
+            return ResponseObject.builder()
+                    .status(1000)
+                    .data(null)
+                    .message(String.format("Customer status changed to '%s' successfully", status))
+                    .build();
+        }
+        return ResponseObject.builder()
+                .status(404)
+                .data(null)
+                .message("Customer status updated failed")
+                .build();
+    }
+    //    ---------------------------------------------------------------------------------------------
+
     //    ---------------------------------------- DELETE ------------------------------------------------
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseObject> deleteCustomer(@PathVariable String id) {
