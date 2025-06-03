@@ -14,6 +14,7 @@ public enum ErrorCode {
     EMAIL_EXSITED(1001, "This email is already in use"),
     PHONE_EXISTED(1003, "Phone number is already in use"),
     USER_NOT_EXIST(1005, "User Not Found"),
+    EMPTY_LIST(1006, "Empty list"),
     INVALID_STATUS(1007, "Status must be active or inactive"),
     ;
     private int code;

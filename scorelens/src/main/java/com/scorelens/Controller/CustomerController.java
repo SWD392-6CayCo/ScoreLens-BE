@@ -35,13 +35,6 @@ public class CustomerController {
     @GetMapping("/all")
     public ResponseObject getAllCustomers() {
         List<CustomerResponseDto> customers = customerService.findAll();
-        if(customers.isEmpty()) {
-            return ResponseObject.builder()
-                    .status(404)
-                    .data(null)
-                    .message("Empty customer list")
-                    .build();
-        }
         return ResponseObject.builder()
                 .status(1000)
                 .data(customers)
@@ -52,17 +45,10 @@ public class CustomerController {
     @GetMapping("/{id}")
     public ResponseObject getCustomerById(@PathVariable String id) {
         CustomerResponseDto responseDto = customerService.findById(id);
-        if (responseDto != null) {
             return ResponseObject.builder()
                     .status(1000)
                     .message("Customer found")
                     .data(responseDto).build();
-        }
-        return ResponseObject.builder()
-                .status(404)
-                .message("Customer not found")
-                .data(null)
-                .build();
     }
     //    ---------------------------------------------------------------------------------------------
 

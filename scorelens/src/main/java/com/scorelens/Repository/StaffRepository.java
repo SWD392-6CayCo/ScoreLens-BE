@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface StaffRepository extends JpaRepository<Staff, String> {
-    Optional<Staff> findByEmail(String name);
-
+    boolean existsByEmail(String email);
+    boolean existsByPhoneNumber(String phoneNumber);
 }

@@ -111,6 +111,12 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
             <version>1.6.3</version>
             <scope>provided</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+<!--        <dependency>-->
+<!--            <groupId>org.flywaydb</groupId>-->
+<!--            <artifactId>flyway-core</artifactId>-->
+<!--            <version>9.22.3</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

@@ -34,12 +34,19 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public List<CustomerResponseDto> findAll() {
-        return customerMapper.toDtoList(customerRepo.findAll());
+        List<Customer> customers = customerRepo.findAll();
+        if(customers.isEmpty()){
+            throw new AppException(ErrorCode.EMPTY_LIST);
+        }
+        return customerMapper.toDtoList(customers);
     }
 
     @Override
     public CustomerResponseDto findById(String id) {
         Optional<Customer> optionalCus = customerRepo.findById(id);
+        if (optionalCus.isEmpty()) {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
         CustomerResponseDto responseDto = customerMapper.toDto(optionalCus.get());
         return responseDto;
     }
