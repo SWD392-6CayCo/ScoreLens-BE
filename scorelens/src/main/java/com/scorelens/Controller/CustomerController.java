@@ -69,7 +69,7 @@ public class CustomerController {
     //    ---------------------------------------- CREATE/POST ----------------------------------------
     @PostMapping
     public ResponseObject createCustomer(@RequestBody @Valid CustomerRequestDto requestDto) {
-        Customer newCustomer = customerService.createCustomer(requestDto);
+        CustomerResponseDto newCustomer = customerService.createCustomer(requestDto);
         return ResponseObject.builder()
                 .status(1000)
                 .data(newCustomer)
@@ -81,7 +81,7 @@ public class CustomerController {
     //    ---------------------------------------- UPDATE/PUT ----------------------------------------
     @PutMapping("/{id}")
     public ResponseObject updateCustomer(@PathVariable String id, @RequestBody CustomerRequestDto requestDto) {
-        Customer updatedCustomer = customerService.update(id, requestDto);
+        CustomerResponseDto updatedCustomer = customerService.updateCustomer(id, requestDto);
         if (updatedCustomer == null) {
             return ResponseObject.builder()
                     .status(404)

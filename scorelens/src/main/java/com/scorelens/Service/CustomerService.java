@@ -8,6 +8,7 @@ import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.CustomerMapper;
 import com.scorelens.Repository.CustomerRepo;
+import com.scorelens.Service.Interface.ICustomerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,15 +18,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class CustomerService {
+public class CustomerService implements ICustomerService {
 
     @Autowired
     CustomerRepo customerRepo;
@@ -33,20 +32,19 @@ public class CustomerService {
     @Autowired
     CustomerMapper customerMapper;
 
+    @Override
     public List<CustomerResponseDto> findAll() {
-        return customerMapper.toResponseDtoList(customerRepo.findAll());
+        return customerMapper.toDtoList(customerRepo.findAll());
     }
 
+    @Override
     public CustomerResponseDto findById(String id) {
         Optional<Customer> optionalCus = customerRepo.findById(id);
-        CustomerResponseDto responseDto = customerMapper.toResponseDto(optionalCus.get());
+        CustomerResponseDto responseDto = customerMapper.toDto(optionalCus.get());
         return responseDto;
     }
 
-    public Customer save(Customer customer) {
-        return customerRepo.save(customer);
-    }
-
+    @Override
     public boolean deleteById(String id) {
         if(customerRepo.existsById(id)) {
             customerRepo.deleteById(id);
@@ -56,7 +54,8 @@ public class CustomerService {
     }
 
     //-------------------------------- UPDATE ---------------------------------
-    public Customer update(String id, CustomerRequestDto requestDto) {
+    @Override
+    public CustomerResponseDto updateCustomer(String id, CustomerRequestDto requestDto) {
         //Lấy ra Customer cần update
         Customer customer = customerRepo.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXIST)
@@ -74,13 +73,16 @@ public class CustomerService {
         requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
         //Map dto sang entity
-        customerMapper.toEntity(customer,requestDto);
-
-        return customerRepo.save(customer);
+        customer = customerMapper.toEntity(requestDto);
+        customer.setUpdateAt(LocalDate.now());
+        customerRepo.save(customer);
+        CustomerResponseDto responseDto = customerMapper.toDto(customer);
+        return responseDto;
     }
 
     //-------------------------------- CREATE ---------------------------------
-    public Customer createCustomer(CustomerRequestDto request){
+    @Override
+    public CustomerResponseDto createCustomer(CustomerRequestDto request){
         //Kiểm tra xem Email và PhoneNumber đã đc sử dụng hay chưa-------
         if(customerRepo.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXSITED);
@@ -103,9 +105,12 @@ public class CustomerService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        return customerRepo.save(customer);
+        customerRepo.save(customer);
+        CustomerResponseDto responseDto = customerMapper.toDto(customer);
+        return responseDto;
     }
-
+    //-------------------------------- UPDATE STATUS BANED/UNBANED ---------------------------------
+    @Override
     public boolean updateCustomerStatus(String id, String status) {
         boolean check = true;
         Customer c = customerRepo.findById(id).orElseThrow(
@@ -114,6 +119,7 @@ public class CustomerService {
             throw new AppException(ErrorCode.INVALID_STATUS); // Optional: bạn có thể thêm enum hoặc custom error code
         }
         c.setStatus(StatusType.valueOf(status));
+        c.setUpdateAt(LocalDate.now());
         customerRepo.save(c);
 
         return check;

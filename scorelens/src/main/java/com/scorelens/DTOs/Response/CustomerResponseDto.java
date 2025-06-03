@@ -17,7 +17,6 @@ public class CustomerResponseDto implements Serializable {
     private final String name;
     private final String email;
     private final String phoneNumber;
-    private final String password;
     private final LocalDate dob;
     private final LocalDate createAt;
     private final LocalDate updateAt;

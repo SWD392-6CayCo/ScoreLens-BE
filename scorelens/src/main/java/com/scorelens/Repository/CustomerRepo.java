@@ -1,6 +1,5 @@
 package com.scorelens.Repository;
 
-
 import com.scorelens.Entity.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 

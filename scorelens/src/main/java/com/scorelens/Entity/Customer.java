@@ -53,5 +53,5 @@ public class Customer {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
-    private StatusType status;
+    private StatusType status; //active, inactive
 }
