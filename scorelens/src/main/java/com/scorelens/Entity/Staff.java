@@ -37,7 +37,7 @@ public class Staff {
     @Column(name = "address", length = 255)
     private String address;
 
-    @Column(name = "password", length = 30, nullable = false)
+    @Column(name = "password", length = 100)
     private String password;
 
     @Enumerated(EnumType.STRING)

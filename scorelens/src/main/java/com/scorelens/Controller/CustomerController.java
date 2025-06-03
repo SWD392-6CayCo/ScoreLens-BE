@@ -66,7 +66,7 @@ public class CustomerController {
 
     //    ---------------------------------------- UPDATE/PUT ----------------------------------------
     @PutMapping("/{id}")
-    public ResponseObject updateCustomer(@PathVariable String id, @RequestBody CustomerRequestDto requestDto) {
+    public ResponseObject updateCustomer(@PathVariable String id, @RequestBody @Valid CustomerRequestDto requestDto) {
         CustomerResponseDto updatedCustomer = customerService.updateCustomer(id, requestDto);
         if (updatedCustomer == null) {
             return ResponseObject.builder()

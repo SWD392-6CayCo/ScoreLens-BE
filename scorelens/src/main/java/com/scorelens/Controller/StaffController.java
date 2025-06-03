@@ -5,7 +5,12 @@ import com.scorelens.DTOs.Response.StaffResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.StaffService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +23,7 @@ public class StaffController {
     @Autowired
     StaffService staffService;
 
+    //    ---------------------------------------- GET ----------------------------------------
     @GetMapping("/all")
     public ResponseObject getAllStaff() {
         List<StaffResponseDto> staffs = staffService.getAllStaff();
@@ -38,8 +44,9 @@ public class StaffController {
                 .build();
     }
 
+    //    ---------------------------------------- CREATE/POST ----------------------------------------
     @PostMapping
-    public ResponseObject addStaff(@RequestBody StaffRequestDto requestDto) {
+    public ResponseObject addStaff(@RequestBody @Valid StaffRequestDto requestDto) {
         StaffResponseDto staff = staffService.createStaff(requestDto);
         return ResponseObject.builder()
                 .status(1000)
@@ -47,4 +54,45 @@ public class StaffController {
                 .message("Staff created successfully.")
                 .build();
     }
+
+    //    ---------------------------------------- UPDATE/PUT ----------------------------------------
+    @PutMapping("/{id}")
+    public ResponseObject updateStaff(@PathVariable String id, @RequestBody @Valid StaffRequestDto requestDto) {
+        StaffResponseDto updated = staffService.updateStaff(id, requestDto);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Staff updated successfully.")
+                .data(updated)
+                .build();
+    }
+
+    //    ---------------------------------------- DELETE ------------------------------------------------
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject> deleteStaff(@PathVariable String id) {
+        boolean deleted = staffService.deleteStaff(id);
+        if (deleted) {
+            return ResponseEntity.ok(new ResponseObject(200, "Staff deleted", null));
+        }
+        return ResponseEntity.status(404).body(new ResponseObject(404, "Staff not found", null));
+    }
+    //    ---------------------------------------------------------------------------------------------------
+
+    //    ---------------------------------------- UPDATE STATUS (BAN/UNBAN) ----------------------------------------
+    @PutMapping("/{id}/status")
+    public ResponseObject updateCustomerStatus(@PathVariable String id, @RequestParam String status) {
+        boolean updated = staffService.updateStaffStatus(id, status);
+        if(updated) {
+            return ResponseObject.builder()
+                    .status(1000)
+                    .data(null)
+                    .message(String.format("Staff status changed to '%s' successfully", status))
+                    .build();
+        }
+        return ResponseObject.builder()
+                .status(404)
+                .data(null)
+                .message("Staff status updated failed")
+                .build();
+    }
+    //    ---------------------------------------------------------------------------------------------
 }

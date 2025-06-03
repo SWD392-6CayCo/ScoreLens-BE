@@ -11,8 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -21,7 +20,8 @@ import java.time.LocalDate;
  * DTO for {@link com.scorelens.Entity.Staff}
  */
 @AllArgsConstructor
-@Getter
+@Data
+@Builder
 public class StaffRequestDto implements Serializable {
 //    private final String staffID;
 //    private final Staff manager;
@@ -48,7 +48,7 @@ public class StaffRequestDto implements Serializable {
 
     @NotBlank(message = ValidationMessages.PASSWORD_REQUIRED)
     @Size(min = 6, message = ValidationMessages.PASSWORD_LENGTH)
-    private final String password;
+    private String password;
 
     private final StaffRole role;
 

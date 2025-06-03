@@ -32,6 +32,7 @@ public class CustomerService implements ICustomerService {
     @Autowired
     CustomerMapper customerMapper;
 
+    //-------------------------------- GET ---------------------------------
     @Override
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
@@ -51,6 +52,7 @@ public class CustomerService implements ICustomerService {
         return responseDto;
     }
 
+    //-------------------------------- DELETE ---------------------------------
     @Override
     public boolean deleteById(String id) {
         if(customerRepo.existsById(id)) {
