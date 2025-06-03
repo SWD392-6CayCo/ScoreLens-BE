@@ -17,6 +17,7 @@ public class Notification {
     private int notificationID;
 
     @ManyToOne
+    @JoinColumn(name = "billiardMatchID")
     private BilliardMatch billiardMatch;
 
     @Column(name = "message")

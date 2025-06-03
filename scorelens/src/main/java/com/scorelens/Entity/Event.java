@@ -16,9 +16,11 @@ public class Event {
     private int eventID;
 
     @ManyToOne
+    @JoinColumn(name = "billiardMatchID")
     private BilliardMatch billiardMatch;
 
     @ManyToOne
+    @JoinColumn(name = "playerID")
     private Player player;
 
     @Column(name = "scoreValue")

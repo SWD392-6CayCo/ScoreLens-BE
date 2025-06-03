@@ -17,6 +17,7 @@ public class Team {
     private int teamID;
 
     @ManyToOne
+    @JoinColumn(name = "billiardMatchID")
     private BilliardMatch billiardMatch;
 
     @Column(name = "name", length = 50)

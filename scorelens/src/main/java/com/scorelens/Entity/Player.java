@@ -17,9 +17,11 @@ public class Player {
     private int playerID;
 
     @ManyToOne
+    @JoinColumn(name = "teamID")
     private Team team;
 
     @ManyToOne
+    @JoinColumn(name = "customerID")
     private Customer customer;
 
     @Column(name = "name", length = 50)

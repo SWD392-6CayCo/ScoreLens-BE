@@ -17,16 +17,16 @@ public class BilliardMatch {
     private int billiardMatchID;
 
     @ManyToOne
+    @JoinColumn(name = "billardTableID")
     private BilliardTable billardTable;
 
     @ManyToOne
+    @JoinColumn(name = "modeID")
     private Mode mode;
 
     @ManyToOne
+    @JoinColumn(name = "byStaff")
     private Staff byStaff;
-
-    @Column(name = "raceTo")
-    private int raceTo;
 
     @Column(name = "winner", length = 50)
     private String winner;
@@ -40,5 +40,6 @@ public class BilliardMatch {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private MatchStatus status; //-- pending, ongoing, completed, cancelled, forfeited
+
     private String code;
 }
