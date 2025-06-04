@@ -2,7 +2,7 @@ package com.scorelens.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.scorelens.DTOs.Request.CustomerRequestDto;
+import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Service.CustomerService;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class CustomerControllerTest {
 
     @Test
     void testCreateCustomer() throws Exception {
-        CustomerRequestDto request = new CustomerRequestDto("John Doe", "john@example.com", "09090808", "123456", LocalDate.of(2004, 8,18));
+        CustomerCreateRequestDto request = new CustomerCreateRequestDto("John Doe", "john@example.com", "09090808", "123456", LocalDate.of(2004, 8,18));
         CustomerResponseDto response = new CustomerResponseDto(null, "John Doe", "john@example.com","09090808", LocalDate.of(2004, 8,18), LocalDate.now(), null, "normal", "active");
 
         Mockito.when(customerService.createCustomer(any())).thenReturn(response);
@@ -76,7 +76,7 @@ public class CustomerControllerTest {
 
 //    @Test
 //    void testUpdateCustomer() throws Exception {
-//        CustomerRequestDto request = new CustomerRequestDto("Updated", "updated@example.com");
+//        CustomerCreateRequestDto request = new CustomerCreateRequestDto("Updated", "updated@example.com");
 //        CustomerResponseDto response = new CustomerResponseDto(1L, "Updated", "updated@example.com");
 //
 //        Mockito.when(customerService.updateCustomer(any(), any())).thenReturn(response);

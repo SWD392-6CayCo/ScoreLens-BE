@@ -1,5 +1,6 @@
 package com.scorelens.DTOs.Response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Entity.Staff;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.StatusType;
@@ -20,10 +21,16 @@ public class StaffResponseDto implements Serializable {
     private final String name;
     private final String email;
     private final String phoneNumber;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate dob;
     private final String address;
     private final StaffRole role;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate createAt;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate updateAt;
     private final StatusType status;
 }

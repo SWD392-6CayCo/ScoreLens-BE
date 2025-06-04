@@ -16,7 +16,10 @@ public enum ErrorCode {
     USER_NOT_EXIST(1005, "User Not Found"),
     EMPTY_LIST(1006, "Empty list"),
     INVALID_STATUS(1007, "Status must be active or inactive"),
-    ;
+    // USER PASSWORD
+    NOT_MATCH_PASSWORD(1009, "Password do not match"),
+    DUPLICATED_PASSWORD(1011, "New password is duplicated to old password");
+
     private int code;
     private String message;
 

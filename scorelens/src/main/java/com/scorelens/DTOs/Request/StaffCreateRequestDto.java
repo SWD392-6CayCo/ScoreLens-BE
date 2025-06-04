@@ -3,7 +3,6 @@ package com.scorelens.DTOs.Request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Constants.RegexConstants;
 import com.scorelens.Constants.ValidationMessages;
-import com.scorelens.Entity.Staff;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.StatusType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +21,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Data
 @Builder
-public class StaffRequestDto implements Serializable {
+public class StaffCreateRequestDto implements Serializable {
 //    private final String staffID;
 //    private final Staff manager;
 

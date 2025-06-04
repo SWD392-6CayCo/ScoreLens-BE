@@ -1,5 +1,6 @@
 package com.scorelens.DTOs.Response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -17,8 +18,14 @@ public class CustomerResponseDto implements Serializable {
     private final String name;
     private final String email;
     private final String phoneNumber;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate dob;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate createAt;
+
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate updateAt;
     private final String type;
     private final String status;

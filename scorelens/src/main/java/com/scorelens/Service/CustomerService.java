@@ -1,6 +1,8 @@
 package com.scorelens.Service;
 
-import com.scorelens.DTOs.Request.CustomerRequestDto;
+import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
+import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
+import com.scorelens.DTOs.Request.CustomerUpdateRequestDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Enums.StatusType;
@@ -13,7 +15,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,12 @@ public class CustomerService implements ICustomerService {
 
     @Autowired
     CustomerMapper customerMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
+
 
     //-------------------------------- GET ---------------------------------
     @Override
@@ -64,7 +71,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- UPDATE ---------------------------------
     @Override
-    public CustomerResponseDto updateCustomer(String id, CustomerRequestDto requestDto) {
+    public CustomerResponseDto updateCustomer(String id, CustomerUpdateRequestDto requestDto) {
         //Lấy ra Customer cần update
         Customer customer = customerRepo.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXIST)
@@ -77,12 +84,10 @@ public class CustomerService implements ICustomerService {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
 
+        //call updateEntity func() in MapStuct to map requestDto into Entity
+        customerMapper.updateEntity(customer, requestDto);
         // Mã hóa password
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-
-        //Map dto sang entity
-        customer = customerMapper.toEntity(requestDto);
+        //customer.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         customer.setUpdateAt(LocalDate.now());
         customerRepo.save(customer);
         CustomerResponseDto responseDto = customerMapper.toDto(customer);
@@ -91,7 +96,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- CREATE ---------------------------------
     @Override
-    public CustomerResponseDto createCustomer(CustomerRequestDto request){
+    public CustomerResponseDto createCustomer(CustomerCreateRequestDto request){
         //Kiểm tra xem Email và PhoneNumber đã đc sử dụng hay chưa-------
         if(customerRepo.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXSITED);
@@ -110,14 +115,14 @@ public class CustomerService implements ICustomerService {
         customer.setType("normal");
         //upload ảnh...
 
-        //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        //mã hóa password
         customer.setPassword(passwordEncoder.encode(request.getPassword()));
 
         customerRepo.save(customer);
         CustomerResponseDto responseDto = customerMapper.toDto(customer);
         return responseDto;
     }
+
     //-------------------------------- UPDATE STATUS BANED/UNBANED ---------------------------------
     @Override
     public boolean updateCustomerStatus(String id, String status) {
@@ -133,4 +138,33 @@ public class CustomerService implements ICustomerService {
 
         return check;
     }
+
+    //    ---------------------------- UPDATE PASSWORD-----------------------------------
+    @Override
+    public boolean updatePassword (String id, ChangePasswordRequestDto requestDto){
+        boolean check = false;
+        Customer c = customerRepo.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST));
+
+        String cusPassword = c.getPassword();
+        if(passwordEncoder.matches(requestDto.getOldPassword(), cusPassword)){ //password nhập vào đúng với pass của user
+            //cho phép đổi
+            if(requestDto.getOldPassword().equals(requestDto.getNewPassword())){ //pass mới trùng với pass cũ
+                throw new AppException(ErrorCode.DUPLICATED_PASSWORD);
+            }
+            //pass mới khác pass cũ
+            c.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+            customerRepo.save(c);
+            check = true;
+        } else {
+            //không cho phép đổi
+            System.out.println(requestDto.getOldPassword());
+            System.out.println(cusPassword);
+            throw new AppException(ErrorCode.NOT_MATCH_PASSWORD);
+
+        }
+        return check;
+    }
+    //    --------------------------------------------------------------------------
+
 }

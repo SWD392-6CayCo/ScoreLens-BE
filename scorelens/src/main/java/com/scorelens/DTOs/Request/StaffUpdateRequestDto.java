@@ -3,22 +3,24 @@ package com.scorelens.DTOs.Request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Constants.RegexConstants;
 import com.scorelens.Constants.ValidationMessages;
-import com.scorelens.Exception.ErrorCode;
+import com.scorelens.Entity.Staff;
+import com.scorelens.Enums.StatusType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
-import lombok.*;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
- * DTO for {@link com.scorelens.Entity.Customer}
+ * DTO for {@link com.scorelens.Entity.Staff}
  */
 @AllArgsConstructor
-@Data
-@Builder
-public class CustomerRequestDto implements Serializable {
-
+@Getter
+public class StaffUpdateRequestDto implements Serializable {
+//    private final Staff manager;
     private final String name;
 
     @Pattern(
@@ -33,12 +35,11 @@ public class CustomerRequestDto implements Serializable {
     )
     private final String phoneNumber;
 
-    @NotBlank(message = ValidationMessages.PASSWORD_REQUIRED)
-    @Size(min = 6, message = ValidationMessages.PASSWORD_LENGTH)
-    private String password;
-
     @Past(message = ValidationMessages.DOB_PAST)
     @Schema(type = "string", pattern = "dd-MM-yyyy")//Hiển thị format dd-MM-yyyy trên swagger
     @JsonFormat(pattern = "dd-MM-yyyy")
     private final LocalDate dob;
+
+    private final String address;
+    private final StatusType status;
 }

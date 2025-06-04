@@ -1,14 +1,13 @@
 package com.scorelens.Controller;
 
-import com.scorelens.DTOs.Request.StaffRequestDto;
+import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
+import com.scorelens.DTOs.Request.StaffCreateRequestDto;
+import com.scorelens.DTOs.Request.StaffUpdateRequestDto;
 import com.scorelens.DTOs.Response.StaffResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.StaffService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,7 +45,7 @@ public class StaffController {
 
     //    ---------------------------------------- CREATE/POST ----------------------------------------
     @PostMapping
-    public ResponseObject addStaff(@RequestBody @Valid StaffRequestDto requestDto) {
+    public ResponseObject addStaff(@RequestBody @Valid StaffCreateRequestDto requestDto) {
         StaffResponseDto staff = staffService.createStaff(requestDto);
         return ResponseObject.builder()
                 .status(1000)
@@ -57,7 +56,7 @@ public class StaffController {
 
     //    ---------------------------------------- UPDATE/PUT ----------------------------------------
     @PutMapping("/{id}")
-    public ResponseObject updateStaff(@PathVariable String id, @RequestBody @Valid StaffRequestDto requestDto) {
+    public ResponseObject updateStaff(@PathVariable String id, @RequestBody @Valid StaffUpdateRequestDto requestDto) {
         StaffResponseDto updated = staffService.updateStaff(id, requestDto);
         return ResponseObject.builder()
                 .status(1000)
@@ -79,7 +78,7 @@ public class StaffController {
 
     //    ---------------------------------------- UPDATE STATUS (BAN/UNBAN) ----------------------------------------
     @PutMapping("/{id}/status")
-    public ResponseObject updateCustomerStatus(@PathVariable String id, @RequestParam String status) {
+    public ResponseObject updateStaffStatus(@PathVariable String id, @RequestParam String status) {
         boolean updated = staffService.updateStaffStatus(id, status);
         if(updated) {
             return ResponseObject.builder()
@@ -95,4 +94,22 @@ public class StaffController {
                 .build();
     }
     //    ---------------------------------------------------------------------------------------------
+
+    //    ---------------------------------------- UPDATE PASSWORD ------------------------------------------------
+    @PutMapping("/{id}/password")
+    public ResponseObject updatePassword(@PathVariable String id, @RequestBody @Valid ChangePasswordRequestDto requestDto) {
+        boolean updated = staffService.updatePassword(id, requestDto);
+        if (updated) {
+            return ResponseObject.builder()
+                    .status(1000)
+                    .data(null)
+                    .message("Password updated successfully")
+                    .build();
+        }
+        return ResponseObject.builder()
+                .status(404)
+                .data(null)
+                .message("Password updated failed")
+                .build();
+    }
 }

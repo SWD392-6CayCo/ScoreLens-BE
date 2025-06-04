@@ -1,10 +1,10 @@
 package com.scorelens.Controller;
 
-import com.scorelens.DTOs.Request.CustomerRequestDto;
+import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
+import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
+import com.scorelens.DTOs.Request.CustomerUpdateRequestDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
-import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.ResponseObject;
-import com.scorelens.Repository.CustomerRepo;
 import com.scorelens.Service.CustomerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Tag(name = "Customer", description = "Quản lý mấy khứa khách hàng")
@@ -54,7 +53,7 @@ public class CustomerController {
 
     //    ---------------------------------------- CREATE/POST ----------------------------------------
     @PostMapping
-    public ResponseObject createCustomer(@RequestBody @Valid CustomerRequestDto requestDto) {
+    public ResponseObject createCustomer(@RequestBody @Valid CustomerCreateRequestDto requestDto) {
         CustomerResponseDto newCustomer = customerService.createCustomer(requestDto);
         return ResponseObject.builder()
                 .status(1000)
@@ -66,7 +65,7 @@ public class CustomerController {
 
     //    ---------------------------------------- UPDATE/PUT ----------------------------------------
     @PutMapping("/{id}")
-    public ResponseObject updateCustomer(@PathVariable String id, @RequestBody @Valid CustomerRequestDto requestDto) {
+    public ResponseObject updateCustomer(@PathVariable String id, @RequestBody @Valid CustomerUpdateRequestDto requestDto) {
         CustomerResponseDto updatedCustomer = customerService.updateCustomer(id, requestDto);
         if (updatedCustomer == null) {
             return ResponseObject.builder()
@@ -112,4 +111,23 @@ public class CustomerController {
         return ResponseEntity.status(404).body(new ResponseObject(404, "Customer not found", null));
     }
     //    ---------------------------------------------------------------------------------------------------
+
+    //    ---------------------------------------- UPDATE PASSWORD ------------------------------------------------
+    @PutMapping("/{id}/password")
+    public ResponseObject updatePassword(@PathVariable String id, @RequestBody @Valid ChangePasswordRequestDto requestDto) {
+        boolean updated = customerService.updatePassword(id, requestDto);
+        if (updated) {
+            return ResponseObject.builder()
+                    .status(1000)
+                    .data(null)
+                    .message("Password updated successfully")
+                    .build();
+        }
+        return ResponseObject.builder()
+                .status(404)
+                .data(null)
+                .message("Password updated failed")
+                .build();
+    }
+
 }

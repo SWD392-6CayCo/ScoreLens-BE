@@ -1,6 +1,8 @@
 package com.scorelens.Service;
 
-import com.scorelens.DTOs.Request.StaffRequestDto;
+import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
+import com.scorelens.DTOs.Request.StaffCreateRequestDto;
+import com.scorelens.DTOs.Request.StaffUpdateRequestDto;
 import com.scorelens.DTOs.Response.StaffResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.IDSequence;
@@ -13,11 +15,7 @@ import com.scorelens.Mapper.StaffMapper;
 import com.scorelens.Repository.IDSequenceRepository;
 import com.scorelens.Repository.StaffRepository;
 import com.scorelens.Service.Interface.IStaffService;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +38,9 @@ public class StaffService implements IStaffService {
 
     @Autowired
     private StaffMapper staffMapper;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     //    ---------------------------- GET BY ID -----------------------------------
     @Override
@@ -68,8 +69,8 @@ public class StaffService implements IStaffService {
     //    ---------------------------- CREATE STAFF-----------------------------------
     @Transactional
     @Override
-    public StaffResponseDto createStaff(StaffRequestDto staffRequestDto) {
-        StaffRole role = staffRequestDto.getRole();
+    public StaffResponseDto createStaff(StaffCreateRequestDto staffCreateRequestDto) {
+        StaffRole role = staffCreateRequestDto.getRole();
 
         String prefix = switch (role) {
             case Staff -> "S";
@@ -88,15 +89,15 @@ public class StaffService implements IStaffService {
         String staffID = String.format("%s%07d", prefix, nextNumber);
 
         //Kiểm tra xem Email và PhoneNumber đã đc sử dụng hay chưa-------
-        if(staffRepository.existsByEmail(staffRequestDto.getEmail())) {
+        if(staffRepository.existsByEmail(staffCreateRequestDto.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXSITED);
         }
-        if(staffRepository.existsByPhoneNumber(staffRequestDto.getPhoneNumber())) {
+        if(staffRepository.existsByPhoneNumber(staffCreateRequestDto.getPhoneNumber())) {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
         //----------------------------------------------------------------
 
-        Staff staff = staffMapper.toEntity(staffRequestDto);
+        Staff staff = staffMapper.toEntity(staffCreateRequestDto);
         staff.setStaffID(staffID);
         staff.setCreateAt(LocalDate.now());
         staff.setStatus(StatusType.active);
@@ -104,17 +105,15 @@ public class StaffService implements IStaffService {
         //upload ảnh...
 
         //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        staff.setPassword(passwordEncoder.encode(staffRequestDto.getPassword()));
+        staff.setPassword(passwordEncoder.encode(staffCreateRequestDto.getPassword()));
         staffRepository.save(staff);
 
         return staffMapper.toDto(staffRepository.save(staff));
     }
 
-
     //    ---------------------------- UPDATE STAFF-----------------------------------
     @Override
-    public StaffResponseDto updateStaff(String id, StaffRequestDto requestDto) {
+    public StaffResponseDto updateStaff(String id, StaffUpdateRequestDto requestDto) {
         // Tìm nhân viên theo ID
         Staff existingStaff = staffRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXIST)
@@ -136,17 +135,12 @@ public class StaffService implements IStaffService {
         existingStaff.setName(requestDto.getName());
         existingStaff.setEmail(requestDto.getEmail());
         existingStaff.setPhoneNumber(requestDto.getPhoneNumber());
-        existingStaff.setRole(requestDto.getRole());
+//        existingStaff.setRole(requestDto.getRole());
         existingStaff.setAddress(requestDto.getAddress());
         existingStaff.setStatus(requestDto.getStatus());
         existingStaff.setDob(requestDto.getDob());
         existingStaff.setUpdateAt(LocalDate.now());
 
-        // Nếu password mới được cung cấp, mã hóa lại
-        if (requestDto.getPassword() != null && !requestDto.getPassword().isBlank()) {
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            existingStaff.setPassword(passwordEncoder.encode(requestDto.getPassword()));
-        }
 
         // Lưu và trả về kết quả
         staffRepository.save(existingStaff);
@@ -180,7 +174,31 @@ public class StaffService implements IStaffService {
     }
     //    --------------------------------------------------------------------------
 
+    //    ---------------------------- UPDATE PASSWORD-----------------------------------
+    @Override
+    public boolean updatePassword (String id, ChangePasswordRequestDto requestDto){
+        boolean check = false;
+        Staff s = staffRepository.findById(id).orElseThrow(
+                () -> new AppException(ErrorCode.USER_NOT_EXIST));
 
+        String staffPassword = s.getPassword();
+        if(passwordEncoder.matches(requestDto.getOldPassword(), staffPassword)){ //password nhập vào đúng với pass của user
+            //cho phép đổi
+            if(requestDto.getOldPassword().equals(requestDto.getNewPassword())){ //pass mới trùng với pass cũ
+                throw new AppException(ErrorCode.DUPLICATED_PASSWORD);
+            }
+            //pass mới khác pass cũ
+            s.setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+            staffRepository.save(s);
+            check = true;
+        } else {
+            //không cho phép đổi
+            System.out.println(requestDto.getOldPassword());
+            System.out.println(staffPassword);
+            throw new AppException(ErrorCode.NOT_MATCH_PASSWORD);
 
-
+        }
+        return check;
+    }
+    //    --------------------------------------------------------------------------
 }
