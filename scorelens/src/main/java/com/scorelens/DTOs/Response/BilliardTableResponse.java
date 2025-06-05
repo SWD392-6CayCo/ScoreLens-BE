@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class BilliardTableResponse {
     private String billardTableID;
+    private String tableCode;
     private TableType tableType;
     private String name;
     private String description;

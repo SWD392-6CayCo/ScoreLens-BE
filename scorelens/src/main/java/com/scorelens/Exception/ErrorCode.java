@@ -22,6 +22,7 @@ public enum ErrorCode {
     //-------------------------- STORE -----------------------------------
     STORE_EXIST(1001, "This store's name is already existed"),
     STORE_NOT_FOUND(1005, "Store Not Found")
+    //-------------------------- BILLIARD STORE -----------------------------------
 
     ;
     private int code;
