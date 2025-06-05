@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 public class BilliardTable {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "billardTableID", nullable = false, length = 10)
     private String billardTableID; //ex: bàn pool mrsung số 1, PMR01
 

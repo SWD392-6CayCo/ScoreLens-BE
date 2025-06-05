@@ -1,7 +1,6 @@
 package com.scorelens.Entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,5 +21,26 @@ public class Store {
 
     @Column(name = "address", length = 50)
     private String address;
+
+    @Column(name = "status", length = 10)
+    private String status;
+
+    @Column(name = "description", length = 100)
+    private String description;
+
+    //bidirectional one to many
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BilliardTable> billiardTables = new ArrayList<>();
+
+    // Helper method
+    public void addTable(BilliardTable table) {
+        billiardTables.add(table);
+        table.setStore(this);
+    }
+
+    public void removeTable(BilliardTable table) {
+        billiardTables.remove(table);
+        table.setStore(null);
+    }
 
 }
