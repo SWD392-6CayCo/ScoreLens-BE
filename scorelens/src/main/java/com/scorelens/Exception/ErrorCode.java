@@ -18,8 +18,11 @@ public enum ErrorCode {
     INVALID_STATUS(1007, "Status must be active or inactive"),
     // USER PASSWORD
     NOT_MATCH_PASSWORD(1009, "Password do not match"),
-    DUPLICATED_PASSWORD(1011, "New password is duplicated to old password");
+    DUPLICATED_PASSWORD(1011, "New password is duplicated to old password"),
+    //Authentication
+    UNAUTHENTICATED(1013, "Unauthenticated"),
 
+    ;
     private int code;
     private String message;
 
