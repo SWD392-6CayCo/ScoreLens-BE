@@ -15,4 +15,5 @@ public class BilliardTableResponse {
     private String description;
     private TableStatus status;
     private boolean isActive;
+    private StoreResponse storeResponse;
 }

@@ -32,6 +32,15 @@ public class BilliardTableController {
                 .build();
     }
 
+    @GetMapping
+    public ResponseObject getAllTables(){
+        return ResponseObject.builder()
+                .status(1000)
+                .message("All tables")
+                .data(billiardTableService.getAllBilliardTables())
+                .build();
+    }
+
 
 
 
