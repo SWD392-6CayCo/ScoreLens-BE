@@ -26,4 +26,6 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+jwt:
+  signerKey: ${JWT_SIGNER_KEY}
 
