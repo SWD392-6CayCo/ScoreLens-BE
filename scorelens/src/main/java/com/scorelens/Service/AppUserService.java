@@ -2,6 +2,7 @@ package com.scorelens.Service;
 
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.Staff;
+import com.scorelens.Enums.StatusType;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.CustomerMapper;
@@ -24,10 +25,20 @@ public class AppUserService implements IAppUserService {
 
     public AppUser authenticateUser(String email, String password) {
         return customerRepo.findByEmail(email)
-                .filter(customer -> passwordEncoder.matches(password, customer.getPassword()))
+                .filter(customer -> {
+                    if (customer.getStatus() == StatusType.inactive) {
+                        throw new AppException(ErrorCode.USER_INACTIVE);
+                    }
+                    return passwordEncoder.matches(password, customer.getPassword());
+                })
                 .map(c -> (AppUser) c)
                 .or(() -> staffRepo.findByEmail(email)
-                        .filter(staff -> passwordEncoder.matches(password, staff.getPassword()))
+                        .filter(staff -> {
+                            if (staff.getStatus() == StatusType.inactive) {
+                                throw new AppException(ErrorCode.USER_INACTIVE);
+                            }
+                            return passwordEncoder.matches(password, staff.getPassword());
+                        })
                         .map(s -> (AppUser) s))
                 .orElseThrow(() -> new AppException(ErrorCode.INCORRECT_EMAIL_OR_PASSWORD));
     }

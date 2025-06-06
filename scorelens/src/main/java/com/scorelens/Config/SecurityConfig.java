@@ -42,11 +42,14 @@ public class SecurityConfig {
         http
 //                .csrf(csrf -> csrf.disable())
 //                .authorizeHttpRequests(auth -> auth
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/customers/**").permitAll()
                                 .anyRequest().authenticated())
 
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwtConfigurer -> jwtConfigurer
+                                .decoder(jwtDecoder())))
 
                 .csrf(AbstractHttpConfigurer::disable);
 
