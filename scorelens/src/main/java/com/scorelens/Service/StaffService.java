@@ -32,15 +32,14 @@ import java.util.Optional;
 public class StaffService implements IStaffService {
     @Autowired
     private StaffRepository staffRepository;
-
     @Autowired
     IDSequenceRepository idSequenceRepository;
-
     @Autowired
     private StaffMapper staffMapper;
-
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    UserValidatorService userValidatorService;
 
     //    ---------------------------- GET BY ID -----------------------------------
     @Override
@@ -89,12 +88,7 @@ public class StaffService implements IStaffService {
         String staffID = String.format("%s%07d", prefix, nextNumber);
 
         //Kiểm tra xem Email và PhoneNumber đã đc sử dụng hay chưa-------
-        if(staffRepository.existsByEmail(staffCreateRequestDto.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_EXSITED);
-        }
-        if(staffRepository.existsByPhoneNumber(staffCreateRequestDto.getPhoneNumber())) {
-            throw new AppException(ErrorCode.PHONE_EXISTED);
-        }
+        userValidatorService.validateEmailAndPhoneUnique(staffCreateRequestDto.getEmail(), staffCreateRequestDto.getPhoneNumber());
         //----------------------------------------------------------------
 
         Staff staff = staffMapper.toEntity(staffCreateRequestDto);
@@ -119,18 +113,9 @@ public class StaffService implements IStaffService {
                 () -> new AppException(ErrorCode.USER_NOT_EXIST)
         );
 
-        // Kiểm tra Email đã được dùng bởi người khác chưa
-        if (staffRepository.existsByEmail(requestDto.getEmail()) &&
-                !existingStaff.getEmail().equals(requestDto.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_EXSITED);
-        }
-
-        // Kiểm tra số điện thoại đã được dùng bởi người khác chưa
-        if (staffRepository.existsByPhoneNumber(requestDto.getPhoneNumber()) &&
-                !existingStaff.getPhoneNumber().equals(requestDto.getPhoneNumber())) {
-            throw new AppException(ErrorCode.PHONE_EXISTED);
-        }
-
+        // Kiểm tra Email & Phonenumber đã được dùng bởi người khác chưa
+        userValidatorService.validatePhoneUnique(requestDto.getPhoneNumber(), existingStaff.getPhoneNumber());
+        userValidatorService.validateEmailUnique(requestDto.getEmail(), existingStaff.getEmail());
         // Cập nhật thông tin
         existingStaff.setName(requestDto.getName());
         existingStaff.setEmail(requestDto.getEmail());

@@ -2,11 +2,15 @@ package com.scorelens.Controller;
 
 import com.nimbusds.jose.JOSEException;
 import com.scorelens.DTOs.Request.AuthenticationRequestDto;
+import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
 import com.scorelens.DTOs.Request.IntrospectRequestDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
+import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.AuthenticationService;
+import com.scorelens.Service.CustomerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +29,7 @@ import java.text.ParseException;
 public class AuthenticationController {
 
     AuthenticationService authenticationService;
+    CustomerService customerService;
 
     @PostMapping("/login")
     ResponseObject authenticate(@RequestBody AuthenticationRequestDto request) {
@@ -33,6 +38,16 @@ public class AuthenticationController {
                 .status(1000)
                 .data(result)
                 .message("Login successfully!!")
+                .build();
+    }
+
+    @PostMapping("/register")
+    ResponseObject register(@RequestBody @Valid CustomerCreateRequestDto request) {
+        CustomerResponseDto response = customerService.createCustomer(request);
+        return ResponseObject.builder()
+                .status(1000)
+                .data(response)
+                .message("Register successfully")
                 .build();
     }
 
