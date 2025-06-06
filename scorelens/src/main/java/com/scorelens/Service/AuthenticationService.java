@@ -2,12 +2,18 @@ package com.scorelens.Service;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.scorelens.DTOs.Request.AuthenticationRequestDto;
+import com.scorelens.DTOs.Request.IntrospectRequestDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
+import com.scorelens.DTOs.Response.CustomerResponseDto;
+import com.scorelens.DTOs.Response.IntrospectResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
+import com.scorelens.Mapper.CustomerMapper;
 import com.scorelens.Repository.CustomerRepo;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -19,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -30,6 +37,7 @@ import java.util.Date;
 public class AuthenticationService {
 
     CustomerRepo customerRepo;
+    CustomerMapper customerMapper;
     private final PasswordEncoder passwordEncoder;
 
     @NonFinal
@@ -47,9 +55,11 @@ public class AuthenticationService {
         }
 
         var token = generateToken(customer);
+        CustomerResponseDto responseDto = customerMapper.toDto(customer);
         return AuthenticationResponseDto.builder()
                 .token(token)
                 .authenticated(true)
+                .user(responseDto)
                 .build();
     }
 
@@ -89,4 +99,20 @@ public class AuthenticationService {
         }
     }
 
+    public IntrospectResponseDto introspect(IntrospectRequestDto request)
+            throws JOSEException, ParseException {
+        var token = request.getToken();
+
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        return IntrospectResponseDto.builder()
+                .valid(verified && expityTime.after(new Date()))
+                .build();
+    }
 }

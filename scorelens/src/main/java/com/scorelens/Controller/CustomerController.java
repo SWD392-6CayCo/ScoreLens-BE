@@ -6,6 +6,7 @@ import com.scorelens.DTOs.Request.CustomerUpdateRequestDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.CustomerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;

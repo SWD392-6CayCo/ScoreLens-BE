@@ -1,5 +1,4 @@
-package com.scorelens.DTOs.Response;
-
+package com.scorelens.DTOs.Request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -9,8 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationResponseDto {
+public class IntrospectRequestDto {
     String token;
-    boolean authenticated;
-    Object user;
 }
