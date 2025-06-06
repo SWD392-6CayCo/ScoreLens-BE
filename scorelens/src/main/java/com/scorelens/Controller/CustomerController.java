@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +35,10 @@ public class CustomerController {
     //    ---------------------------------------- GET ----------------------------------------
     @GetMapping("/all")
     public ResponseObject getAllCustomers() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info("Username: {}", authentication.getName());
+        authentication.getAuthorities().forEach(grantedAuthority -> log.info("GrantedAuthority: {}", grantedAuthority));
+
         List<CustomerResponseDto> customers = customerService.findAll();
         return ResponseObject.builder()
                 .status(1000)

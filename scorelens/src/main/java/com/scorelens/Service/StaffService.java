@@ -96,6 +96,12 @@ public class StaffService implements IStaffService {
         staff.setCreateAt(LocalDate.now());
         staff.setStatus(StatusType.active);
 
+        if(staffCreateRequestDto.getManagerID() != null) {
+            Staff manager = staffRepository.findById(staffCreateRequestDto.getManagerID())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+            staff.setManager(manager);
+        }
+
         //upload ảnh...
 
         //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
@@ -116,16 +122,20 @@ public class StaffService implements IStaffService {
         // Kiểm tra Email & Phonenumber đã được dùng bởi người khác chưa
         userValidatorService.validatePhoneUnique(requestDto.getPhoneNumber(), existingStaff.getPhoneNumber());
         userValidatorService.validateEmailUnique(requestDto.getEmail(), existingStaff.getEmail());
+
+        //Kiểm tra xem có managerID hay chưa
+        Staff manager = staffRepository.findById(requestDto.getManagerID())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
         // Cập nhật thông tin
         existingStaff.setName(requestDto.getName());
         existingStaff.setEmail(requestDto.getEmail());
         existingStaff.setPhoneNumber(requestDto.getPhoneNumber());
-//        existingStaff.setRole(requestDto.getRole());
+//        existingStaff.setRole(requestDto.getRole()); // không cho set role
         existingStaff.setAddress(requestDto.getAddress());
         existingStaff.setStatus(requestDto.getStatus());
         existingStaff.setDob(requestDto.getDob());
         existingStaff.setUpdateAt(LocalDate.now());
-
+        existingStaff.setManager(manager);
 
         // Lưu và trả về kết quả
         staffRepository.save(existingStaff);
