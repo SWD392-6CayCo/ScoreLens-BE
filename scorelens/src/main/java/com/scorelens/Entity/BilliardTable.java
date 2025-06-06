@@ -37,6 +37,6 @@ public class BilliardTable {
     private boolean isActive; //0: available, 1: unavailable
 
     @ManyToOne
-    @JoinColumn(name = "storeID")
+    @JoinColumn(name = "storeID", nullable = false)
     private Store store;
 }

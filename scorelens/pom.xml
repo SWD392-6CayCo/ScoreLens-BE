@@ -46,6 +46,14 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
 
     <dependencies>
 
+<!--        real time chat-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+<!--            <version>3.5.0</version>-->
+        </dependency>
+
         <!--        google secret manager-->
         <dependency>
             <groupId>com.google.cloud</groupId>
