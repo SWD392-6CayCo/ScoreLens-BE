@@ -63,6 +63,6 @@ public class Staff implements AppUser {
 
     @Override
     public UserType getUserType() {
-        return UserType.STAFF;
+        return UserType.Staff;
     }
 }
