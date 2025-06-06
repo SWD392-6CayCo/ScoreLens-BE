@@ -11,8 +11,12 @@ import lombok.Setter;
 @Setter
 public class BilliardTable {
     @Id
-    @Column(name = "billardTableID", nullable = false, length = 10)
-    private String billardTableID; //ex: bàn pool mrsung số 1, PMR01
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "billardTableID", nullable = false, length = 50)
+    private String billardTableID;
+
+    @Column(name = "tableCode", length = 10)
+    private String tableCode; //ex: bàn pool mrsung số 1, PMR01
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tableType", length = 10)

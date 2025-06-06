@@ -44,7 +44,7 @@ public class CustomerService implements ICustomerService {
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
         if(customers.isEmpty()){
-            throw new AppException(ErrorCode.EMPTY_LIST);
+                throw new AppException(ErrorCode.EMPTY_LIST);
         }
         return customerMapper.toDtoList(customers);
     }

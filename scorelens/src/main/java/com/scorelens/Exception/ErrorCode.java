@@ -21,6 +21,10 @@ public enum ErrorCode {
     DUPLICATED_PASSWORD(1011, "New password is duplicated to old password"),
     //Authentication
     UNAUTHENTICATED(1013, "Unauthenticated"),
+    //-------------------------- STORE -----------------------------------
+    STORE_EXIST(1001, "This store's name is already existed"),
+    STORE_NOT_FOUND(1005, "Store Not Found")
+    //-------------------------- BILLIARD STORE -----------------------------------
 
     ;
     private int code;
