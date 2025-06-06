@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Chat Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #messages { margin-top: 20px; }
+        .message { padding: 5px 0; }
+    </style>
+</head>
+<body>
+
+<h1>WebSocket Chat</h1>
+
+<input type="text" id="messageInput" placeholder="Type a message..." />
+<button onclick="sendMessage()">Send</button>
+
+<div id="messages"></div>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe('/topic/public', function (messageOutput) {
+                showMessage(messageOutput.body);
+            });
+        });
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+
+        if (message && stompClient) {
+            stompClient.send("/app/chat.send", {}, message);
+            messageInput.value = '';
+        }
+    }
+
+    function showMessage(message) {
+        const messagesDiv = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.textContent = message;
+        messagesDiv.appendChild(messageElement);
+    }
+
+    connect();
+</script>
+
+</body>
+</html>
