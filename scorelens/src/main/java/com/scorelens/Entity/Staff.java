@@ -2,6 +2,8 @@ package com.scorelens.Entity;
 
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.StatusType;
+import com.scorelens.Enums.UserType;
+import com.scorelens.Security.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -12,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Staff {
+public class Staff implements AppUser {
 
     @Id
     @Column(name = "staffID", length = 10)
@@ -53,4 +55,14 @@ public class Staff {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
     private StatusType status; // active, inactive
+
+    @Override
+    public String getId() {
+        return staffID;
+    }
+
+    @Override
+    public UserType getUserType() {
+        return UserType.STAFF;
+    }
 }

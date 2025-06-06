@@ -2,6 +2,8 @@ package com.scorelens.Entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Enums.StatusType;
+import com.scorelens.Enums.UserType;
+import com.scorelens.Security.AppUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,7 +17,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name="customer")
-public class Customer {
+public class Customer implements AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "customerID", nullable = false, length = 50)
@@ -54,4 +56,14 @@ public class Customer {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
     private StatusType status; //active, inactive
+
+    @Override
+    public String getId() {
+        return customerID;
+    }
+
+    @Override
+    public UserType getUserType() {
+        return UserType.CUSTOMER;
+    }
 }

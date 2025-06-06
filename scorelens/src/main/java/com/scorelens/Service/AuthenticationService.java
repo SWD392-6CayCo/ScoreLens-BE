@@ -11,10 +11,14 @@ import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.DTOs.Response.IntrospectResponseDto;
 import com.scorelens.Entity.Customer;
+import com.scorelens.Entity.Staff;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.CustomerMapper;
+import com.scorelens.Mapper.StaffMapper;
 import com.scorelens.Repository.CustomerRepo;
+import com.scorelens.Security.AppUser;
+import com.scorelens.Service.Interface.IAuthenticationService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,71 +38,68 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AuthenticationService {
+public class AuthenticationService implements IAuthenticationService {
 
-    CustomerRepo customerRepo;
+    AppUserService appUserService;
     CustomerMapper customerMapper;
+    StaffMapper staffMapper;
+    CustomerRepo customerRepo;
     private final PasswordEncoder passwordEncoder;
 
     @NonFinal
     @Value("${jwt.signerKey}") //Đọc từ file application.yaml
     protected String SIGNER_KEY;
 
+    //--------------------------------------- AUTHENTICATION --------------------------------------------------
+    @Override
     public AuthenticationResponseDto authenticate(AuthenticationRequestDto request) {
-        var customer = customerRepo.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        AppUser user = appUserService.authenticateUser(request.getEmail(), request.getPassword());
+        String token = generateToken(user);
 
-        boolean authenticated = passwordEncoder.matches(request.getPassword(), customer.getPassword());
+        Object responseUser = mapUserToDto(user);
 
-        if(!authenticated) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-        }
-
-        var token = generateToken(customer);
-        CustomerResponseDto responseDto = customerMapper.toDto(customer);
         return AuthenticationResponseDto.builder()
-                .token(token)
                 .authenticated(true)
-                .user(responseDto)
+                .token(token)
+                .user(responseUser)
+                .userType(user.getUserType())
                 .build();
     }
 
     // tạo token
-    private String generateToken(Customer c){
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(c.getEmail())
-
-
-                .claim("customerID", c.getCustomerID())
-//                .claim("createAt", c.getCreateAt())
-//                .claim("dob", c.getDob())
-//                .claim("email", c.getEmail())
-//                .claim("name", c.getName())
-//                .claim("phoneNumber", c.getPhoneNumber())
-//                .claim("status", c.getStatus())
-//                .claim("type", c.getType())
-//                .claim("updateAt", c.getUpdateAt())
+    private String generateToken(AppUser user) {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .subject(user.getEmail())
+                .claim("userID", user.getId())
+                .claim("userType", user.getUserType())
                 .issuer("scorelens")
                 .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
-                ))
+                .expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
                 .build();
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-
-        JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
+            JWSObject jwsObject = new JWSObject(
+                    new JWSHeader(JWSAlgorithm.HS512),
+                    new Payload(claims.toJSONObject())
+            );
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
-            log.error("Cannot create token", e);
+            log.error("Token generation failed", e);
             throw new RuntimeException(e);
         }
     }
 
+    //map Customer/Staff về ResponseDto
+    private Object mapUserToDto(AppUser user) {
+        return switch (user.getUserType()) {
+            case CUSTOMER -> customerMapper.toDto((Customer) user);
+            case STAFF -> staffMapper.toDto((Staff) user);
+            default -> throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+        };
+    }
+
+    @Override
     public IntrospectResponseDto introspect(IntrospectRequestDto request)
             throws JOSEException, ParseException {
         var token = request.getToken();

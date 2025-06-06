@@ -55,4 +55,12 @@ public class GlobalHandlingException {//Runtime exception
                 .build());
     }
 
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ResponseObject> handleUnexpectedException(Exception exception) {
+        exception.printStackTrace(); // nên dùng log.error() nếu đã cấu hình logging
+        return ResponseEntity.status(500).body(ResponseObject.builder()
+                .status(500)
+                .message("Internal Server Error: " + exception.getMessage())
+                .build());
+    }
 }

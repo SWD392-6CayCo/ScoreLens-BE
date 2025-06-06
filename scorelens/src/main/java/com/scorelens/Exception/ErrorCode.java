@@ -21,6 +21,8 @@ public enum ErrorCode {
     DUPLICATED_PASSWORD(1011, "New password is duplicated to old password"),
     //Authentication
     UNAUTHENTICATED(1013, "Unauthenticated"),
+    UNSUPPORTED_USER_TYPE(1014, "Unsupported User Type"),
+    INCORRECT_EMAIL_OR_PASSWORD(1015, "Incorrect email or password"),
     //-------------------------- STORE -----------------------------------
     STORE_EXIST(1001, "This store's name is already existed"),
     STORE_NOT_FOUND(1005, "Store Not Found")

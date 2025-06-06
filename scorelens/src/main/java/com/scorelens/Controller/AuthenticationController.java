@@ -6,6 +6,7 @@ import com.scorelens.DTOs.Request.IntrospectRequestDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.AuthenticationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 
+@Tag(name = "Authentication", description = "Authentication APIs")
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
