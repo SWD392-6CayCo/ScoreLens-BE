@@ -51,12 +51,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
-                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.Admin.name(), StaffRole.Manager.name())
-                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.Admin.name(), StaffRole.Manager.name())
-                .anyRequest().authenticated());
+//                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+//                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.Admin.name(), StaffRole.Manager.name())
+//                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.Admin.name(), StaffRole.Manager.name())
+//                .anyRequest().authenticated());
 
-//                .anyRequest().permitAll());
+                .anyRequest().permitAll());
 
         http.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
