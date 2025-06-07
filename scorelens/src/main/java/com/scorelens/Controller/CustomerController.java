@@ -55,6 +55,16 @@ public class CustomerController {
                     .message("Customer found")
                     .data(responseDto).build();
     }
+
+    @GetMapping("/my-profile") //API lấy tt customer đang login
+    public ResponseObject getProfile() {
+        CustomerResponseDto responseDto = customerService.getMyProfile();
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Customer found")
+                .data(responseDto)
+                .build();
+    }
     //    ---------------------------------------------------------------------------------------------
 
     //    ---------------------------------------- CREATE/POST ----------------------------------------

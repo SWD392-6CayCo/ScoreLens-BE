@@ -28,14 +28,13 @@ import java.beans.Encoder;
 
 @Configuration
 @EnableWebSecurity(debug = false)
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @CrossOrigin(origins = "http://localhost:5173")
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
             "/auth/login", "/auth/introspect", "/auth/register", "/auth/login/**", "/auth/logout",
-            "/customers/*"
     };
     private final String[] CUSTOMER_ENDPOINTS = {
             "/customers/**"
@@ -52,8 +51,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
 //                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-//                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.Admin.name(), StaffRole.Manager.name())
-//                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.Admin.name(), StaffRole.Manager.name())
+//                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
+//                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
 //                .anyRequest().authenticated());
 
                 .anyRequest().permitAll());

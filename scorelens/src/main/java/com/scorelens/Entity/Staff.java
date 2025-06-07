@@ -44,7 +44,7 @@ public class Staff implements AppUser {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20)
-    private StaffRole role; // Staff, Manager, Administrator
+    private StaffRole role; // STAFF, MANAGER, ADMIN
 
     @Column(name = "createAt")
     private LocalDate createAt;

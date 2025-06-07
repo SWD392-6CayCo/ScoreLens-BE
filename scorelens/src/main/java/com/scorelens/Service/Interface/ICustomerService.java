@@ -10,6 +10,7 @@ import java.util.List;
 public interface ICustomerService {
     List<CustomerResponseDto> findAll();
     CustomerResponseDto findById(String id);
+    CustomerResponseDto getMyProfile();
     boolean deleteById(String id);
     CustomerResponseDto updateCustomer(String id, CustomerUpdateRequestDto requestDto);
     CustomerResponseDto createCustomer(CustomerCreateRequestDto request);

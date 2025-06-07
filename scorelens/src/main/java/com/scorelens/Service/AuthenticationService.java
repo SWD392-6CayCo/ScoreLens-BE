@@ -102,7 +102,7 @@ public class AuthenticationService implements IAuthenticationService {
         }
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(email)
+                .subject(email) // name của biến authentication
                 .claim("userID", userId)
                 .claim("scope", scope)
                 .issuer("scorelens")

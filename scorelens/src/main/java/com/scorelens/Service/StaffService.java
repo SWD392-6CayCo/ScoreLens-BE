@@ -16,6 +16,7 @@ import com.scorelens.Repository.IDSequenceRepository;
 import com.scorelens.Repository.StaffRepository;
 import com.scorelens.Service.Interface.IStaffService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +64,17 @@ public class StaffService implements IStaffService {
         }
         return staffMapper.toDto(staffList);
     }
+
+    @Override
+    public StaffResponseDto getMyProfile() {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName(); //authentication.name là email
+        Staff s = staffRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        return staffMapper.toDto(s);
+    }
     //    --------------------------------------------------------------------------
+
 
     //    ---------------------------- CREATE STAFF-----------------------------------
     @Transactional
@@ -72,9 +83,9 @@ public class StaffService implements IStaffService {
         StaffRole role = staffCreateRequestDto.getRole();
 
         String prefix = switch (role) {
-            case Staff -> "S";
-            case Manager -> "M";
-            case Admin -> "A";
+            case STAFF -> "S";
+            case MANAGER -> "M";
+            case ADMIN -> "A";
             default -> throw new IllegalArgumentException("Invalid staff role");
         };
 

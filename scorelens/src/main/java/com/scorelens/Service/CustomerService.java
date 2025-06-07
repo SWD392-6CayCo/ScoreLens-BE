@@ -15,7 +15,12 @@ import com.scorelens.Service.Interface.ICustomerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +28,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class CustomerService implements ICustomerService {
 
     @Autowired
@@ -35,12 +41,13 @@ public class CustomerService implements ICustomerService {
     @Autowired
     StaffRepository staffRepo;
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
     @Autowired
     UserValidatorService userValidatorService;
 
     //-------------------------------- GET ---------------------------------
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
         if(customers.isEmpty()){
@@ -50,13 +57,28 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @PostAuthorize("returnObject.email == authentication.name")
     public CustomerResponseDto findById(String id) {
-        Optional<Customer> optionalCus = customerRepo.findById(id);
+                Optional<Customer> optionalCus = customerRepo.findById(id);
         if (optionalCus.isEmpty()) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
         CustomerResponseDto responseDto = customerMapper.toDto(optionalCus.get());
+
+//        String returnObjectName = responseDto.getName(); // assuming getName() exists
+//        String authenticatedName = SecurityContextHolder.getContext().getAuthentication().getName();
+//        log.info("returnObject.email = {}, authentication.name = {}", returnObjectName, authenticatedName);
+
         return responseDto;
+    }
+
+    @Override
+    public CustomerResponseDto getMyProfile() {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName(); //authentication.name là email
+        Customer c = customerRepo.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        return customerMapper.toDto(c);
     }
 
     //-------------------------------- DELETE ---------------------------------
