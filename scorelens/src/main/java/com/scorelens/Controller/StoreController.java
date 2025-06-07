@@ -54,4 +54,24 @@ public class StoreController {
                 .build();
     }
 
+    @PutMapping("/{id}")
+    public ResponseObject updateStore(@PathVariable String id, @RequestBody StoreRequest storeRequest) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Store is updated")
+                .data(storeService.updateStore(id, storeRequest))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseObject updateStoreStatus(@PathVariable String id, @RequestParam String status) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Store's status is updated")
+                .data(storeService.updateStore(id, status))
+                .build();
+    }
+
+
+
 }

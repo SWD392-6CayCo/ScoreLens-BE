@@ -49,5 +49,25 @@ public class StoreService implements IStoreService {
         return storeMapper.toStoreResponse(store.get());
     }
 
+    @Override
+    public StoreResponse updateStore(String storeID, StoreRequest storeRequest) {
+        Store updateStore = storeRepo.findById(storeID)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
+        storeMapper.updateStore(updateStore, storeRequest);
+        storeRepo.save(updateStore);
+        StoreResponse storeResponse = storeMapper.toStoreResponse(updateStore);
+        return storeResponse;
+    }
+
+    @Override
+    public StoreResponse updateStore(String storeID, String status) {
+        Store updateStore = storeRepo.findById(storeID)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
+        updateStore.setStatus(status);
+        storeRepo.save(updateStore);
+        StoreResponse storeResponse = storeMapper.toStoreResponse(updateStore);
+        return storeResponse;
+    }
+
 
 }

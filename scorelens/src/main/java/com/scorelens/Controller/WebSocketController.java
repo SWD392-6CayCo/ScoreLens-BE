@@ -24,12 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class WebSocketController {
 
-    @Autowired
     SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send")
     @SendTo("/topic/public")
-    public ResponseObject message(String message){
+    public ResponseObject handleMessage(String message){
         return ResponseObject.builder().message(message).build();
     }
 
