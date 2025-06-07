@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BilliardTableService implements IBilliardTableService {
@@ -32,22 +33,16 @@ public class BilliardTableService implements IBilliardTableService {
 
     @Override
     public BilliardTableResponse createBilliardTable(BilliardTableRequest request) {
-
         //map store thủ công để đảm bảo store có tồn tại, k map qua mapstruct
         Store store = getStoreById(request.getStoreID());
-
         BilliardTable billiardTable = billiardTableMapper.toBilliardTable(request);
-
         //set table code
         String tableCode = generateID(request.getName());
         billiardTable.setTableCode(tableCode);
-
         //set store
         billiardTable.setStore(store);
-
         BilliardTableResponse billiardTableResponse = billiardTableMapper.toBilliardTableResponse(billiardTableRepo.save(billiardTable));
         return billiardTableResponse;
-
     }
 
     @Override
@@ -58,8 +53,39 @@ public class BilliardTableService implements IBilliardTableService {
     }
 
     @Override
-    public BilliardTableResponse findBilliardTableById(String billardTableID) {
-        return null;
+    public BilliardTableResponse findBilliardTableById(String billiardTableID) {
+        BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)
+                .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+        return billiardTableMapper.toBilliardTableResponse(billiardTable);
+    }
+
+    @Override
+    public BilliardTableResponse updateBilliardTable(String billiardTableID, BilliardTableRequest request) {
+        BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)
+                .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+        billiardTableMapper.updateBilliardTable(billiardTable, request);
+        billiardTableRepo.save(billiardTable);
+        BilliardTableResponse response = billiardTableMapper.toBilliardTableResponse(billiardTable);
+        return response;
+    }
+
+    @Override
+    public BilliardTableResponse updateBilliardTable(String billiardTableID, String status) {
+        BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)
+                .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+        billiardTable.setBillardTableID(status);
+        billiardTableRepo.save(billiardTable);
+        BilliardTableResponse response = billiardTableMapper.toBilliardTableResponse(billiardTable);
+        return response;
+    }
+
+    @Override
+    public boolean deleteBilliardTable(String billiardTableID) {
+        return billiardTableRepo.findById(billiardTableID)
+                .map(table -> {
+                    billiardTableRepo.delete(table);
+                    return true;
+                }).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
     }
 
 
@@ -68,14 +94,13 @@ public class BilliardTableService implements IBilliardTableService {
                 .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
     }
 
-    private String generateID(String billiardTableName){
+    private String generateID(String billiardTableName) {
         if (billiardTableName == null || billiardTableName.isEmpty()) {
             return "";
         }
         StringBuilder codeBuilder = new StringBuilder();
         // Tách các từ bằng khoảng trắng
         String[] words = billiardTableName.trim().split("\\s+");
-
         for (String word : words) {
             // Nếu là số thì giữ nguyên
             if (word.matches("\\d+")) {
@@ -88,6 +113,5 @@ public class BilliardTableService implements IBilliardTableService {
         }
         return codeBuilder.toString();
     }
-
 
 }

@@ -5,8 +5,7 @@ import com.scorelens.DTOs.Response.BilliardTableResponse;
 import com.scorelens.DTOs.Response.StoreResponse;
 import com.scorelens.Entity.BilliardTable;
 import com.scorelens.Entity.Store;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -24,5 +23,8 @@ public interface BIlliardTableMapper {
     // Map request to entity, ignore store
     @Mapping(target = "store", ignore = true)
     BilliardTable toBilliardTable(BilliardTableRequest billiardTableRequest);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateBilliardTable(@MappingTarget BilliardTable billiardTable, BilliardTableRequest billiardTableRequest);
 
 }

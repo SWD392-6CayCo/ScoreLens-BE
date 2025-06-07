@@ -25,9 +25,9 @@ public enum ErrorCode {
     INCORRECT_EMAIL_OR_PASSWORD(1015, "Incorrect email or password"),
     //-------------------------- STORE -----------------------------------
     STORE_EXIST(1001, "This store's name is already existed"),
-    STORE_NOT_FOUND(1005, "Store Not Found")
+    STORE_NOT_FOUND(1005, "Store Not Found"),
     //-------------------------- BILLIARD STORE -----------------------------------
-
+    TABLE_NOT_FOUND(1005, "Table not found")
     ;
     private int code;
     private String message;

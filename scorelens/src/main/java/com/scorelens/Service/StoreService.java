@@ -44,9 +44,9 @@ public class StoreService implements IStoreService {
 
     @Override
     public StoreResponse findStoreById(String storeID) {
-        Optional<Store> store = storeRepo.findById(storeID);
-        if (store.isEmpty()) throw new AppException(ErrorCode.STORE_NOT_FOUND);
-        return storeMapper.toStoreResponse(store.get());
+        Store store = storeRepo.findById(storeID)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
+        return storeMapper.toStoreResponse(store);
     }
 
     @Override
