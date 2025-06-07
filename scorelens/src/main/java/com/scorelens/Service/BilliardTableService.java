@@ -4,6 +4,7 @@ import com.scorelens.DTOs.Request.BilliardTableRequest;
 import com.scorelens.DTOs.Response.BilliardTableResponse;
 import com.scorelens.Entity.BilliardTable;
 import com.scorelens.Entity.Store;
+import com.scorelens.Enums.TableStatus;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.BilliardTableMapper;
@@ -36,8 +37,7 @@ public class BilliardTableService implements IBilliardTableService {
         Store store = getStoreById(request.getStoreID());
         BilliardTable billiardTable = billiardTableMapper.toBilliardTable(request);
         //set table code
-        String tableCode = generateID(request.getName());
-        billiardTable.setTableCode(tableCode);
+        billiardTable.setTableCode(generateID(request.getName()));
         //set store
         billiardTable.setStore(store);
         BilliardTableResponse billiardTableResponse = billiardTableMapper.toBilliardTableResponse(billiardTableRepo.save(billiardTable));
@@ -63,6 +63,8 @@ public class BilliardTableService implements IBilliardTableService {
         BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)
                 .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
         billiardTableMapper.updateBilliardTable(billiardTable, request);
+        //thay đổi table code theo tên đã update
+        billiardTable.setTableCode(generateID(request.getName()));
         billiardTableRepo.save(billiardTable);
         BilliardTableResponse response = billiardTableMapper.toBilliardTableResponse(billiardTable);
         return response;
@@ -72,7 +74,7 @@ public class BilliardTableService implements IBilliardTableService {
     public BilliardTableResponse updateBilliardTable(String billiardTableID, String status) {
         BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)
                 .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
-        billiardTable.setBillardTableID(status);
+        billiardTable.setStatus(TableStatus.valueOf(status));
         billiardTableRepo.save(billiardTable);
         BilliardTableResponse response = billiardTableMapper.toBilliardTableResponse(billiardTable);
         return response;
