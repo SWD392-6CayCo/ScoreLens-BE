@@ -75,4 +75,22 @@ public class EventService implements IEventService {
             throw new AppException(ErrorCode.NULL_EVENT_ROUNDID);
         return eventMapper.toEventResponses(events);
     }
+
+    @Override
+    public boolean deleteEventByPlayerID(int playerID) {
+        List<Event> events = eventRepo.findAllByPlayer_PlayerID(playerID);
+        if (events.isEmpty())
+            throw new AppException(ErrorCode.NULL_EVENT_PLAYERID);
+        eventRepo.deleteAll(events);
+        return true;
+    }
+
+    @Override
+    public boolean deleteEventByRoundID(int roundID) {
+        List<Event> events = eventRepo.findAllByRound_RoundID(roundID);
+        if (events.isEmpty())
+            throw new AppException(ErrorCode.NULL_EVENT_ROUNDID);
+        eventRepo.deleteAll(events);
+        return true;
+    }
 }

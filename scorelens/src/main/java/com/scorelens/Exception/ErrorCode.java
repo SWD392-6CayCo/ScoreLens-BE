@@ -40,7 +40,8 @@ public enum ErrorCode {
     //-------------------------- EVENT  -----------------------------------
     NULL_EVENT(1005, "Event is null"),
     NULL_EVENT_PLAYERID(1005, "No data matched with this player"),
-    NULL_EVENT_ROUNDID(1005, "No data matched with this round")
+    NULL_EVENT_ROUNDID(1005, "No data matched with this round"),
+    EVENT_NOT_FOUND(1005, "Event not found"),
     ;
     private int code;
     private String message;

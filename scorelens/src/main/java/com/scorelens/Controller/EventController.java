@@ -61,5 +61,23 @@ public class EventController {
                 .build();
     }
 
+    @DeleteMapping("/player/{id}")
+    ResponseObject deleteEventByPlayerID(@PathVariable int id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Events deleted")
+                .data(eventService.deleteEventByPlayerID(id))
+                .build();
+    }
+
+    @DeleteMapping("/round/{id}")
+    ResponseObject deleteEventByRoundID(@PathVariable int id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Events deleted")
+                .data(eventService.deleteEventByRoundID(id))
+                .build();
+    }
+
 
 }

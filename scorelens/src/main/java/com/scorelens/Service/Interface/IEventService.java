@@ -11,5 +11,7 @@ public interface IEventService {
     List<EventResponse> getAllEvents();
     List<EventResponse> getEventsByPlayerID(int playerID);
     List<EventResponse> getEventsByRoundID(int roundID);
+    boolean deleteEventByPlayerID(int playerID);
+    boolean deleteEventByRoundID(int roundID);
 
 }
