@@ -63,7 +63,7 @@ public class StoreController {
                 .build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/status/{id}")
     public ResponseObject updateStoreStatus(@PathVariable String id, @RequestParam String status) {
         return ResponseObject.builder()
                 .status(1000)

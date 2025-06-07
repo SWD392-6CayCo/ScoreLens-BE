@@ -61,7 +61,7 @@ public class BilliardTableController {
                 .build();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/status/{id}")
     public ResponseObject updateTableStatus(@PathVariable String id, @RequestParam String status) {
         return ResponseObject.builder()
                 .status(1000)

@@ -6,7 +6,7 @@ import com.scorelens.Entity.BilliardTable;
 import com.scorelens.Entity.Store;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
-import com.scorelens.Mapper.BIlliardTableMapper;
+import com.scorelens.Mapper.BilliardTableMapper;
 import com.scorelens.Repository.BilliardTableRepo;
 import com.scorelens.Repository.StoreRepo;
 import com.scorelens.Service.Interface.IBilliardTableService;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BilliardTableService implements IBilliardTableService {
@@ -23,7 +22,7 @@ public class BilliardTableService implements IBilliardTableService {
     BilliardTableRepo billiardTableRepo;
 
     @Autowired
-    BIlliardTableMapper billiardTableMapper;
+    BilliardTableMapper billiardTableMapper;
 
     @Autowired
     StoreService storeService;

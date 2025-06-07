@@ -2,15 +2,13 @@ package com.scorelens.Mapper;
 
 import com.scorelens.DTOs.Request.BilliardTableRequest;
 import com.scorelens.DTOs.Response.BilliardTableResponse;
-import com.scorelens.DTOs.Response.StoreResponse;
 import com.scorelens.Entity.BilliardTable;
-import com.scorelens.Entity.Store;
 import org.mapstruct.*;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {StoreMapper.class})
-public interface BIlliardTableMapper {
+public interface BilliardTableMapper {
 
     @Mapping(source = "store", target = "storeResponse")
     BilliardTableResponse toBilliardTableResponse(BilliardTable billiardTable);
