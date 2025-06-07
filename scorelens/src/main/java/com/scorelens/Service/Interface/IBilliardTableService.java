@@ -10,4 +10,8 @@ public interface IBilliardTableService {
     BilliardTableResponse createBilliardTable(BilliardTableRequest request);
     List<BilliardTableResponse> getAllBilliardTables();
     BilliardTableResponse findBilliardTableById(String billardTableID);
+    BilliardTableResponse updateBilliardTable(String billiardTableID, BilliardTableRequest request);
+    BilliardTableResponse updateBilliardTable(String billiardTableID, String status);
+    boolean deleteBilliardTable(String billiardTableID);
+
 }
