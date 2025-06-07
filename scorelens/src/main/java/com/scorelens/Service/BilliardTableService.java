@@ -11,12 +11,17 @@ import com.scorelens.Mapper.BilliardTableMapper;
 import com.scorelens.Repository.BilliardTableRepo;
 import com.scorelens.Repository.StoreRepo;
 import com.scorelens.Service.Interface.IBilliardTableService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class BilliardTableService implements IBilliardTableService {
 
     @Autowired
@@ -29,7 +34,7 @@ public class BilliardTableService implements IBilliardTableService {
     StoreService storeService;
 
     @Autowired
-    private StoreRepo storeRepo;
+    StoreRepo storeRepo;
 
     @Override
     public BilliardTableResponse createBilliardTable(BilliardTableRequest request) {
