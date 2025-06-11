@@ -51,8 +51,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
-                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
+                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.GET, "/customers/**").hasAnyRole("ADMIN", "MANAGER")
                 .anyRequest().authenticated());
 
 //                .anyRequest().permitAll());
@@ -70,7 +71,8 @@ public class SecurityConfig {
 
     JwtAuthenticationConverter jwtAuthenticationConverter(){
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+//        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix(""); //đã set pattern bên phía AuthenticationService
 
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);

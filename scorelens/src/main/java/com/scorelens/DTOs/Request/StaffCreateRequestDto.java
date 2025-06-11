@@ -16,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * DTO for {@link com.scorelens.Entity.Staff}
@@ -50,5 +51,6 @@ public class StaffCreateRequestDto implements Serializable {
     String password;
 
     StaffRole role;
+    Set<String> roles;
     String managerID;
 }

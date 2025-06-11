@@ -37,7 +37,7 @@ public class CustomerController {
     public ResponseObject getAllCustomers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         log.info("Username: {}", authentication.getName());
-        authentication.getAuthorities().forEach(grantedAuthority -> log.info("GrantedAuthority: {}", grantedAuthority));
+        authentication.getAuthorities().forEach(grantedAuthority -> log.info("GrantedAuthority: {}", grantedAuthority.toString()));
 
         List<CustomerResponseDto> customers = customerService.findAll();
         return ResponseObject.builder()

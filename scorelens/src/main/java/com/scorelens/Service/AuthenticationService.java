@@ -32,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -116,7 +117,7 @@ public class AuthenticationService implements IAuthenticationService {
                     new JWSHeader(JWSAlgorithm.HS512),
                     new Payload(claims.toJSONObject())
             );
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes(StandardCharsets.UTF_8)));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Token generation failed", e);
@@ -128,7 +129,18 @@ public class AuthenticationService implements IAuthenticationService {
         if (userEntity instanceof Customer) {
             return UserType.Customer.name(); // "Customer"
         } else if (userEntity instanceof Staff staff) {
-            return staff.getRole().name();   // "Staff" / "Manager" / "Admin"
+            //return staff.getRole().name();   // "Staff" / "Manager" / "Admin"
+            StringJoiner stringJoiner = new StringJoiner(" ");
+            if(!CollectionUtils.isEmpty(staff.getRoles()))
+                staff.getRoles().forEach(role -> {
+                    stringJoiner.add("ROLE_" + role.getName());
+                    if (!CollectionUtils.isEmpty(role.getPermissions()))
+                        role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
+                });
+
+
+
+            return stringJoiner.toString();   // "Staff" / "Manager" / "Admin"
         } else {
             throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
         }

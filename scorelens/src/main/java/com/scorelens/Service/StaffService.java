@@ -13,9 +13,14 @@ import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.StaffMapper;
 import com.scorelens.Repository.IDSequenceRepository;
+import com.scorelens.Repository.RoleRepository;
 import com.scorelens.Repository.StaffRepository;
 import com.scorelens.Service.Interface.IStaffService;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,13 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 // còn Spring dùng của chính nó để dễ kiểm soát và tích hợp với Spring Context.
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffService implements IStaffService {
     @Autowired
-    private StaffRepository staffRepository;
+    StaffRepository staffRepository;
+    @Autowired
+    RoleRepository roleRepository;
     @Autowired
     IDSequenceRepository idSequenceRepository;
     @Autowired
@@ -57,6 +66,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- GET ALL -----------------------------------
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public List<StaffResponseDto> getAllStaff() {
         List<Staff> staffList = staffRepository.findAll();
         if (staffList.isEmpty()) {
@@ -66,6 +76,7 @@ public class StaffService implements IStaffService {
     }
 
     @Override
+    @PostAuthorize("returnObject.email == authentication.name")
     public StaffResponseDto getMyProfile() {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName(); //authentication.name là email
@@ -117,6 +128,8 @@ public class StaffService implements IStaffService {
 
         //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
         staff.setPassword(passwordEncoder.encode(staffCreateRequestDto.getPassword()));
+        var roles = roleRepository.findAllById(staffCreateRequestDto.getRoles());
+        staff.setRoles(new HashSet<>(roles));
         staffRepository.save(staff);
 
         return staffMapper.toDto(staffRepository.save(staff));
@@ -137,11 +150,19 @@ public class StaffService implements IStaffService {
         //Kiểm tra xem có managerID hay chưa
         Staff manager = staffRepository.findById(requestDto.getManagerID())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+
+        staffMapper.updateStaff(existingStaff, requestDto);
+
         // Cập nhật thông tin
         existingStaff.setName(requestDto.getName());
         existingStaff.setEmail(requestDto.getEmail());
         existingStaff.setPhoneNumber(requestDto.getPhoneNumber());
+
 //        existingStaff.setRole(requestDto.getRole()); // không cho set role
+
+        var roles = roleRepository.findAllById(requestDto.getRoles());
+        existingStaff.setRoles(new HashSet<>(roles));
+
         existingStaff.setAddress(requestDto.getAddress());
         existingStaff.setStatus(requestDto.getStatus());
         existingStaff.setDob(requestDto.getDob());
@@ -149,7 +170,7 @@ public class StaffService implements IStaffService {
         existingStaff.setManager(manager);
 
         // Lưu và trả về kết quả
-        staffRepository.save(existingStaff);
+        //staffRepository.save(existingStaff);
         return staffMapper.toDto(existingStaff);
     }
 

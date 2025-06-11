@@ -47,10 +47,14 @@ public class Staff implements AppUser {
     @Column(name = "password", length = 100)
     String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 20)
-    StaffRole role; // STAFF, MANAGER, ADMIN
-
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "role", length = 20)
+//    StaffRole role; // STAFF, MANAGER, ADMIN
+    @JoinTable(
+            name = "staff_roles",
+            joinColumns = @JoinColumn(name = "staff_staffID", referencedColumnName = "staffID"),
+            inverseJoinColumns = @JoinColumn(name = "roles_name", referencedColumnName = "name")
+    )
     @ManyToMany
     Set<Role> roles;
 
