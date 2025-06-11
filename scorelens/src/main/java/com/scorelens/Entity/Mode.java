@@ -22,3 +22,5 @@ public class Mode {
     @Column(name = "isActive") // 0: available, 1: unavailable
     private boolean isActive;
 }
+
+
