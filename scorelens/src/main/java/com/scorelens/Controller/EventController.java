@@ -16,7 +16,7 @@ import java.util.EventObject;
 @Slf4j
 @Tag(name = "Event", description = "Handling match event")
 @RestController
-@RequestMapping("/events")
+@RequestMapping("v1/events")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

@@ -23,7 +23,7 @@ import java.util.List;
 @Slf4j
 @Tag(name = "Customer", description = "Quản lý mấy khứa khách hàng")
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("v1/customers")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -33,7 +33,7 @@ public class CustomerController {
     CustomerService customerService;
 
     //    ---------------------------------------- GET ----------------------------------------
-    @GetMapping("/all")
+    @GetMapping("")
     public ResponseObject getAllCustomers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         log.info("Username: {}", authentication.getName());
@@ -99,7 +99,7 @@ public class CustomerController {
     //    -----------------------------------------------------------------------------------------------
 
     //    ---------------------------------------- UPDATE STATUS (BAN/UNBAN) ----------------------------------------
-    @PutMapping("/{id}/status")
+    @PutMapping("/status/{id}")
     public ResponseObject updateCustomerStatus(@PathVariable String id, @RequestParam String status) {
         boolean updated = customerService.updateCustomerStatus(id, status);
         if(updated) {
@@ -129,7 +129,7 @@ public class CustomerController {
     //    ---------------------------------------------------------------------------------------------------
 
     //    ---------------------------------------- UPDATE PASSWORD ------------------------------------------------
-    @PutMapping("/{id}/password")
+    @PutMapping("/password/{id}")
     public ResponseObject updatePassword(@PathVariable String id, @RequestBody @Valid ChangePasswordRequestDto requestDto) {
         boolean updated = customerService.updatePassword(id, requestDto);
         if (updated) {

@@ -23,7 +23,7 @@ import java.text.ParseException;
 
 @Tag(name = "Authentication", description = "Authentication APIs")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("v1/auth")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationController {

@@ -19,7 +19,7 @@ import java.util.List;
 
 @Tag(name = "Staff", description = "Quản lý Admin, Manager và Staff")
 @RestController
-@RequestMapping("/staffs")
+@RequestMapping("/v1/staffs")
 public class StaffController {
 
     @Autowired
@@ -27,7 +27,7 @@ public class StaffController {
 
     //    ---------------------------------------- GET ----------------------------------------
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @GetMapping("/all")
+    @GetMapping()
     public ResponseObject getAllStaff() {
         List<StaffResponseDto> staffs = staffService.getAllStaff();
         return ResponseObject.builder()
@@ -92,7 +92,7 @@ public class StaffController {
     //    ---------------------------------------------------------------------------------------------------
 
     //    ---------------------------------------- UPDATE STATUS (BAN/UNBAN) ----------------------------------------
-    @PutMapping("/{id}/status")
+    @PutMapping("/status/{id}")
     public ResponseObject updateStaffStatus(@PathVariable String id, @RequestParam String status) {
         boolean updated = staffService.updateStaffStatus(id, status);
         if(updated) {
@@ -111,7 +111,7 @@ public class StaffController {
     //    ---------------------------------------------------------------------------------------------
 
     //    ---------------------------------------- UPDATE PASSWORD ------------------------------------------------
-    @PutMapping("/{id}/password")
+    @PutMapping("/password/{id}")
     public ResponseObject updatePassword(@PathVariable String id, @RequestBody @Valid ChangePasswordRequestDto requestDto) {
         boolean updated = staffService.updatePassword(id, requestDto);
         if (updated) {

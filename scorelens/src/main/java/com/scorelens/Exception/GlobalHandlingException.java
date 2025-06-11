@@ -2,9 +2,11 @@ package com.scorelens.Exception;
 
 import com.scorelens.Entity.ResponseObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 
 @ControllerAdvice
 public class GlobalHandlingException {//Runtime exception
@@ -19,10 +21,25 @@ public class GlobalHandlingException {//Runtime exception
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ResponseObject> HandlingAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        return ResponseEntity.badRequest().body(ResponseObject.builder()
-                .status(errorCode.getCode())
-                .message(errorCode.getMessage())
-                .build());
+        ResponseObject responseObject = new ResponseObject();
+        responseObject.setStatus(errorCode.getCode());
+        responseObject.setMessage(errorCode.getMessage());
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(responseObject)
+                ;
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    ResponseEntity<ResponseObject> HandlingAccessDeniedException(AccessDeniedException exception) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZE;
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(
+                ResponseObject.builder()
+                        .status(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build()
+        );
     }
 
     //validation
@@ -58,9 +75,10 @@ public class GlobalHandlingException {//Runtime exception
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ResponseObject> handleUnexpectedException(Exception exception) {
         exception.printStackTrace(); // nên dùng log.error() nếu đã cấu hình logging
-        return ResponseEntity.status(500).body(ResponseObject.builder()
-                .status(500)
-                .message("Internal Server Error: " + exception.getMessage())
-                .build());
+        ResponseObject responseObject = new ResponseObject();
+        responseObject.setStatus(ErrorCode.UNAUTHENTICATED.getCode());
+        responseObject.setMessage(ErrorCode.UNAUTHENTICATED.getMessage());
+
+        return ResponseEntity.badRequest().body(responseObject);
     }
 }

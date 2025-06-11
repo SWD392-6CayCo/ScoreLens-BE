@@ -34,7 +34,7 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-            "/auth/login", "/auth/introspect", "/auth/register", "/auth/login/**", "/auth/logout",
+            "v*/auth/login", "/auth/introspect", "v*/auth/register", "/auth/login/**", "/auth/logout",
     };
     private final String[] CUSTOMER_ENDPOINTS = {
             "/customers/**"
@@ -50,18 +50,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
-//                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-//                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
-//                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
-//                .anyRequest().authenticated());
+                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
+                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
+                .anyRequest().authenticated());
 
-                .anyRequest().permitAll());
+//                .anyRequest().permitAll());
 
         http.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                ));
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -99,6 +99,19 @@ public class SecurityConfig {
 
         return new CorsFilter(url);
     }
+
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins("http://localhost:3000")
+//                        .allowedMethods("*")
+//                        .allowCredentials(true);
+//            }
+//        };
+//    }
 
     //Encoding password
     @Bean
