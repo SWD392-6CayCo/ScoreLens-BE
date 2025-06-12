@@ -47,7 +47,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- GET ---------------------------------
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAuthority('GET_USER_LIST')")
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
         if(customers.isEmpty()){

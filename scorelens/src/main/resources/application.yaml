@@ -1,7 +1,7 @@
 server:
   port: 8080
   servlet:
-    context-path: /
+    context-path: /api/
 spring:
   datasource:
     url: ${DB_URL}

@@ -6,7 +6,11 @@ import com.scorelens.Enums.UserType;
 import com.scorelens.Security.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Staff")
@@ -14,47 +18,55 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Staff implements AppUser {
 
     @Id
     @Column(name = "staffID", length = 10)
-    private String staffID;  // Example: S01, M01, A01
+    String staffID;  // Example: S01, M01, A01
 
     @ManyToOne
     @JoinColumn(name = "managerID")
-    private Staff manager;
+    Staff manager;
 
     @Column(name = "name", length = 100, nullable = false)
-    private String name;
+    String name;
 
     @Column(name = "email", length = 100, unique = true, nullable = false)
-    private String email;
+    String email;
 
     @Column(name = "phoneNumber", length = 10, nullable = false)
-    private String phoneNumber;
+    String phoneNumber;
 
     @Column(name = "dob")
-    private LocalDate dob;
+    LocalDate dob;
 
     @Column(name = "address", length = 255)
-    private String address;
+    String address;
 
     @Column(name = "password", length = 100)
-    private String password;
+    String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 20)
-    private StaffRole role; // STAFF, MANAGER, ADMIN
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "role", length = 20)
+//    StaffRole role; // STAFF, MANAGER, ADMIN
+    @JoinTable(
+            name = "staff_roles",
+            joinColumns = @JoinColumn(name = "staff_staffID", referencedColumnName = "staffID"),
+            inverseJoinColumns = @JoinColumn(name = "roles_name", referencedColumnName = "name")
+    )
+    @ManyToMany
+    Set<Role> roles;
 
     @Column(name = "createAt")
-    private LocalDate createAt;
+    LocalDate createAt;
 
     @Column(name = "updateAt")
-    private LocalDate updateAt;
+    LocalDate updateAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10)
-    private StatusType status; // active, inactive
+    StatusType status; // active, inactive
 
     @Override
     public String getId() {
@@ -63,6 +75,6 @@ public class Staff implements AppUser {
 
     @Override
     public UserType getUserType() {
-        return UserType.Staff;
+        return UserType.STAFF;
     }
 }

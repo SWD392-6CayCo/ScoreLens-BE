@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Tag(name = "Web Socket", description = "Manage Noti")
 @RestController
-@RequestMapping("/api/noti")
+@RequestMapping("/v1/noti")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class WebSocketController {
 

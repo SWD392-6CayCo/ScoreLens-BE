@@ -15,13 +15,14 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * DTO for {@link com.scorelens.Entity.Staff}
  */
 @AllArgsConstructor
 @Getter
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffUpdateRequestDto implements Serializable {
     String name;
 
@@ -44,5 +45,8 @@ public class StaffUpdateRequestDto implements Serializable {
 
     String address;
     StatusType status;
+
+    List<String> roles;
+
     String managerID;
 }

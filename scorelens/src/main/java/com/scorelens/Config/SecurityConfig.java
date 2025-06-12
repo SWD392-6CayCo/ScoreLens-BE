@@ -2,9 +2,12 @@ package com.scorelens.Config;
 
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.UserType;
+import org.apache.http.client.methods.HttpGet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,7 +37,7 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-            "/auth/login", "/auth/introspect", "/auth/register", "/auth/login/**", "/auth/logout",
+            "v*/auth/login", "/v*/auth/introspect", "v*/auth/register", "/auth/login/**", "/v*/auth/logout",
     };
     private final String[] CUSTOMER_ENDPOINTS = {
             "/customers/**"
@@ -44,24 +47,27 @@ public class SecurityConfig {
             "/staffs",
     };
 
-    @Value("${jwt.signerKey}") //Đọc từ file application.yaml
-    protected String SIGNER_KEY;
+    @Autowired
+    @Lazy
+    private CustomJwtDecoder customJwtDecoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
-//                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-//                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
-//                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole(StaffRole.ADMIN.name(), StaffRole.MANAGER.name())
-//                .anyRequest().authenticated());
+                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.GET, "/customers/").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.POST, "/customers/my-profile").hasRole("CUSTOMER")
+                .anyRequest().authenticated());
 
-                .anyRequest().permitAll());
+//                .anyRequest().permitAll());
 
         http.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(jwtDecoder())
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                ));
+                        jwtConfigurer.decoder(customJwtDecoder)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -70,21 +76,22 @@ public class SecurityConfig {
 
     JwtAuthenticationConverter jwtAuthenticationConverter(){
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+//        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix(""); //đã set pattern bên phía AuthenticationService
 
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return converter;
     }
 
-    //giải mã JWT
-    @Bean
-    JwtDecoder jwtDecoder(){
-        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
-        return NimbusJwtDecoder.withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
-    }
+    //giải mã JWT -> ĐÃ DÙNG CUSTOMJWTDECODER
+//    @Bean
+//    JwtDecoder jwtDecoder(){
+//        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
+//        return NimbusJwtDecoder.withSecretKey(secretKeySpec)
+//                .macAlgorithm(MacAlgorithm.HS512)
+//                .build();
+//    }
 
     //CORS handling
     @Bean
@@ -99,6 +106,19 @@ public class SecurityConfig {
 
         return new CorsFilter(url);
     }
+
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins("http://localhost:3000")
+//                        .allowedMethods("*")
+//                        .allowCredentials(true);
+//            }
+//        };
+//    }
 
     //Encoding password
     @Bean

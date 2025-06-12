@@ -67,6 +67,6 @@ public class Customer implements AppUser {
 
     @Override
     public UserType getUserType() {
-        return UserType.Customer;
+        return UserType.CUSTOMER;
     }
 }
