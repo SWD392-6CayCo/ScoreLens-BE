@@ -20,9 +20,12 @@ public enum ErrorCode {
     USER_NOT_EXIST(1003, "User Not Found", HttpStatus.NOT_FOUND),
     EMPTY_LIST(1004, "Empty list", HttpStatus.BAD_REQUEST),
     INVALID_STATUS(1005, "Status must be active or inactive", HttpStatus.BAD_REQUEST),
+    INVALID_DOB(1098, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
+    NAME_LENGTH(1097, "Name must be at least {min}", HttpStatus.BAD_REQUEST),
     // USER PASSWORD
     NOT_MATCH_PASSWORD(1006, "Password do not match", HttpStatus.BAD_REQUEST),
     DUPLICATED_PASSWORD(1007, "New password is duplicated to old password", HttpStatus.CONFLICT),
+    PASSWORD_LENGTH(999, "Password length must be at least {min} characters", HttpStatus.BAD_REQUEST),
     //Authentication
     UNAUTHENTICATED(1008, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZE(1099, "You do not have permission", HttpStatus.FORBIDDEN),

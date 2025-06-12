@@ -3,6 +3,7 @@ package com.scorelens.DTOs.Request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Constants.RegexConstants;
 import com.scorelens.Constants.ValidationMessages;
+import com.scorelens.Validation.DobConstraint;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
@@ -37,6 +38,7 @@ public class CustomerUpdateRequestDto implements Serializable {
     @Past(message = ValidationMessages.DOB_PAST)
     @Schema(type = "string", pattern = "dd-MM-yyyy")//Hiển thị format dd-MM-yyyy trên swagger
     @JsonFormat(pattern = "dd-MM-yyyy")
+    @DobConstraint(min = 10)
     LocalDate dob;
 
     String managerID;
