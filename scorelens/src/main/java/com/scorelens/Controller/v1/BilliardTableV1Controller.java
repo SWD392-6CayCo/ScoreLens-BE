@@ -84,12 +84,12 @@ public class BilliardTableV1Controller {
     }
 
     @GetMapping("/v2/{id}")
-    public ResponseObject getListByStoreID(@PathVariable String id){
-        StoreResponse store = storeService.findStoreById(id);
+    public ResponseObject getListByStoreID(@PathVariable String storeID){
+        StoreResponse store = storeService.findStoreById(storeID);
         return ResponseObject.builder()
                 .status(1000)
                 .message("Tables in Store name:" + store.getName())
-                .data(billiardTableService.getTablesByStore(id))
+                .data(billiardTableService.getTablesByStore(storeID))
                 .build();
     }
 

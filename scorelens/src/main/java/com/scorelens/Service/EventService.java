@@ -93,11 +93,4 @@ public class EventService implements IEventService {
         eventRepo.deleteAll(events);
         return true;
     }
-
-    @Override
-    public List<EventResponse> getEventsByPlayerIDAndRoundID(int playerID, int roundID) {
-        List<Event> list = eventRepo.findAllByRound_RoundIDAndPlayer_PlayerID(roundID, playerID);
-        if (list.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
-        return eventMapper.toEventResponses(list);
-    }
 }
