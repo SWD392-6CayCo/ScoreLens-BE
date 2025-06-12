@@ -1,9 +1,8 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
 import com.scorelens.DTOs.Request.StaffCreateRequestDto;
 import com.scorelens.DTOs.Request.StaffUpdateRequestDto;
-import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.DTOs.Response.StaffResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.StaffService;
@@ -20,7 +19,7 @@ import java.util.List;
 @Tag(name = "Staff", description = "Quản lý Admin, Manager và Staff")
 @RestController
 @RequestMapping("v1/staffs")
-public class StaffController {
+public class StaffV1Controller {
 
     @Autowired
     StaffService staffService;

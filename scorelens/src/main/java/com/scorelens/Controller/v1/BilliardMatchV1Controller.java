@@ -1,4 +1,4 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.BilliardMatchRequest;
 import com.scorelens.Entity.ResponseObject;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class BilliardMatchController {
+public class BilliardMatchV1Controller {
 
     @Autowired
     BilliardMatchService billiardMatchService;

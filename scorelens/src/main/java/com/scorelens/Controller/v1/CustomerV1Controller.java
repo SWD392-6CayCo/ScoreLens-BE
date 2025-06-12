@@ -1,4 +1,4 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
 import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
@@ -6,7 +6,6 @@ import com.scorelens.DTOs.Request.CustomerUpdateRequestDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.CustomerService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -27,7 +26,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class CustomerController {
+public class CustomerV1Controller {
 
     @Autowired
     CustomerService customerService;

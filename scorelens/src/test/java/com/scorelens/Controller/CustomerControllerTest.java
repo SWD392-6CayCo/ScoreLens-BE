@@ -2,25 +2,16 @@ package com.scorelens.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
-import com.scorelens.DTOs.Response.CustomerResponseDto;
+import com.scorelens.Controller.v1.CustomerV1Controller;
 import com.scorelens.Service.CustomerService;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf; // Thêm dòng này
-import java.time.LocalDate;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(CustomerController.class)
+@WebMvcTest(CustomerV1Controller.class)
 public class CustomerControllerTest {
 
     @Autowired

@@ -1,9 +1,8 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v2;
 
-
-import com.scorelens.DTOs.Request.NotificationRequest;
+import com.scorelens.DTOs.Request.EventRequest;
 import com.scorelens.Entity.ResponseObject;
-import com.scorelens.Service.NotificationService;
+import com.scorelens.Service.EventService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,23 +12,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@Tag(name = "Notification", description = "Handling Notifications")
+@Tag(name = "Event", description = "Handling match event")
 @RestController
-@RequestMapping("v1/notifications")
+@RequestMapping("v2/events")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class NotificationController {
+public class EventV2Controller {
 
-    NotificationService notificationService;
+    @Autowired
+    EventService eventService;
 
-    @PostMapping
-    public ResponseObject newNotification(@RequestBody NotificationRequest request){
+    @GetMapping("")
+    ResponseObject getEventsByRoundAndPlayer(@RequestParam int roundID, @RequestParam int playerID) {
         return ResponseObject.builder()
                 .status(1000)
-                .message("New Notification")
-                .data(notificationService.sendNotification(request))
+                .message("Event list")
+                .data(eventService.getEventsByPlayerIDAndRoundID(roundID, playerID))
                 .build();
     }
+
 
 }

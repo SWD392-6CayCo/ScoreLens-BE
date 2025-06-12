@@ -1,4 +1,4 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.EventRequest;
 import com.scorelens.Entity.ResponseObject;
@@ -11,8 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.EventObject;
-
 @Slf4j
 @Tag(name = "Event", description = "Handling match event")
 @RestController
@@ -20,7 +18,7 @@ import java.util.EventObject;
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class EventController {
+public class EventV1Controller {
 
     @Autowired
     EventService eventService;

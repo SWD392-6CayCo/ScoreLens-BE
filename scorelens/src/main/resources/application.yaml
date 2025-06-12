@@ -1,12 +1,13 @@
 server:
   port: 8080
   servlet:
-    context-path: /api/
+    context-path: /
 spring:
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+
     driver-class-name: com.mysql.cj.jdbc.Driver
   web:
     resources:
@@ -30,4 +31,5 @@ springdoc:
     path: /swagger-ui.html
 jwt:
   signerKey: ${JWT_SIGNER_KEY}
+
 

@@ -1,4 +1,4 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.ModeRequest;
 import com.scorelens.Entity.ResponseObject;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ModeController {
+public class ModeV1Controller {
 
     @Autowired
     private ModeService modeService;

@@ -1,9 +1,7 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
-import com.scorelens.DTOs.Request.PermissionRequest;
 import com.scorelens.DTOs.Request.RoleRequest;
 import com.scorelens.Entity.ResponseObject;
-import com.scorelens.Service.PermissionService;
 import com.scorelens.Service.RoleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -16,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/roles")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class RoleController {
+public class RoleV1Controller {
     RoleService roleService;
 
     @PostMapping

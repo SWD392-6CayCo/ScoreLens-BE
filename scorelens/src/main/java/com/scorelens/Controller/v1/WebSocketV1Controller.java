@@ -1,4 +1,4 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.Entity.ResponseObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1/noti")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class WebSocketController {
+public class WebSocketV1Controller {
 
     SimpMessagingTemplate messagingTemplate;
 

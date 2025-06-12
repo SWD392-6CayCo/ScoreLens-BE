@@ -1,7 +1,6 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.BilliardTableRequest;
-import com.scorelens.DTOs.Response.BilliardTableResponse;
 import com.scorelens.DTOs.Response.StoreResponse;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.BilliardTableService;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class BilliardTableController {
+public class BilliardTableV1Controller {
 
     BilliardTableService billiardTableService;
 

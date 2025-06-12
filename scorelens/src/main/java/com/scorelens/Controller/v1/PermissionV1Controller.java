@@ -1,7 +1,6 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.PermissionRequest;
-import com.scorelens.DTOs.Response.PermissionResponse;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.PermissionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/permissions")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PermissionController {
+public class PermissionV1Controller {
     PermissionService permissionService;
 
     @PostMapping

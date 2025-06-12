@@ -1,11 +1,10 @@
-package com.scorelens.Controller;
+package com.scorelens.Controller.v1;
 
 import com.nimbusds.jose.JOSEException;
 import com.scorelens.DTOs.Request.AuthenticationRequestDto;
 import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
 import com.scorelens.DTOs.Request.IntrospectRequestDto;
 import com.scorelens.DTOs.Request.LogoutRequestDto;
-import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.AuthenticationService;
@@ -27,7 +26,7 @@ import java.text.ParseException;
 @RequestMapping("v1/auth")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AuthenticationController {
+public class AuthenticationV1Controller {
 
     AuthenticationService authenticationService;
     CustomerService customerService;
