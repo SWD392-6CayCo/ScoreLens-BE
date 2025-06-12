@@ -28,7 +28,7 @@ public class EventV2Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Event list")
-                .data(eventService.getEventsByPlayerIDAndRoundID(roundID, playerID))
+                .data(eventService.getEventsByPlayerIDAndRoundID(playerID, roundID))
                 .build();
     }
 
