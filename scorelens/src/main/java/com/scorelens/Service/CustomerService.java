@@ -10,11 +10,17 @@ import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.CustomerMapper;
 import com.scorelens.Repository.CustomerRepo;
+import com.scorelens.Repository.StaffRepository;
 import com.scorelens.Service.Interface.ICustomerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,25 +28,26 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class CustomerService implements ICustomerService {
 
     @Autowired
     CustomerRepo customerRepo;
-
     @Autowired
     CustomerMapper customerMapper;
-
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
-
+    StaffRepository staffRepo;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+    @Autowired
+    UserValidatorService userValidatorService;
 
     //-------------------------------- GET ---------------------------------
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
         if(customers.isEmpty()){
@@ -50,13 +57,28 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @PostAuthorize("returnObject.email == authentication.name")
     public CustomerResponseDto findById(String id) {
-        Optional<Customer> optionalCus = customerRepo.findById(id);
+                Optional<Customer> optionalCus = customerRepo.findById(id);
         if (optionalCus.isEmpty()) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
         CustomerResponseDto responseDto = customerMapper.toDto(optionalCus.get());
+
+//        String returnObjectName = responseDto.getName(); // assuming getName() exists
+//        String authenticatedName = SecurityContextHolder.getContext().getAuthentication().getName();
+//        log.info("returnObject.email = {}, authentication.name = {}", returnObjectName, authenticatedName);
+
         return responseDto;
+    }
+
+    @Override
+    public CustomerResponseDto getMyProfile() {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName(); //authentication.name là email
+        Customer c = customerRepo.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        return customerMapper.toDto(c);
     }
 
     //-------------------------------- DELETE ---------------------------------
@@ -77,12 +99,9 @@ public class CustomerService implements ICustomerService {
                 () -> new AppException(ErrorCode.USER_NOT_EXIST)
         );
 
-        if(customerRepo.existsByEmail(requestDto.getEmail()) && !customer.getEmail().equals(requestDto.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_EXSITED);
-        }
-        if(customerRepo.existsByPhoneNumber(requestDto.getPhoneNumber()) && !customer.getPhoneNumber().equals(requestDto.getPhoneNumber())) {
-            throw new AppException(ErrorCode.PHONE_EXISTED);
-        }
+        //Check email & phone validation
+        userValidatorService.validateEmailUnique(requestDto.getEmail(), customer.getEmail());
+        userValidatorService.validatePhoneUnique(requestDto.getPhoneNumber(), customer.getPhoneNumber());
 
         //call updateEntity func() in MapStuct to map requestDto into Entity
         customerMapper.updateEntity(customer, requestDto);
@@ -98,12 +117,7 @@ public class CustomerService implements ICustomerService {
     @Override
     public CustomerResponseDto createCustomer(CustomerCreateRequestDto request){
         //Kiểm tra xem Email và PhoneNumber đã đc sử dụng hay chưa-------
-        if(customerRepo.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_EXSITED);
-        }
-        if(customerRepo.existsByPhoneNumber(request.getPhoneNumber())) {
-            throw new AppException(ErrorCode.PHONE_EXISTED);
-        }
+        userValidatorService.validateEmailAndPhoneUnique(request.getEmail(), request.getPhoneNumber());
         //----------------------------------------------------------------
 
         //Map từ dto sang Entity

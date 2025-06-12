@@ -3,6 +3,7 @@ package com.scorelens.Controller;
 import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
 import com.scorelens.DTOs.Request.StaffCreateRequestDto;
 import com.scorelens.DTOs.Request.StaffUpdateRequestDto;
+import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.DTOs.Response.StaffResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.StaffService;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +26,7 @@ public class StaffController {
     StaffService staffService;
 
     //    ---------------------------------------- GET ----------------------------------------
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/all")
     public ResponseObject getAllStaff() {
         List<StaffResponseDto> staffs = staffService.getAllStaff();
@@ -33,13 +37,24 @@ public class StaffController {
                 .build();
     }
 
+    @PostAuthorize("returnObject.email == authentication.name")
     @GetMapping("/{id}")
     public ResponseObject getStaffById(@PathVariable String id) {
         StaffResponseDto staff = staffService.getStaffById(id);
         return ResponseObject.builder()
                 .status(1000)
                 .data(staff)
-                .message("Staff founded")
+                .message("Staff found")
+                .build();
+    }
+    
+    @GetMapping("/my-profile") //API lấy tt customer đang login
+    public ResponseObject getProfile() {
+        StaffResponseDto responseDto = staffService.getMyProfile();
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Staff found")
+                .data(responseDto)
                 .build();
     }
 

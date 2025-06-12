@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Entity.Staff;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.StatusType;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -15,22 +17,24 @@ import java.time.LocalDate;
  */
 @AllArgsConstructor
 @Getter
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StaffResponseDto implements Serializable {
-    private final String staffID;
-    private final Staff manager;
-    private final String name;
-    private final String email;
-    private final String phoneNumber;
+    String staffID;
+
+    String name;
+    String email;
+    String phoneNumber;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    private final LocalDate dob;
-    private final String address;
-    private final StaffRole role;
+    LocalDate dob;
+    String address;
+    StaffRole role;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    private final LocalDate createAt;
+    LocalDate createAt;
 
     @JsonFormat(pattern = "dd-MM-yyyy")
-    private final LocalDate updateAt;
-    private final StatusType status;
+    LocalDate updateAt;
+    StatusType status;
+    Staff manager;
 }

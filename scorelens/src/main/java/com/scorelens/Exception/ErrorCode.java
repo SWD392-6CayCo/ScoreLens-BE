@@ -23,11 +23,27 @@ public enum ErrorCode {
     UNAUTHENTICATED(1013, "Unauthenticated"),
     UNSUPPORTED_USER_TYPE(1014, "Unsupported User Type"),
     INCORRECT_EMAIL_OR_PASSWORD(1015, "Incorrect email or password"),
+    USER_INACTIVE(1016, "This account is inactive"),
+
     //-------------------------- STORE -----------------------------------
     STORE_EXIST(1001, "This store's name is already existed"),
-    STORE_NOT_FOUND(1005, "Store Not Found")
+    STORE_NOT_FOUND(1005, "Store Not Found"),
     //-------------------------- BILLIARD STORE -----------------------------------
+    TABLE_NOT_FOUND(1005, "Table not found"),
 
+    //-------------------------- BILLIARD MATCH -----------------------------------
+    MATCH_NOT_FOUND(1005,"Match not found"),
+    //-------------------------- ROUND  -----------------------------------
+    ROUND_NOT_FOUND(1005, "Round not found"),
+
+    //-------------------------- PLAYER  -----------------------------------
+    PLAYER_NOT_FOUND(1005, "Player not found"),
+
+    //-------------------------- EVENT  -----------------------------------
+    NULL_EVENT(1005, "Event is null"),
+    NULL_EVENT_PLAYERID(1005, "No data matched with this player"),
+    NULL_EVENT_ROUNDID(1005, "No data matched with this round"),
+    EVENT_NOT_FOUND(1005, "Event not found"),
     ;
     private int code;
     private String message;

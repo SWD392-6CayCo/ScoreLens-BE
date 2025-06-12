@@ -9,5 +9,8 @@ public interface IStoreService {
     StoreResponse createStore(StoreRequest storeRequest);
     List<StoreResponse> findAllStores();
     StoreResponse findStoreById(String storeID);
+    StoreResponse updateStore(String storeID, StoreRequest storeRequest);
+    StoreResponse updateStore(String storeID, String status);
+
 
 }

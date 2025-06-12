@@ -12,11 +12,13 @@ import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.DTOs.Response.IntrospectResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.Staff;
+import com.scorelens.Enums.UserType;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.CustomerMapper;
 import com.scorelens.Mapper.StaffMapper;
 import com.scorelens.Repository.CustomerRepo;
+import com.scorelens.Repository.StaffRepository;
 import com.scorelens.Security.AppUser;
 import com.scorelens.Service.Interface.IAuthenticationService;
 import jakarta.validation.Valid;
@@ -28,11 +30,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Slf4j
 @Service
@@ -44,6 +48,7 @@ public class AuthenticationService implements IAuthenticationService {
     CustomerMapper customerMapper;
     StaffMapper staffMapper;
     CustomerRepo customerRepo;
+    StaffRepository staffRepo;
     private final PasswordEncoder passwordEncoder;
 
     @NonFinal
@@ -53,28 +58,57 @@ public class AuthenticationService implements IAuthenticationService {
     //--------------------------------------- AUTHENTICATION --------------------------------------------------
     @Override
     public AuthenticationResponseDto authenticate(AuthenticationRequestDto request) {
-        AppUser user = appUserService.authenticateUser(request.getEmail(), request.getPassword());
-        String token = generateToken(user);
-
-        Object responseUser = mapUserToDto(user);
-
+        AppUser appUser = appUserService.authenticateUser(request.getEmail(), request.getPassword());
+        Object responseUser;
+        String token;
+        switch (appUser.getUserType()) {
+            case Customer -> {
+                Customer customer = customerRepo.findById(appUser.getId())
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+                responseUser = customerMapper.toDto(customer);
+            }
+            case Staff -> {
+                Staff staff = staffRepo.findById(appUser.getId())
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+                responseUser = staffMapper.toDto(staff);
+            }
+            default -> throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+        }
+        token = generateToken(appUser);
         return AuthenticationResponseDto.builder()
                 .authenticated(true)
                 .token(token)
                 .user(responseUser)
-                .userType(user.getUserType())
+                .userType(appUser.getUserType())
                 .build();
     }
 
     // tạo token
-    private String generateToken(AppUser user) {
+    private String generateToken(Object userEntity) {
+        String email;
+        String userId;
+        String scope;
+
+        if (userEntity instanceof Customer customer) {
+            email = customer.getEmail();
+            userId = customer.getCustomerID();
+            scope = buildScope(customer);
+        } else if (userEntity instanceof Staff staff) {
+            email = staff.getEmail();
+            userId = staff.getStaffID();
+            scope = buildScope(staff);
+        } else {
+            throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+        }
+
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(user.getEmail())
-                .claim("userID", user.getId())
-                .claim("userType", user.getUserType())
+                .subject(email) // name của biến authentication
+                .claim("userID", userId)
+                .claim("scope", scope)
                 .issuer("scorelens")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
+                .expirationTime(Date.from(Instant.now().plus(1,
+                        ChronoUnit.HOURS)))
                 .build();
 
         try {
@@ -90,13 +124,14 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
-    //map Customer/Staff về ResponseDto
-    private Object mapUserToDto(AppUser user) {
-        return switch (user.getUserType()) {
-            case CUSTOMER -> customerMapper.toDto((Customer) user);
-            case STAFF -> staffMapper.toDto((Staff) user);
-            default -> throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
-        };
+    private String buildScope(Object userEntity) {
+        if (userEntity instanceof Customer) {
+            return UserType.Customer.name(); // "Customer"
+        } else if (userEntity instanceof Staff staff) {
+            return staff.getRole().name();   // "Staff" / "Manager" / "Admin"
+        } else {
+            throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+        }
     }
 
     @Override

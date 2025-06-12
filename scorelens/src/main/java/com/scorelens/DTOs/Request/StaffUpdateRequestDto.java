@@ -8,8 +8,10 @@ import com.scorelens.Enums.StatusType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -19,27 +21,28 @@ import java.time.LocalDate;
  */
 @AllArgsConstructor
 @Getter
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StaffUpdateRequestDto implements Serializable {
-//    private final Staff manager;
-    private final String name;
+    String name;
 
     @Pattern(
             regexp = RegexConstants.VIETNAMESE_EMAIL,
             message = ValidationMessages.EMAIL_DOMAIN
     )
-    private final String email;
+    String email;
 
     @Pattern(
             regexp = RegexConstants.VIETNAMESE_PHONE,
             message = ValidationMessages.PHONE_FORMAT
     )
-    private final String phoneNumber;
+    String phoneNumber;
 
     @Past(message = ValidationMessages.DOB_PAST)
     @Schema(type = "string", pattern = "dd-MM-yyyy")//Hiển thị format dd-MM-yyyy trên swagger
     @JsonFormat(pattern = "dd-MM-yyyy")
-    private final LocalDate dob;
+    LocalDate dob;
 
-    private final String address;
-    private final StatusType status;
+    String address;
+    StatusType status;
+    String managerID;
 }

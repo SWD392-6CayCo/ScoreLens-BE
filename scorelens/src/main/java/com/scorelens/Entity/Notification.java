@@ -17,8 +17,8 @@ public class Notification {
     private int notificationID;
 
     @ManyToOne
-    @JoinColumn(name = "billiardMatchID")
-    private BilliardMatch billiardMatch;
+    @JoinColumn(name = "roundID")
+    private Round round;
 
     @Column(name = "message")
     private String message;

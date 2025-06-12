@@ -44,7 +44,7 @@ public class Staff implements AppUser {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20)
-    private StaffRole role; // Staff, Manager, Administrator
+    private StaffRole role; // STAFF, MANAGER, ADMIN
 
     @Column(name = "createAt")
     private LocalDate createAt;
@@ -63,6 +63,6 @@ public class Staff implements AppUser {
 
     @Override
     public UserType getUserType() {
-        return UserType.STAFF;
+        return UserType.Staff;
     }
 }
