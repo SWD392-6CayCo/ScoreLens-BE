@@ -2,14 +2,15 @@ package com.scorelens.Controller;
 
 import com.scorelens.DTOs.Request.BilliardTableRequest;
 import com.scorelens.DTOs.Response.BilliardTableResponse;
+import com.scorelens.DTOs.Response.StoreResponse;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.BilliardTableService;
+import com.scorelens.Service.StoreService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -21,8 +22,9 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BilliardTableController {
 
-    @Autowired
     BilliardTableService billiardTableService;
+
+    StoreService storeService;
 
     @PostMapping
     public ResponseObject addTable(@RequestBody BilliardTableRequest request) {
@@ -80,6 +82,16 @@ public class BilliardTableController {
                 .data(billiardTableService.deleteBilliardTable(id))
                 .build();
 
+    }
+
+    @GetMapping("/v2/{id}")
+    public ResponseObject getListByStoreID(@PathVariable String storeID){
+        StoreResponse store = storeService.findStoreById(storeID);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Tables in Store name:" + store.getName())
+                .data(billiardTableService.getTablesByStore(storeID))
+                .build();
     }
 
 }

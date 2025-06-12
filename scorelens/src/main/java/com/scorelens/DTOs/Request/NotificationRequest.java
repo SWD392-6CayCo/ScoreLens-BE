@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NotificationRequest {
-    private int roundID;
+    private int billiardMatchID;
     private String message;
     private boolean isRead;
     private NotificationType type;

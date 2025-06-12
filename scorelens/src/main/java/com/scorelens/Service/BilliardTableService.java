@@ -94,6 +94,13 @@ public class BilliardTableService implements IBilliardTableService {
                 }).orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
     }
 
+    @Override
+    public List<BilliardTableResponse> getTablesByStore(String storeID) {
+        List<BilliardTable> list = billiardTableRepo.findAllByStore_StoreID(storeID);
+        if (list.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
+        return billiardTableMapper.toBilliardTableResponsesList(list);
+    }
+
 
     private Store getStoreById(String storeId) {
         return storeRepo.findById(storeId)

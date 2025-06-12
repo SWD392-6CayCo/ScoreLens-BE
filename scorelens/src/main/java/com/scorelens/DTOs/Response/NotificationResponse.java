@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class NotificationResponse {
     private int notificationID;
-    private int roundID;
+    private int billiardMatchID;
     private String message;
     private boolean isRead;
     private NotificationType type;

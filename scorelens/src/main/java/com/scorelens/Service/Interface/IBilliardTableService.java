@@ -13,5 +13,6 @@ public interface IBilliardTableService {
     BilliardTableResponse updateBilliardTable(String billiardTableID, BilliardTableRequest request);
     BilliardTableResponse updateBilliardTable(String billiardTableID, String status);
     boolean deleteBilliardTable(String billiardTableID);
+    List<BilliardTableResponse> getTablesByStore(String storeID);
 
 }
