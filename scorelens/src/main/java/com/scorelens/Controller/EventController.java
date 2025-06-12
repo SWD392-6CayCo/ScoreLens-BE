@@ -79,5 +79,14 @@ public class EventController {
                 .build();
     }
 
+    @GetMapping("/v2")
+    ResponseObject getEventsByRoundAndPlayer(@RequestParam int roundID, @RequestParam int playerID) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Event list")
+                .data(eventService.getEventsByPlayerIDAndRoundID(roundID, playerID))
+                .build();
+    }
+
 
 }

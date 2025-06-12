@@ -13,5 +13,7 @@ public interface IEventService {
     List<EventResponse> getEventsByRoundID(int roundID);
     boolean deleteEventByPlayerID(int playerID);
     boolean deleteEventByRoundID(int roundID);
+    List<EventResponse> getEventsByPlayerIDAndRoundID(int playerID, int roundID);
+
 
 }
