@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import com.scorelens.DTOs.Request.AuthenticationRequestDto;
 import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
 import com.scorelens.DTOs.Request.IntrospectRequestDto;
+import com.scorelens.DTOs.Request.LogoutRequestDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
@@ -48,6 +49,16 @@ public class AuthenticationController {
                 .status(1000)
                 .data(response)
                 .message("Register successfully")
+                .build();
+    }
+
+    @PostMapping("/logout")
+    ResponseObject logout(@RequestBody LogoutRequestDto request)
+            throws ParseException, JOSEException {
+        authenticationService.logout(request);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Logout succesfully")
                 .build();
     }
 
