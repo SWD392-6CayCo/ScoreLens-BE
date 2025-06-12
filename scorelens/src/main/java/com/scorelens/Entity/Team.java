@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,10 +16,6 @@ public class Team {
     @Column(name = "teamID")
     private int teamID;
 
-    @ManyToOne
-    @JoinColumn(name = "billiardMatchID")
-    private BilliardMatch billiardMatch;
-
     @Column(name = "name", length = 50)
     private String name;
 
@@ -27,10 +23,13 @@ public class Team {
     private int totalScore;
 
     @Column(name = "createAt")
-    private LocalDate createAt;
+    private LocalDateTime createAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ResultStatus status; //-- win, lose, draw, pending
 
+    @ManyToOne
+    @JoinColumn(name = "billiardMatchID", nullable = false)
+    private BilliardMatch billiardMatch;
 }

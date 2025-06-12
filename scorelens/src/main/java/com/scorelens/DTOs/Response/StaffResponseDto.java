@@ -1,6 +1,7 @@
 package com.scorelens.DTOs.Response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.scorelens.Entity.Role;
 import com.scorelens.Entity.Staff;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.StatusType;
@@ -11,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * DTO for {@link com.scorelens.Entity.Staff}
@@ -28,7 +30,9 @@ public class StaffResponseDto implements Serializable {
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate dob;
     String address;
-    StaffRole role;
+//    StaffRole role;
+    Set<RoleResponse> roles;
+
 
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate createAt;

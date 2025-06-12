@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Tag(name = "Billiard Table", description = "Manage Billiard Table")
 @RestController
-@RequestMapping("/tables")
+@RequestMapping("v1/tables")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

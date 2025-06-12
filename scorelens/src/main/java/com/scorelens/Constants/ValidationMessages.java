@@ -11,7 +11,7 @@ public class ValidationMessages {
             "Password can not be left blank";
 
     public static final String PASSWORD_LENGTH =
-            "Password must be at least 6 characters";
+            "Password must be at least {min} characters";
 
     public static final String DOB_PAST =
             "Ngày sinh phải nằm trong quá khứ";

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Tag(name = "Notification", description = "Handling Notifications")
 @RestController
-@RequestMapping("/notifications")
+@RequestMapping("v1/notifications")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
