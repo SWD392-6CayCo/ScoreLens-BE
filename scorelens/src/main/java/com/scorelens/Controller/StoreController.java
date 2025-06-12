@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 @Tag(name = "Store", description = "Manage Store")
 @RestController
-@RequestMapping("/v1/stores")
+@RequestMapping("v1/stores")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

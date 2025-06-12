@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 @Tag(name = "Game Set", description = "Manage Game Set")
 @RestController
-@RequestMapping("/gamesets")
+@RequestMapping("v1/gamesets")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

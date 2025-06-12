@@ -19,7 +19,7 @@ import java.util.List;
 
 @Tag(name = "Staff", description = "Quản lý Admin, Manager và Staff")
 @RestController
-@RequestMapping("/v1/staffs")
+@RequestMapping("v1/staffs")
 public class StaffController {
 
     @Autowired

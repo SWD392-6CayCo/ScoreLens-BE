@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Tag(name = "Mode", description = "Manage Game Mode")
 @RestController
-@RequestMapping("/modes")
+@RequestMapping("v1/modes")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
