@@ -1,34 +1,81 @@
-HELP.md
+# ===================== #
+#   Maven / Gradle      #
+# ===================== #
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+build/
+*.log
 
-### STS ###
-.apt_generated
+# ===================== #
+#   IntelliJ IDEA       #
+# ===================== #
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ===================== #
+#   VS Code             #
+# ===================== #
+.vscode/
+
+# ===================== #
+#   STS (Spring Tools)  #
+# ===================== #
+.apt_generated/
 .classpath
 .factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
+.settings/
+.springBeans/
+.sts4-cache/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# ===================== #
+#   NetBeans            #
+# ===================== #
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
+# ===================== #
+#   Environment / Keys  #
+# ===================== #
+.env
+.env.*
+*.jks
+*.p12
+*.pem
+*.crt
+*.key
+certs/
+
+# ===================== #
+#   OS Specific         #
+# ===================== #
+.DS_Store
+Thumbs.db
+
+# ===================== #
+#   Maven Wrapper       #
+# ===================== #
+.mvn/wrapper/maven-wrapper.jar
+mvnw
+mvnw.cmd
+
+# ===================== #
+#   Docker              #
+# ===================== #
+*.jar
+*.war
+*.tar
+docker-compose.override.yml
+
+# ===================== #
+#   Exception: Keep target/build inside src folders
+# ===================== #
+!**/src/main/**/target/
+!**/src/test/**/target/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-.env
+ 
