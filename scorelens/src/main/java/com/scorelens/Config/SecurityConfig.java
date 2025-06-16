@@ -37,7 +37,8 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-            "v*/auth/login", "/v*/auth/introspect", "v*/auth/register", "/auth/login/**", "/v*/auth/logout",
+            "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout",
+            "/v*/auth/refresh"
     };
     private final String[] CUSTOMER_ENDPOINTS = {
             "/customers/**"
@@ -57,7 +58,7 @@ public class SecurityConfig {
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.GET, "/customers/").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.GET, "/customers/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/customers/my-profile").hasRole("CUSTOMER")
                 .anyRequest().authenticated());
 

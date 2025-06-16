@@ -1,10 +1,7 @@
 package com.scorelens.Controller.v1;
 
 import com.nimbusds.jose.JOSEException;
-import com.scorelens.DTOs.Request.AuthenticationRequestDto;
-import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
-import com.scorelens.DTOs.Request.IntrospectRequestDto;
-import com.scorelens.DTOs.Request.LogoutRequestDto;
+import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.AuthenticationService;
@@ -68,6 +65,17 @@ public class AuthenticationV1Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .data(result)
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    ResponseObject authenticate(@RequestBody RefreshRequest request)
+            throws ParseException, JOSEException {
+        var result = authenticationService.refreshToken(request);
+        return ResponseObject.builder()
+                .status(1000)
+                .data(result)
+                .message("Login successfully!!")
                 .build();
     }
 

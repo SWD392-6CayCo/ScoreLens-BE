@@ -12,7 +12,7 @@ spring:
     resources:
       add-mappings: true
   config:
-    import: optional:file:.env[.propeties]
+    import: optional:file:.env[.properties]
   jpa:
     hibernate:
       ddl-auto: update
@@ -43,3 +43,5 @@ springdoc:
     path: /swagger-ui.html
 jwt:
   signerKey: ${JWT_SIGNER_KEY}
+  valid-duration: 30 #in second
+  refreshable-duration: 180 #in seconds

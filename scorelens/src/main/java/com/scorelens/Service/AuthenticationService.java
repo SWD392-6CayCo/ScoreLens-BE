@@ -8,6 +8,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.scorelens.DTOs.Request.AuthenticationRequestDto;
 import com.scorelens.DTOs.Request.IntrospectRequestDto;
 import com.scorelens.DTOs.Request.LogoutRequestDto;
+import com.scorelens.DTOs.Request.RefreshRequest;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.DTOs.Response.IntrospectResponseDto;
@@ -61,6 +62,16 @@ public class AuthenticationService implements IAuthenticationService {
     @Value("${jwt.signerKey}") //Đọc từ file application.yaml
     protected String SIGNER_KEY;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}") //Đọc từ file application.yaml
+    protected long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refreshable-duration}") //Đọc từ file application.yaml
+    protected long REFRESHABLE_DURATION;
+
+
+
     //--------------------------------------- AUTHENTICATION --------------------------------------------------
     @Override
     public AuthenticationResponseDto authenticate(AuthenticationRequestDto request) {
@@ -91,29 +102,37 @@ public class AuthenticationService implements IAuthenticationService {
 
     //--------------------------------------- LOGOUT -----------------------------------------------------------
     public void logout(LogoutRequestDto request) throws ParseException, JOSEException {
-        var signToken = verifyToken(request.getToken());
+        try {
+            var signToken = verifyToken(request.getToken(), true);
 
-        String jti = signToken.getJWTClaimsSet().getJWTID();
-        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+            String jti = signToken.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jti)
-                .expiryTime(expiryTime)
-                .build();
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .id(jti)
+                    .expiryTime(expiryTime)
+                    .build();
 
-        invalidatedTokenRepository.save(invalidatedToken);
+            invalidatedTokenRepository.save(invalidatedToken);
+        } catch (AppException e){
+            log.info("Token is already expired");
+        }
     }
 
     //-----------------------------------VERIFY---------------------------------------
-    private SignedJWT verifyToken(String token) throws ParseException, JOSEException {
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws ParseException, JOSEException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime = (isRefresh)
+                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
+                .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                :
+                signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(verifier);
-        if(!(verified && expityTime.after(new Date())))
+        if(!(verified && expiryTime.after(new Date())))
             throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         if(invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
@@ -122,7 +141,76 @@ public class AuthenticationService implements IAuthenticationService {
         return signedJWT;
     }
 
+    public AuthenticationResponseDto refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signJWT = verifyToken(request.getToken(), true);
+
+        var jti = signJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signJWT.getJWTClaimsSet().getExpirationTime();
+
+        //lưu token đã bị invalidated vào db - phần này của logout
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jti)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        var email = signJWT.getJWTClaimsSet().getSubject();
+        AppUser user = staffRepo.findByEmail(email)
+                .map(s -> (AppUser) s)
+                .orElseGet(() -> customerRepo.findByEmail(email)
+                        .map(c -> (AppUser) c)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST)));
+
+        String token = generateToken(user);
+        return AuthenticationResponseDto.builder()
+                .token(token)
+                .authenticated(true)
+                .build();
+    }
+
     // tạo token
+//    private String generateToken(Object userEntity) {
+//        String email;
+//        String userId;
+//        String scope;
+//
+//        if (userEntity instanceof Customer customer) {
+//            email = customer.getEmail();
+//            userId = customer.getCustomerID();
+//            scope = buildScope(customer);
+//        } else if (userEntity instanceof Staff staff) {
+//            email = staff.getEmail();
+//            userId = staff.getStaffID();
+//            scope = buildScope(staff);
+//        } else {
+//            throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+//        }
+//
+//        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+//                .subject(email) // name của biến authentication
+//                .claim("userID", userId)
+//                .claim("scope", scope)
+//                .jwtID(UUID.randomUUID().toString())
+//                .issuer("scorelens")
+//                .issueTime(new Date())
+//                .expirationTime(new Date(
+//                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
+//                ))
+//                .build();
+//
+//        try {
+//            JWSObject jwsObject = new JWSObject(
+//                    new JWSHeader(JWSAlgorithm.HS512),
+//                    new Payload(claims.toJSONObject())
+//            );
+//            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes(StandardCharsets.UTF_8)));
+//            return jwsObject.serialize();
+//        } catch (JOSEException e) {
+//            log.error("Token generation failed", e);
+//            throw new RuntimeException(e);
+//        }
+//    }
     private String generateToken(Object userEntity) {
         String email;
         String userId;
@@ -141,28 +229,30 @@ public class AuthenticationService implements IAuthenticationService {
         }
 
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .subject(email) // name của biến authentication
+                .subject(email)
                 .claim("userID", userId)
                 .claim("scope", scope)
                 .jwtID(UUID.randomUUID().toString())
                 .issuer("scorelens")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(1,
-                        ChronoUnit.HOURS)))
+                .expirationTime(new Date(
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
+                ))
                 .build();
 
         try {
-            JWSObject jwsObject = new JWSObject(
+            SignedJWT signedJWT = new SignedJWT(
                     new JWSHeader(JWSAlgorithm.HS512),
-                    new Payload(claims.toJSONObject())
+                    claims
             );
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes(StandardCharsets.UTF_8)));
-            return jwsObject.serialize();
+            signedJWT.sign(new MACSigner(SIGNER_KEY.getBytes(StandardCharsets.UTF_8)));
+            return signedJWT.serialize(); // SignedJWT trả về chuỗi JWT chuẩn
         } catch (JOSEException e) {
             log.error("Token generation failed", e);
             throw new RuntimeException(e);
         }
     }
+
 
     //build ra scope - chứa role và các permission
     private String buildScope(Object userEntity) {
@@ -190,7 +280,7 @@ public class AuthenticationService implements IAuthenticationService {
         var token = request.getToken();
         boolean isValid = true;;
         try {
-            verifyToken(token);
+            verifyToken(token, false);
         } catch (AppException e){
             isValid = false;
         }
