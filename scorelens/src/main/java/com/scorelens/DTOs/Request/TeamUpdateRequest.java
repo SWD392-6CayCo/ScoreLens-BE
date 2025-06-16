@@ -4,15 +4,12 @@ import com.scorelens.Enums.ResultStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
-public class TeamRequest {
+public class TeamUpdateRequest {
     private String name;
-    private int totalScore;
-    private LocalDateTime createAt;
+    private Integer totalMember;
+    private Integer totalScore;
     private ResultStatus status;
-    private Integer billiardMatchID;
 }
 

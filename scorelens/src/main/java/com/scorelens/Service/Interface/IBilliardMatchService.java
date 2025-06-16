@@ -1,14 +1,14 @@
 package com.scorelens.Service.Interface;
 
 
-import com.scorelens.DTOs.Request.BilliardMatchRequest;
+import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
+import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
+import com.scorelens.DTOs.Request.GameSetCreateRequest;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
-
-import java.util.List;
 
 public interface IBilliardMatchService {
         BilliardMatchResponse getById(Integer id);
-        BilliardMatchResponse createMatch(BilliardMatchRequest request);
-        BilliardMatchResponse updateMatch(Integer id, BilliardMatchRequest request);
+        BilliardMatchResponse createMatch(BilliardMatchCreateRequest request);
+        BilliardMatchResponse updateMatch(Integer id, BilliardMatchUpdateRequest request);
         Integer delete(Integer id);
 }

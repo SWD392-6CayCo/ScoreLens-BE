@@ -1,6 +1,8 @@
 package com.scorelens.Controller.v1;
 
-import com.scorelens.DTOs.Request.BilliardMatchRequest;
+import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
+import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
+import com.scorelens.DTOs.Request.GameSetCreateRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.BilliardMatchService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +35,7 @@ public class BilliardMatchV1Controller {
     }
 
     @PostMapping
-    public ResponseObject createMatch(@RequestBody BilliardMatchRequest request) {
+    public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Create new Match successfully")
@@ -42,7 +44,7 @@ public class BilliardMatchV1Controller {
     }
 
     @PutMapping("/{id}")
-    public ResponseObject updateMatch(@PathVariable Integer id, @RequestBody BilliardMatchRequest request) {
+    public ResponseObject updateMatch(@PathVariable Integer id, @RequestBody BilliardMatchUpdateRequest request) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Update Match information successfully")

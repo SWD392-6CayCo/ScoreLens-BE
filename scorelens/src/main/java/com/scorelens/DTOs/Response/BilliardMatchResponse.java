@@ -15,15 +15,16 @@ import lombok.Setter;
 @Setter
 public class BilliardMatchResponse {
     private Integer billiardMatchID;
-    private BilliardTable billiardTableID;
-    private Mode modeID;
-    private Staff byStaff;
-    private Customer byCustomer;
+    private String billiardTableID;
+    private Integer modeID;
+    private String byStaff;
+    private String byCustomer;
+    private String setUp;
     private String winner;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Integer totalRound;
-    private MatchStatus status;
+    private Integer totalSet;
+    private String status;
     private String code;
 
     private List<GameSetResponse> sets;
