@@ -52,7 +52,7 @@ public class BilliardTableService implements IBilliardTableService {
     @Override
     public List<BilliardTableResponse> getAllBilliardTables() {
         List<BilliardTable> billiardTables = billiardTableRepo.findAll();
-        if (billiardTables == null || billiardTables.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
+        if (billiardTables.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
         return billiardTableMapper.toBilliardTableResponsesList(billiardTables);
     }
 

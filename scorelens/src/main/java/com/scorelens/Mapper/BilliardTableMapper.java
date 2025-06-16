@@ -10,9 +10,8 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {StoreMapper.class})
 public interface BilliardTableMapper {
 
-    @Mapping(source = "store", target = "storeResponse")
+    @Mapping(source = "store.name", target = "storeName")
     BilliardTableResponse toBilliardTableResponse(BilliardTable billiardTable);
-
 
     BilliardTable toBilliardTable(BilliardTableResponse billiardTableResponse);
     List<BilliardTableResponse> toBilliardTableResponsesList(List<BilliardTable> billiardTables);
