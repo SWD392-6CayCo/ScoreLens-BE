@@ -61,7 +61,8 @@ public enum ErrorCode {
     //-------------------------- ROUND  -----------------------------------
     TEAM_NOT_FOUND(1023, "Team not found", HttpStatus.NOT_FOUND),
 
-    TEAM_NOT_NULL(1023, "Team set up requires a list of teams", HttpStatus.BAD_REQUEST)
+    TEAM_NOT_NULL(1023, "Team set up requires a list of teams", HttpStatus.BAD_REQUEST),
+    ALL_NOT_NULL(1025, "staff and customer not null", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

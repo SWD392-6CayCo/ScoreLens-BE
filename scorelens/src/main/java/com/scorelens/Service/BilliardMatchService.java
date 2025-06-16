@@ -15,6 +15,7 @@ import com.scorelens.Mapper.BilliardMatchMapper;
 import com.scorelens.Repository.*;
 import com.scorelens.Service.Interface.IBilliardMatchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -58,19 +59,34 @@ public class BilliardMatchService implements IBilliardMatchService {
     @Override
     public BilliardMatchResponse createMatch(BilliardMatchCreateRequest request) {
         BilliardMatch match = billiardMatchMapper.toBilliardMatch(request);
-        BilliardTable table = tableRepo.findById(request.getBilliardTableID())
-                .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
-        Mode mode = modeRepo.findById(request.getModeID())
-                .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
-        Staff staff = staffRepo.findById(request.getStaffID())
-                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
-        Customer customer = customerRepo.findById(request.getCustomerID())
-                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+        if (request.getStaffID() == null && request.getCustomerID() == null) {
+            throw new AppException(ErrorCode.ALL_NOT_NULL);
+        }
+        if (request.getStaffID() == null) {
+            BilliardTable table = tableRepo.findById(request.getBilliardTableID())
+                    .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+            Mode mode = modeRepo.findById(request.getModeID())
+                    .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
+            Customer customer = customerRepo.findById(request.getCustomerID())
+                    .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+            match.setBillardTable(table);
+            match.setMode(mode);
+            match.setStaff(null);
+            match.setCustomer(customer);
+        }
+        if (request.getCustomerID() == null) {
+            BilliardTable table = tableRepo.findById(request.getBilliardTableID())
+                    .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+            Mode mode = modeRepo.findById(request.getModeID())
+                    .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
+            Staff staff = staffRepo.findById(request.getStaffID())
+                    .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
 
-        match.setBillardTable(table);
-        match.setMode(mode);
-        match.setStaff(staff);
-        match.setCustomer(customer);
+            match.setBillardTable(table);
+            match.setMode(mode);
+            match.setStaff(staff);
+            match.setCustomer(null);
+        }
 
         match.setTotalSet(request.getTotalSet());
         match.setStartTime(LocalDateTime.now());
