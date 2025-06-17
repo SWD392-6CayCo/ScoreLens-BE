@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,4 +37,12 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "billiardMatchID", nullable = false)
     private BilliardMatch billiardMatch;
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Player> players = new ArrayList<>();
+
+    public void addPlayer(Player player) {
+        players.add(player);
+        player.setTeam(this);
+    }
 }

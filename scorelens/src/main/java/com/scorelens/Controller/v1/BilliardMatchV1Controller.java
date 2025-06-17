@@ -34,6 +34,24 @@ public class BilliardMatchV1Controller {
                         .build();
     }
 
+    @GetMapping("/bycustomer/{id}")
+    public ResponseObject getByCustomer(@PathVariable String id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Matchs information successfully")
+                .data(billiardMatchService.getByCustomer(id))
+                .build();
+    }
+
+    @GetMapping("/bystaff/{id}")
+    public ResponseObject getByStaff(@PathVariable String id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Matchs information successfully")
+                .data(billiardMatchService.getByStaff(id))
+                .build();
+    }
+
     @PostMapping
     public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
         return ResponseObject.builder()

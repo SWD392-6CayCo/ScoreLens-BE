@@ -37,7 +37,7 @@ public class TeamV1Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Get Teams information succesfully")
-                .data(teamService.getTeamsByMatchID(id))
+                .data(teamService.getByMatchID(id))
                 .build();
     }
 

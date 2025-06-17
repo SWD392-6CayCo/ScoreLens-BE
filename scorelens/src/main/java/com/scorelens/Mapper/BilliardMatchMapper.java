@@ -6,6 +6,8 @@ import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.Entity.BilliardMatch;
 import org.mapstruct.*;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = { GameSetMapper.class, TeamMapper.class })
 public interface BilliardMatchMapper {
 
@@ -26,6 +28,13 @@ public interface BilliardMatchMapper {
     @Mapping(target = "byCustomer", source = "customer.customerID")
     @Mapping(target = "status", source = "status")
     BilliardMatchResponse toBilliardMatchResponse(BilliardMatch match);
+
+    @Mapping(target = "billiardTableID", source = "billardTable.billardTableID")
+    @Mapping(target = "modeID", source = "mode.modeID")
+    @Mapping(target = "byStaff", source = "staff.staffID")
+    @Mapping(target = "byCustomer", source = "customer.customerID")
+    @Mapping(target = "status", source = "status")
+    List<BilliardMatchResponse> toBilliardMatchResponses(List<BilliardMatch> matchs);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateBilliardMatchFromRequest(BilliardMatchUpdateRequest request, @MappingTarget BilliardMatch match);

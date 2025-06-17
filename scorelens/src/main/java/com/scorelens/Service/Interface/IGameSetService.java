@@ -10,9 +10,10 @@ import java.util.List;
 
 public interface IGameSetService {
     GameSetResponse getById(Integer id);
-    List<GameSetResponse> getSetsByMatchID(Integer id);
+    List<GameSetResponse> getByMatchID(Integer id);
     GameSetResponse createSet(GameSetCreateRequest request);
     GameSet createSetInMatch(Integer i, GameSetCreateRequest request);
     GameSetResponse updateSet(Integer id, GameSetUpdateRequest request);
     Integer delete(Integer id);
+    void deleteByMatch(Integer id);
 }

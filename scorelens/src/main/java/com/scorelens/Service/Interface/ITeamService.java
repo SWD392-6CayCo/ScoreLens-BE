@@ -11,6 +11,7 @@ public interface ITeamService {
         TeamResponse getById(Integer id);
         Team createTeam(TeamCreateRequest request);
         TeamResponse updateTeam(Integer id, TeamUpdateRequest request);
-        List<TeamResponse> getTeamsByMatchID(Integer id);
+        List<TeamResponse> getByMatchID(Integer id);
         Integer delete(Integer id);
+        void deleteByMatch(Integer id);
 }

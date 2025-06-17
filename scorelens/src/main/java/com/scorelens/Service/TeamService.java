@@ -38,7 +38,7 @@ public class TeamService implements ITeamService {
     }
 
     @Override
-    public List<TeamResponse> getTeamsByMatchID(Integer id) {
+    public List<TeamResponse> getByMatchID(Integer id) {
         BilliardMatch match = matchRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         List<Team> teams = teamRepository.findByBilliardMatch_BilliardMatchID(id);
@@ -84,5 +84,13 @@ public class TeamService implements ITeamService {
         }
         teamRepository.deleteById(id);
         return id;
+    }
+
+    @Override
+    public void deleteByMatch(Integer id) {
+        if (!teamRepository.existsById(id)) {
+            throw new AppException(ErrorCode.TEAM_NOT_FOUND);
+        }
+        teamRepository.deleteById(id);
     }
 }
