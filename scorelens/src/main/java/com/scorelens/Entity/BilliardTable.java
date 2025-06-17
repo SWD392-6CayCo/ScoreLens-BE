@@ -3,12 +3,15 @@ package com.scorelens.Entity;
 import com.scorelens.Enums.TableStatus;
 import com.scorelens.Enums.TableType;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class BilliardTable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -39,4 +42,5 @@ public class BilliardTable {
     @ManyToOne
     @JoinColumn(name = "storeID", nullable = false)
     private Store store;
+
 }
