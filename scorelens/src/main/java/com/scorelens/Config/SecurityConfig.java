@@ -39,7 +39,9 @@ public class SecurityConfig {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
             "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout",
             "/v*/auth/refresh",
-            "/v*/ping"
+            "/v*/ping",
+
+
     };
     private final String[] CUSTOMER_ENDPOINTS = {
             "/customers/**"
@@ -57,6 +59,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.PUT, "/teams/*").permitAll()
+                
                 .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.GET, "/customers/**").hasAnyRole("ADMIN", "MANAGER")
