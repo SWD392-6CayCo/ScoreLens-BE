@@ -10,12 +10,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class GameSetResponse {
+    private Integer billiardMatchID;
     private int gameSetID;
     private int gameSetNo;
     private int raceTo;
     private String winner;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private MatchStatus status;
-    private BilliardMatch billiardMatch;
+    private String status;
 }

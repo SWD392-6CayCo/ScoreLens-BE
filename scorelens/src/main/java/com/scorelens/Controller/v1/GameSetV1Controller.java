@@ -1,6 +1,7 @@
 package com.scorelens.Controller.v1;
 
-import com.scorelens.DTOs.Request.GameSetRequest;
+import com.scorelens.DTOs.Request.GameSetCreateRequest;
+import com.scorelens.DTOs.Request.GameSetUpdateRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.GameSetService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,8 +33,17 @@ public class GameSetV1Controller {
                         .build();
     }
 
+    @GetMapping("match/{id}")
+    public ResponseObject getByMatch(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Game Sets information succesfully")
+                .data(gameSetService.getSetsByMatchID(id))
+                .build();
+    }
+
     @PostMapping
-    public ResponseObject createSet(@RequestBody GameSetRequest request) {
+    public ResponseObject createSet(@RequestBody GameSetCreateRequest request) {
         return ResponseObject.builder()
                         .status(1000)
                         .message("Create GameSet sucessfully")
@@ -42,7 +52,7 @@ public class GameSetV1Controller {
     }
 
     @PutMapping("/{id}")
-    public ResponseObject updateSet(@PathVariable Integer id, @RequestBody GameSetRequest request) {
+    public ResponseObject updateSet(@PathVariable Integer id, @RequestBody GameSetUpdateRequest request) {
         return ResponseObject.builder()
                         .status(1000)
                         .message("Update GameSet sucessfully")

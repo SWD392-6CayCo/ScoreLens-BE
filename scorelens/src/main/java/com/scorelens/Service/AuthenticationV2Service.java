@@ -1,17 +1,16 @@
 package com.scorelens.Service;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.scorelens.DTOs.Request.AuthenticationRequestDto;
-import com.scorelens.DTOs.Request.IntrospectRequestDto;
-import com.scorelens.DTOs.Request.LogoutRequestDto;
-import com.scorelens.DTOs.Request.RefreshRequest;
+import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDtoV2;
-import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.DTOs.Response.IntrospectResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.InvalidatedToken;
@@ -26,7 +25,6 @@ import com.scorelens.Repository.InvalidatedTokenRepository;
 import com.scorelens.Repository.StaffRepository;
 import com.scorelens.Security.AppUser;
 import com.scorelens.Service.Interface.IAuthenticationService;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -49,7 +47,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AuthenticationService implements IAuthenticationService {
+public class AuthenticationV2Service implements IAuthenticationService {
 
     AppUserService appUserService;
     CustomerMapper customerMapper;
@@ -101,6 +99,35 @@ public class AuthenticationService implements IAuthenticationService {
                 .build();
     }
 
+    public AuthenticationResponseDtoV2 authenticateV2(AuthenticationRequestDto request) {
+        AppUser appUser = appUserService.authenticateUser(request.getEmail(), request.getPassword());
+        Object responseUser;
+
+        switch (appUser.getUserType()) {
+            case CUSTOMER -> {
+                Customer c = customerRepo.findById(appUser.getId())
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+                responseUser = customerMapper.toDto(c);
+            }
+            case STAFF -> {
+                Staff s = staffRepo.findById(appUser.getId())
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+                responseUser = staffMapper.toDto(s);
+            }
+            default -> throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+        }
+        String accessToken = generateTokenV2(appUser, VALID_DURATION);
+        String refreshToken = generateTokenV2(appUser, REFRESHABLE_DURATION);
+
+        return AuthenticationResponseDtoV2.builder()
+                .authenticated(true)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(responseUser)
+                .userType(appUser.getUserType())
+                .build();
+    }
+
     //--------------------------------------- LOGOUT -----------------------------------------------------------
     public void logout(LogoutRequestDto request) throws ParseException, JOSEException {
         try {
@@ -142,6 +169,37 @@ public class AuthenticationService implements IAuthenticationService {
         return signedJWT;
     }
 
+    public AuthenticationResponseDtoV2 refreshTokenV2(RefreshV2Request request) throws ParseException, JOSEException {
+        SignedJWT signedJWT = verifyToken(request.getRefreshToken(), true);
+
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        //Blacklist refresh token cũ
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jti)
+                .expiryTime(expiryTime)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+
+        String email = signedJWT.getJWTClaimsSet().getSubject();
+        AppUser user = staffRepo.findByEmail(email)
+                .map(s -> (AppUser) s)
+                .orElseGet(() -> customerRepo.findByEmail(email)
+                        .map(c -> (AppUser) c)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST)));
+
+        String newAccessToken = generateTokenV2(user, VALID_DURATION);
+        String newRefreshToken = generateTokenV2(user, REFRESHABLE_DURATION);
+
+        return AuthenticationResponseDtoV2.builder()
+                .authenticated(true)
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+
+    }
+
     public AuthenticationResponseDto refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signJWT = verifyToken(request.getAccessToken(), true);
 
@@ -168,6 +226,47 @@ public class AuthenticationService implements IAuthenticationService {
                 .token(token)
                 .authenticated(true)
                 .build();
+    }
+
+    private String generateTokenV2(Object o, long duration){
+        String email;
+        String userId;
+        String scope;
+
+        if(o instanceof Customer c){
+            email = c.getEmail();
+            userId = c.getId();
+            scope = buildScope(c);
+        } else if(o instanceof Staff s){
+            email = s.getEmail();
+            userId = s.getId();
+            scope = buildScope(s);
+        } else {
+            throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+        }
+
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .subject(email)
+                .claim("userID", userId)
+                .claim("scope", scope)
+                .jwtID(UUID.randomUUID().toString())
+                .issuer("scorelens")
+                .issueTime(new Date())
+                .expirationTime(Date.from(Instant.now().plusSeconds(duration)))
+                .build();
+
+        try {
+            SignedJWT signedJWT = new SignedJWT(
+                    new JWSHeader(JWSAlgorithm.HS512),
+                    claims
+            );
+            signedJWT.sign(new MACSigner(SIGNER_KEY.getBytes(StandardCharsets.UTF_8)));
+            return signedJWT.serialize();
+        } catch (JOSEException e) {
+            log.error("Token generation failed", e);
+            throw new AppException(ErrorCode.UNSUPPORTED_USER_TYPE);
+        }
+
     }
 
     private String generateToken(Object userEntity) {
@@ -211,6 +310,7 @@ public class AuthenticationService implements IAuthenticationService {
             throw new RuntimeException(e);
         }
     }
+
 
     //build ra scope - chứa role và các permission
     private String buildScope(Object userEntity) {

@@ -43,6 +43,8 @@ public enum ErrorCode {
     MATCH_NOT_FOUND(1015,"Match not found", HttpStatus.NOT_FOUND),
     //-------------------------- ROUND  -----------------------------------
     ROUND_NOT_FOUND(1016, "Round not found", HttpStatus.NOT_FOUND),
+    SET_NOT_FOUND(1016, "GameSet not found", HttpStatus.NOT_FOUND),
+
 
     //-------------------------- PLAYER  -----------------------------------
     PLAYER_NOT_FOUND(1017, "Player not found", HttpStatus.NOT_FOUND),
@@ -52,6 +54,15 @@ public enum ErrorCode {
     NULL_EVENT_PLAYERID(1019, "No data matched with this player", HttpStatus.BAD_REQUEST),
     NULL_EVENT_ROUNDID(1020, "No data matched with this round", HttpStatus.BAD_REQUEST),
     EVENT_NOT_FOUND(1021, "Event not found", HttpStatus.NOT_FOUND),
+
+    //-------------------------- ROUND  -----------------------------------
+    MODE_NOT_FOUND(1022, "Mode not found", HttpStatus.NOT_FOUND),
+
+    //-------------------------- ROUND  -----------------------------------
+    TEAM_NOT_FOUND(1023, "Team not found", HttpStatus.NOT_FOUND),
+
+    TEAM_NOT_NULL(1023, "Team set up requires a list of teams", HttpStatus.BAD_REQUEST),
+    ALL_NOT_NULL(1025, "staff and customer not null", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
