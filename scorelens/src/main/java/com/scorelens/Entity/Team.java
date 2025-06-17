@@ -14,13 +14,16 @@ public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "teamID")
-    private int teamID;
+    private Integer teamID;
 
     @Column(name = "name", length = 50)
     private String name;
 
+    @Column(name = "totalMember")
+    private Integer totalMember;
+
     @Column(name = "totalScore")
-    private int totalScore;
+    private Integer totalScore;
 
     @Column(name = "createAt")
     private LocalDateTime createAt;

@@ -3,12 +3,11 @@ package com.scorelens.Service;
 import com.scorelens.DTOs.Request.ModeRequest;
 import com.scorelens.DTOs.Response.ModeResponse;
 import com.scorelens.Entity.Mode;
+import com.scorelens.Exception.AppException;
+import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Repository.ModeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ModeService {
@@ -27,13 +26,13 @@ public class ModeService {
 
     public ModeResponse getById(Integer id) {
         Mode mode = modeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mode not found with ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
         return mapToResponse(mode);
     }
 
     public ModeResponse updateMode(Integer id, ModeRequest request) {
         Mode mode = modeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mode not found with ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
 
         mode.setName(request.getName());
         mode.setDescription(request.getDescription());
@@ -43,7 +42,7 @@ public class ModeService {
 
     public Integer delete(Integer id) {
         if (!modeRepository.existsById(id)) {
-            throw new RuntimeException("Mode not found with ID: " + id);
+            throw new AppException(ErrorCode.MODE_NOT_FOUND);
         }
         modeRepository.deleteById(id);
         return id;

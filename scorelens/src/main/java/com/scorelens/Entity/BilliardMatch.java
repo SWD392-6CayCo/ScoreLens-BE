@@ -18,32 +18,34 @@ public class BilliardMatch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "billiardMatchID")
-    private int billiardMatchID;
+    private Integer billiardMatchID;
 
     @NotNull
     @ManyToOne
     @JoinColumn(name = "billardTableID", nullable = false)
-    private BilliardTable billardTableID;
+    private BilliardTable billardTable;
 
     @NotNull
     @ManyToOne
     @JoinColumn(name = "modeID", nullable = false)
-    private Mode modeID;
+    private Mode mode;
 
     @ManyToOne
-    @JoinColumn(name = "byStaff")
-    private Staff byStaff;
+    @JoinColumn(name = "staffID")
+    private Staff staff;
 
     @ManyToOne
-    @JoinColumn(name = "byCustomer")
-    private Customer byCustomer;
+    @JoinColumn(name = "customerID")
+    private Customer customer;
+
+    @Column(name = "setUp")
+    private String setUp;
 
     @Column(name = "winner", length = 50)
     private String winner;
 
-    @NotNull
-    @Column(name = "totalRound")
-    private int totalRound;
+    @Column(name = "totalSet")
+    private Integer totalSet;
 
     @NotNull
     @Column(name = "startTime")
@@ -61,10 +63,19 @@ public class BilliardMatch {
     @Column(name = "code")
     private String code;
 
-    @OneToMany(mappedBy = "billiardMatch", cascade = CascadeType.ALL)
-    private List<GameSet> rounds = new ArrayList<>();
+    @OneToMany(mappedBy = "billiardMatch", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GameSet> sets = new ArrayList<>();
 
-    @OneToMany(mappedBy = "billiardMatch", cascade = CascadeType.ALL)
+    public void addSet(GameSet set) {
+        sets.add(set);
+        set.setBilliardMatch(this);
+    }
+
+    @OneToMany(mappedBy = "billiardMatch", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Team> teams = new ArrayList<>();
 
+    public void addTeam(Team team) {
+        teams.add(team);
+        team.setBilliardMatch(this);
+    }
 }
