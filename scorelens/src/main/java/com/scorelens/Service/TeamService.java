@@ -1,14 +1,22 @@
 package com.scorelens.Service;
 
-import com.scorelens.DTOs.Request.TeamRequest;
+import com.scorelens.DTOs.Request.TeamCreateRequest;
+import com.scorelens.DTOs.Request.TeamUpdateRequest;
 import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.Team;
+import com.scorelens.Enums.ResultStatus;
+import com.scorelens.Exception.AppException;
+import com.scorelens.Exception.ErrorCode;
+import com.scorelens.Mapper.TeamMapper;
 import com.scorelens.Repository.BilliardMatchRepository;
 import com.scorelens.Repository.TeamRepository;
 import com.scorelens.Service.Interface.ITeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class TeamService implements ITeamService {
@@ -19,62 +27,62 @@ public class TeamService implements ITeamService {
     @Autowired
     private BilliardMatchRepository matchRepository;
 
+    @Autowired
+    TeamMapper teamMapper;
+
     @Override
     public TeamResponse getById(Integer id) {
         Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Team not found"));
-        return toResponse(team);
+                .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
+        return teamMapper.toTeamResponse(team);
     }
 
     @Override
-    public TeamResponse createTeam(TeamRequest request) {
+    public List<TeamResponse> getTeamsByMatchID(Integer id) {
+        BilliardMatch match = matchRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+        List<Team> teams = teamRepository.findByBilliardMatch_BilliardMatchID(id);
+        return teamMapper.toTeamResponseList(teams);
+    }
+
+    @Override
+    public Team createTeam(TeamCreateRequest request) {
         BilliardMatch match = matchRepository.findById(request.getBilliardMatchID())
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
 
         Team team = new Team();
         team.setName(request.getName());
-        team.setTotalScore(request.getTotalScore());
-        team.setCreateAt(request.getCreateAt());
-        team.setStatus(request.getStatus());
+        team.setTotalMember(request.getTotalMember());
+        team.setTotalScore(0);
+        team.setCreateAt(LocalDateTime.now());
+        team.setStatus(ResultStatus.draw);
         team.setBilliardMatch(match);
 
-        return toResponse(teamRepository.save(team));
+        return teamRepository.save(team);
     }
 
     @Override
-    public TeamResponse updateTeam(Integer id, TeamRequest request) {
+    public TeamResponse updateTeam(Integer id, TeamUpdateRequest request) {
         Team team = teamRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Team not found"));
-
-        BilliardMatch match = matchRepository.findById(request.getBilliardMatchID())
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
 
         team.setName(request.getName());
+        team.setTotalMember(request.getTotalMember());
         team.setTotalScore(request.getTotalScore());
-        team.setCreateAt(request.getCreateAt());
-        team.setStatus(request.getStatus());
-        team.setBilliardMatch(match);
-
-        return toResponse(teamRepository.save(team));
+        if (request.getStatus().equals(ResultStatus.lose)) {
+            team.setStatus(ResultStatus.lose);
+        }else {
+            team.setStatus(ResultStatus.win);
+        }
+        return teamMapper.toTeamResponse(teamRepository.save(team));
     }
 
     @Override
     public Integer delete(Integer id) {
         if (!teamRepository.existsById(id)) {
-            throw new RuntimeException("Team not found");
+            throw new AppException(ErrorCode.TEAM_NOT_FOUND);
         }
         teamRepository.deleteById(id);
         return id;
-    }
-
-    private TeamResponse toResponse(Team team) {
-        TeamResponse res = new TeamResponse();
-        res.setTeamID(team.getTeamID());
-        res.setName(team.getName());
-        res.setTotalScore(team.getTotalScore());
-        res.setCreateAt(team.getCreateAt());
-        res.setStatus(team.getStatus());
-        res.setBilliardMatch(team.getBilliardMatch());
-        return res;
     }
 }

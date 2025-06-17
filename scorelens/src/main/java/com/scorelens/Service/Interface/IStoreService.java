@@ -12,5 +12,4 @@ public interface IStoreService {
     StoreResponse updateStore(String storeID, StoreRequest storeRequest);
     StoreResponse updateStore(String storeID, String status);
 
-
 }

@@ -6,7 +6,7 @@ import com.scorelens.Entity.Notification;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.NotificationMapper;
-import com.scorelens.Repository.BilliardMatchRepo;
+import com.scorelens.Repository.BilliardMatchRepository;
 import com.scorelens.Repository.NotificationRepo;
 import com.scorelens.Service.Interface.INotificationService;
 import lombok.AccessLevel;
@@ -27,7 +27,7 @@ public class NotificationService implements INotificationService {
 
     NotificationRepo notificationRepo;
 
-    BilliardMatchRepo billiardMatchRepo;
+    BilliardMatchRepository billiardMatchRepo;
 
     @Override
     public NotificationResponse sendNotification(NotificationRequest notificationRequest) {

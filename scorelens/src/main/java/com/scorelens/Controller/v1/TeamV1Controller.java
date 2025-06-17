@@ -1,6 +1,7 @@
 package com.scorelens.Controller.v1;
 
-import com.scorelens.DTOs.Request.TeamRequest;
+import com.scorelens.DTOs.Request.TeamCreateRequest;
+import com.scorelens.DTOs.Request.TeamUpdateRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.TeamService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,8 +32,17 @@ public class TeamV1Controller {
                         .build();
     }
 
+    @GetMapping("match/{id}")
+    public ResponseObject getByMatch(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Teams information succesfully")
+                .data(teamService.getTeamsByMatchID(id))
+                .build();
+    }
+
     @PostMapping
-    public ResponseObject createTeam(@RequestBody TeamRequest request) {
+    public ResponseObject createTeam(@RequestBody TeamCreateRequest request) {
         return ResponseObject.builder()
                         .status(1000)
                         .message("Create new Team successfully")
@@ -41,7 +51,7 @@ public class TeamV1Controller {
     }
 
     @PutMapping("/{id}")
-    public ResponseObject updateTeam(@PathVariable Integer id, @RequestBody TeamRequest request) {
+    public ResponseObject updateTeam(@PathVariable Integer id, @RequestBody TeamUpdateRequest request) {
         return ResponseObject.builder()
                         .status(1000)
                         .message("Update Team information successfully")

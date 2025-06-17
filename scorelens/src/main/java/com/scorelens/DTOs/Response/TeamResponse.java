@@ -10,10 +10,11 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class TeamResponse {
+    private Integer billiardMatchID;
     private int teamID;
     private String name;
+    private int totalMember;
     private int totalScore;
     private LocalDateTime createAt;
-    private ResultStatus status;
-    private BilliardMatch billiardMatch;
+    private String status;
 }

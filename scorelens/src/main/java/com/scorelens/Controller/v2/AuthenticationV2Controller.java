@@ -1,10 +1,11 @@
-package com.scorelens.Controller.v1;
+package com.scorelens.Controller.v2;
 
 import com.nimbusds.jose.JOSEException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.AuthenticationService;
+import com.scorelens.Service.AuthenticationV2Service;
 import com.scorelens.Service.CustomerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,17 +21,17 @@ import java.text.ParseException;
 
 @Tag(name = "Authentication", description = "Authentication APIs")
 @RestController
-@RequestMapping("v1/auth")
+@RequestMapping("v2/auth")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AuthenticationV1Controller {
+public class AuthenticationV2Controller {
 
-    AuthenticationService authenticationService;
+    AuthenticationV2Service authenticationService;
     CustomerService customerService;
 
     @PostMapping("/login")
     ResponseObject authenticate(@RequestBody AuthenticationRequestDto request) {
-        var result = authenticationService.authenticate(request);
+        var result = authenticationService.authenticateV2(request);
         return ResponseObject.builder()
                 .status(1000)
                 .data(result)
@@ -69,9 +70,9 @@ public class AuthenticationV1Controller {
     }
 
     @PostMapping("/refresh")
-    ResponseObject authenticate(@RequestBody RefreshRequest request)
+    ResponseObject authenticate(@RequestBody RefreshV2Request request)
             throws ParseException, JOSEException {
-        var result = authenticationService.refreshToken(request);
+        var result = authenticationService.refreshTokenV2(request);
         return ResponseObject.builder()
                 .status(1000)
                 .data(result)
