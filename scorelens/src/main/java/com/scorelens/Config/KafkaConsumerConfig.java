@@ -1,6 +1,6 @@
 package com.scorelens.Config;
 
-import com.scorelens.DTOs.Request.KafkaMessageRequest;
+import com.scorelens.DTOs.Request.EventRequest;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -42,9 +42,9 @@ public class KafkaConsumerConfig {
 
     //    ********************************json message********************************************************
     @Bean
-    public ConsumerFactory<String, KafkaMessageRequest> jsonConsumerFactory() {
+    public ConsumerFactory<String, EventRequest> jsonConsumerFactory() {
         Map<String, Object> props = commonKafkaSSLProps();
-        JsonDeserializer<KafkaMessageRequest> deserializer = new JsonDeserializer<>(KafkaMessageRequest.class);
+        JsonDeserializer<EventRequest> deserializer = new JsonDeserializer<>(EventRequest.class);
         deserializer.addTrustedPackages("*");
 
         // type headers
@@ -56,8 +56,8 @@ public class KafkaConsumerConfig {
 
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, KafkaMessageRequest> jsonKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, KafkaMessageRequest> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, EventRequest> jsonKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, EventRequest> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(jsonConsumerFactory());
         return factory;
