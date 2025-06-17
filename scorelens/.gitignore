@@ -48,7 +48,11 @@ nbdist/
 *.pem
 *.crt
 *.key
-certs/
+# Ignore all certs by default
+certs/*
+# Allow specific cert files (if needed)
+!certs/client.keystore.p12
+!certs/client.truststore.jks
 
 # ===================== #
 #   OS Specific         #

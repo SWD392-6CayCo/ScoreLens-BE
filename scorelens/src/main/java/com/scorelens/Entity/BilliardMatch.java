@@ -2,6 +2,8 @@ package com.scorelens.Entity;
 
 import com.scorelens.Enums.MatchStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,10 +20,12 @@ public class BilliardMatch {
     @Column(name = "billiardMatchID")
     private Integer billiardMatchID;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "billardTableID", nullable = false)
     private BilliardTable billardTable;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "modeID", nullable = false)
     private Mode mode;
@@ -43,16 +47,19 @@ public class BilliardMatch {
     @Column(name = "totalSet")
     private Integer totalSet;
 
+    @NotNull
     @Column(name = "startTime")
     private LocalDateTime startTime;
 
     @Column(name = "endTime")
     private LocalDateTime endTime;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private MatchStatus status; //-- pending, ongoing, completed, cancelled, forfeited
 
+    @NotNull
     @Column(name = "code")
     private String code;
 
