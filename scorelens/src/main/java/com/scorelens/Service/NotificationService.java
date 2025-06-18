@@ -12,6 +12,7 @@ import com.scorelens.Service.Interface.INotificationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,8 @@ public class NotificationService implements INotificationService {
     NotificationRepo notificationRepo;
 
     BilliardMatchRepository billiardMatchRepo;
+
+    SimpMessagingTemplate messagingTemplate;
 
     @Override
     public NotificationResponse sendNotification(NotificationRequest notificationRequest) {
@@ -52,6 +55,11 @@ public class NotificationService implements INotificationService {
         if (list.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
         notificationRepo.deleteAll(list);
         return true;
+    }
+
+    @Override
+    public void sendToWebSocket(String destination, Object message) {
+        messagingTemplate.convertAndSend(destination, message);
     }
 
 

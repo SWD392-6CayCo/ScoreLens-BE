@@ -29,6 +29,7 @@
         @MessageMapping("/noti.send")
         public void handleNotification(String message) {
             messagingTemplate.convertAndSend("/topic/notification", message);
+            System.out.println("Received noti: " + message);
         }
 
         // WebSocket receive → forward to /topic/logging_notification

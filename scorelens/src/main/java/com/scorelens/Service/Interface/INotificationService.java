@@ -9,4 +9,5 @@ public interface INotificationService {
     NotificationResponse sendNotification(NotificationRequest notificationRequest);
     List<NotificationResponse> getNotificationsByMatch(int billiardMatchID);
     boolean deleteNotificationByMatchID(int billiardMatchID);
+    void sendToWebSocket(String destination, Object message);
 }

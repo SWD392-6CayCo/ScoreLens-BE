@@ -3,11 +3,16 @@ package com.scorelens.Consumer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scorelens.DTOs.Request.LogMessageRequest;
+import com.scorelens.Service.NotificationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class KafkaListeners {
+
+    private final NotificationService notificationService;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -21,6 +26,8 @@ public class KafkaListeners {
         try {
             String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(message);
             System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
+            // Push message lên WebSocket topic "/topic/logging_notification"
+            notificationService.sendToWebSocket("/topic/logging_notification", json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
