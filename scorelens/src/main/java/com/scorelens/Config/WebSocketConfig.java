@@ -8,6 +8,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
+//Spring Boot WebSocket STOMP => server web socket riêng sử dụng STOMP protocol(Simple Text Oriented Messaging Protocol)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
