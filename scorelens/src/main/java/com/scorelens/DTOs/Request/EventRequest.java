@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class EventRequest {
     private int playerID;
-    private int roundID;
+    private int gameSetID;
     private boolean scoreValue;
     private boolean isFoul;
     private boolean isUncertain;

@@ -2,14 +2,13 @@ package com.scorelens.Service;
 
 import com.scorelens.DTOs.Request.EventRequest;
 import com.scorelens.DTOs.Response.EventResponse;
-import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.Event;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.EventMapper;
 import com.scorelens.Repository.EventRepo;
+import com.scorelens.Repository.GameSetRepository;
 import com.scorelens.Repository.PlayerRepo;
-import com.scorelens.Repository.RoundRepo;
 import com.scorelens.Service.Interface.IEventService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class EventService implements IEventService {
     EventMapper eventMapper;
 
     @Autowired
-    RoundRepo roundRepo;
+    GameSetRepository gameSetRepo;
 
     @Autowired
     PlayerRepo playerRepo;
@@ -40,8 +39,8 @@ public class EventService implements IEventService {
 
     @Override
     public EventResponse addEvent(EventRequest eventRequest) {
-        if (!roundRepo.existsById(eventRequest.getRoundID()))
-            throw new AppException(ErrorCode.ROUND_NOT_FOUND);
+        if (!gameSetRepo.existsById(eventRequest.getGameSetID()))
+            throw new AppException(ErrorCode.SET_NOT_FOUND);
         if (!playerRepo.existsById(eventRequest.getPlayerID()))
             throw new AppException(ErrorCode.PLAYER_NOT_FOUND);
         Event event = eventMapper.toEventRequest(eventRequest);
@@ -69,10 +68,10 @@ public class EventService implements IEventService {
     }
 
     @Override
-    public List<EventResponse> getEventsByRoundID(int roundID) {
-        List<Event> events = eventRepo.findAllByRound_RoundID(roundID);
+    public List<EventResponse> getEventsByGameSetID(int gamseSetID) {
+        List<Event> events = eventRepo.findAllByGameSet_GameSetID(gamseSetID);
         if (events.isEmpty())
-            throw new AppException(ErrorCode.NULL_EVENT_ROUNDID);
+            throw new AppException(ErrorCode.NULL_EVENT_GAMESETID);
         return eventMapper.toEventResponses(events);
     }
 
@@ -86,19 +85,32 @@ public class EventService implements IEventService {
     }
 
     @Override
-    public boolean deleteEventByRoundID(int roundID) {
-        List<Event> events = eventRepo.findAllByRound_RoundID(roundID);
+    public boolean deleteEventByGameSetID(int gameSetID) {
+        List<Event> events = eventRepo.findAllByGameSet_GameSetID(gameSetID);
         if (events.isEmpty())
-            throw new AppException(ErrorCode.NULL_EVENT_ROUNDID);
+            throw new AppException(ErrorCode.NULL_EVENT_GAMESETID);
         eventRepo.deleteAll(events);
         return true;
     }
 
     @Override
-    public List<EventResponse> getEventsByPlayerIDAndRoundID(int playerID, int roundID) {
-        List<Event> list = eventRepo.findAllByRound_RoundIDAndPlayer_PlayerID(roundID, playerID);
+    public List<EventResponse> getEventsByPlayerIDAndGameSetID(int gameSetID, int playerID) {
+        List<Event> list = eventRepo.findAllByGameSet_GameSetIDAndPlayer_PlayerID(gameSetID, playerID);
         if (list.isEmpty())
             throw new AppException(ErrorCode.EMPTY_LIST);
         return eventMapper.toEventResponses(list);
+    }
+
+    @Override
+    public Event geteventByID(int eventID) {
+        Event e = eventRepo.findById(eventID)
+                .orElseThrow(() -> new AppException(ErrorCode.NULL_EVENT));
+        return e;
+    }
+
+    @Override
+    public int countEventsGameSetID(int gameSetID) {
+        List<Event> events = eventRepo.findAllByGameSet_GameSetID(gameSetID);
+        return events != null ? events.size() : 0;
     }
 }

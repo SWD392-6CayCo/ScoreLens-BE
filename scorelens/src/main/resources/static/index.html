@@ -6,22 +6,50 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #messages { margin-top: 20px; }
-        .message { padding: 5px 0; }
-        .notification { color: green; }
-        .logging { color: red; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #messages {
+            margin-top: 20px;
+        }
+
+        .message {
+            padding: 5px 0;
+        }
+
+        .notification {
+            color: green;
+        }
+
+        .logging {
+            color: red;
+        }
     </style>
 </head>
 <body>
 
-<h1>WebSocket Multi-Topic Demo</h1>
+<h1>WebSocket</h1>
 
-<input type="text" id="messageInput" placeholder="Type a message..." />
+<input type="text" id="messageInput" placeholder="Type a message..."/>
 <button onclick="sendNotification()">Send Notification</button>
 <button onclick="sendLogging()">Send Logging</button>
 
 <div id="messages"></div>
+
+<h3>Shot History</h3>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Time</th>
+        <th>Shot</th>
+        <th>Player</th>
+        <th>Result</th>
+    </tr>
+    </thead>
+    <tbody id="shotTableBody"></tbody>
+</table>
 
 <script>
     let stompClient = null;
@@ -42,6 +70,13 @@
             stompClient.subscribe('/topic/logging_notification', function (messageOutput) {
                 showMessage(messageOutput.body, 'logging');
             });
+
+            // Subscribe topic /topic/shot_event
+            stompClient.subscribe('/topic/shot_event', function (messageOutput) {
+                const data = JSON.parse(messageOutput.body);
+                showShotEvent(data);
+            });
+
         });
     }
 
@@ -72,6 +107,21 @@
         messageElement.textContent = `[${type.toUpperCase()}] ${message}`;
         messagesDiv.appendChild(messageElement);
     }
+
+    function showShotEvent(data) {
+        const tableBody = document.getElementById('shotTableBody');
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+        <td>${data.time}</td>
+        <td>${data.shot}</td>
+        <td>${data.player}</td>
+        <td style="color: ${data.result === 'SCORED' ? 'green' : 'red'}">${data.result}</td>
+    `;
+
+        tableBody.appendChild(row);
+    }
+
 
     connect();
 </script>
