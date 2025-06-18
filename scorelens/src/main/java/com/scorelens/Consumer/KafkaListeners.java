@@ -17,7 +17,10 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+
+
+import java.time.LocalTime;
+
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -57,6 +60,18 @@ public class KafkaListeners {
         }
     }
 
+    @KafkaListener(
+            topics = "ai-noti",
+            groupId = "scorelens-group",
+            containerFactory = "aiNotiKafkaListenerContainerFactory"
+    )
+    public void listenAINoti(EventRequest event) throws JsonProcessingException {
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(event);
+        System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
+        // Push message lên WebSocket topic "/topic/logging_notification"
+        notificationService.sendToWebSocket("/topic/logging_notification", json);
+    }
+
     // tạo event mới và xác định shot event
     public void handlingEvent(EventRequest request) {
         boolean isFoul = request.isFoul();
@@ -75,7 +90,7 @@ public class KafkaListeners {
                 // nếu không xác định
                 : ShotResult.UNKNOWN));
 
-        shot.setTime(LocalDate.now());
+        shot.setTime(LocalTime.now());
         shot.setShot(String.format("SHOT #%02d", shotCount));
         shot.setPlayer(String.format("PLAYER %d", request.getPlayerID()));
         shot.setResult(result.name());
