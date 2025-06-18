@@ -2,7 +2,7 @@ package com.scorelens.Consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scorelens.DTOs.Request.EventRequest;
+import com.scorelens.DTOs.Request.LogMessageRequest;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ public class KafkaListeners {
             groupId = "scorelens-group",
             containerFactory = "jsonKafkaListenerContainerFactory"
     )
-    public void listenJson(EventRequest message) {
+    public void listenJson(LogMessageRequest message) {
         try {
             String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(message);
             System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
