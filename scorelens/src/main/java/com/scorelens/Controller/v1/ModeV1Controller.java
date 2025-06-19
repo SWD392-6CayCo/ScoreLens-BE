@@ -24,6 +24,15 @@ public class ModeV1Controller {
     @Autowired
     private ModeService modeService;
 
+    @GetMapping
+    public ResponseObject getAll() {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Modes information successfully")
+                .data(modeService.getAll())
+                .build();
+    }
+
     @GetMapping("/{id}")
     public ResponseObject getById(@PathVariable Integer id) {
         return ResponseObject.builder()

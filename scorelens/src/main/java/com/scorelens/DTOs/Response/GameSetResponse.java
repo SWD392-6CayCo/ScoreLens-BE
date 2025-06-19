@@ -17,5 +17,5 @@ public class GameSetResponse {
     private String winner;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private String status;
+    private MatchStatus status;
 }

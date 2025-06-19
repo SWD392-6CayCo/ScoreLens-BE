@@ -1,5 +1,9 @@
 package com.scorelens.Controller.v1;
 
+import com.scorelens.DTOs.Request.PlayerCreateRequest;
+import com.scorelens.DTOs.Request.PlayerUpdateRequest;
+import com.scorelens.DTOs.Request.TeamCreateRequest;
+import com.scorelens.DTOs.Request.TeamUpdateRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.PlayerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +38,33 @@ public class PlayerV1Controller {
                 .status(1000)
                 .message("Get player successfully")
                 .data(player)
+                .build();
+    }
+
+    @PostMapping
+    public ResponseObject createPlayer(@RequestBody PlayerCreateRequest request) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Create new Player successfully")
+                .data(playerService.createPlayer(request))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseObject updatePlayer(@PathVariable Integer id, @RequestBody PlayerUpdateRequest request) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Update Team information successfully")
+                .data(playerService.updatePlayer(id, request))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseObject deletePlayer(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Player with ID " + id + " has been deleted")
+                .data(playerService.delete(id))
                 .build();
     }
 }

@@ -11,13 +11,7 @@ import java.time.LocalDate;
 
 @Data
 @Getter
-@Builder
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlayerCreateRequest {
+    Integer teamID;
     String name;
-//    int totalScore;
-    LocalDate createAt;
-    ResultStatus status;
-    String teamID;
-    String customerID; //có thể null
 }

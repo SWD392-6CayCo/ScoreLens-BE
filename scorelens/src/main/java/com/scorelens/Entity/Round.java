@@ -38,5 +38,4 @@ public class Round {
     @JoinColumn(name = "billiardMatchID", nullable = false)
     private BilliardMatch billiardMatch;
 
-
 }

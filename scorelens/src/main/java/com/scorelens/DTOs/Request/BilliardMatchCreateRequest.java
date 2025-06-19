@@ -24,5 +24,6 @@ public class BilliardMatchCreateRequest {
     public static class TeamConfig {
         private String name;
         private Integer totalMember;
+        private List<String> memberNames;
     }
 }

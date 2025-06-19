@@ -4,29 +4,24 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.Team;
 import com.scorelens.Enums.ResultStatus;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-/**
- * DTO for {@link com.scorelens.Entity.Player}
- */
-@AllArgsConstructor
+///**
+// * DTO for {@link com.scorelens.Entity.Player}
+// */
 @Getter
-@Builder
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PlayerResponse implements Serializable {
-    int playerID;
-    String name;
-    int totalScore;
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    LocalDate createAt;
-    ResultStatus status; //win, lose, draw, pending
-    TeamResponse team;
-    CustomerResponseDto customer;
+@Setter
+public class PlayerResponse {
+    private Integer teamID;
+    private int playerID;
+    private String name;
+    private int totalScore;
+    private String customerID;
+    private ResultStatus status; //win, lose, draw, pending
+    private LocalDateTime createAt;
 }
