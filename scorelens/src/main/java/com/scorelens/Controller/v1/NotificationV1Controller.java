@@ -31,4 +31,13 @@ public class NotificationV1Controller {
                 .build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseObject getNotificationListByBilliardMatchID(@PathVariable int id){
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Notification List")
+                .data(notificationService.getNotificationsByMatch(id))
+                .build();
+    }
+
 }

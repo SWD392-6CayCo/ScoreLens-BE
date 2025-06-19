@@ -20,8 +20,8 @@ public class Event {
     private Player player;
 
     @ManyToOne
-    @JoinColumn(name = "roundID")
-    private Round round;
+    @JoinColumn(name = "gameSetID")
+    private GameSet gameSet;
 
     @Column(name = "scoreValue")
     private boolean scoreValue;

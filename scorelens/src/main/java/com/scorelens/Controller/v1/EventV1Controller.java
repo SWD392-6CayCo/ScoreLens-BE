@@ -42,7 +42,7 @@ public class EventV1Controller {
     }
 
     @GetMapping("/player/{id}")
-    ResponseObject getEvent(@PathVariable int id) {
+    ResponseObject getEventPlayer(@PathVariable int id) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Event found")
@@ -50,12 +50,12 @@ public class EventV1Controller {
                 .build();
     }
 
-    @GetMapping("/round/{id}")
-    ResponseObject geEvent(@PathVariable int id) {
+    @GetMapping("/game_set/{id}")
+    ResponseObject getEventGameSet(@PathVariable int id) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Event found")
-                .data(eventService.getEventsByRoundID(id))
+                .data(eventService.getEventsByGameSetID(id))
                 .build();
     }
 
@@ -68,12 +68,12 @@ public class EventV1Controller {
                 .build();
     }
 
-    @DeleteMapping("/round/{id}")
+    @DeleteMapping("/game_set/{id}")
     ResponseObject deleteEventByRoundID(@PathVariable int id) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Events deleted")
-                .data(eventService.deleteEventByRoundID(id))
+                .data(eventService.deleteEventByGameSetID(id))
                 .build();
     }
 

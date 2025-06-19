@@ -28,6 +28,8 @@ import org.springframework.web.filter.CorsFilter;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.beans.Encoder;
+import java.sql.Array;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity(debug = false)
@@ -103,7 +105,12 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
+        corsConfiguration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:5173"
+        ));
+        //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
+        corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
 

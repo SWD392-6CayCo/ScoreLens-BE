@@ -52,7 +52,7 @@ public enum ErrorCode {
     //-------------------------- EVENT  -----------------------------------
     NULL_EVENT(1018, "Event is null", HttpStatus.BAD_REQUEST),
     NULL_EVENT_PLAYERID(1019, "No data matched with this player", HttpStatus.BAD_REQUEST),
-    NULL_EVENT_ROUNDID(1020, "No data matched with this round", HttpStatus.BAD_REQUEST),
+    NULL_EVENT_GAMESETID(1020, "No data matched with this game set", HttpStatus.BAD_REQUEST),
     EVENT_NOT_FOUND(1021, "Event not found", HttpStatus.NOT_FOUND),
 
     //-------------------------- ROUND  -----------------------------------

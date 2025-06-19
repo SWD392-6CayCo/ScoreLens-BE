@@ -1,6 +1,5 @@
 package com.scorelens.Controller.v2;
 
-import com.scorelens.DTOs.Request.EventRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.EventService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +27,7 @@ public class EventV2Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Event list")
-                .data(eventService.getEventsByPlayerIDAndRoundID(playerID, roundID))
+                .data(eventService.getEventsByPlayerIDAndGameSetID(playerID, roundID))
                 .build();
     }
 
