@@ -34,7 +34,7 @@ public class BilliardMatchV1Controller {
                         .build();
     }
 
-    @GetMapping("/bycustomer/{id}")
+    @GetMapping("/bycreator/customer/{id}")
     public ResponseObject getByCustomer(@PathVariable String id) {
         return ResponseObject.builder()
                 .status(1000)
@@ -43,12 +43,30 @@ public class BilliardMatchV1Controller {
                 .build();
     }
 
-    @GetMapping("/bystaff/{id}")
+    @GetMapping("/bycreator/staff/{id}")
     public ResponseObject getByStaff(@PathVariable String id) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Get Matchs information successfully")
                 .data(billiardMatchService.getByStaff(id))
+                .build();
+    }
+
+    @GetMapping("/bycustomer/{id}")
+    public ResponseObject getByCustomerID(@PathVariable String id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Matchs information successfully")
+                .data(billiardMatchService.getByCustomerID(id))
+                .build();
+    }
+
+    @GetMapping("/byplayer/{id}")
+    public ResponseObject getByPlayerID(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Match information successfully")
+                .data(billiardMatchService.getByPlayerID(id))
                 .build();
     }
 

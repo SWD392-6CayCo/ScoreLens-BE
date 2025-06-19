@@ -1,9 +1,6 @@
 package com.scorelens.Service;
 
-import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
-import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
-import com.scorelens.DTOs.Request.GameSetCreateRequest;
-import com.scorelens.DTOs.Request.TeamCreateRequest;
+import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.DTOs.Response.GameSetResponse;
 import com.scorelens.Entity.*;
@@ -40,14 +37,15 @@ public class BilliardMatchService implements IBilliardMatchService {
     private TeamRepository teamRepo;
     @Autowired
     private GameSetRepository setRepo;
+    @Autowired
+    private PlayerRepo playerRepo;
 
     @Autowired
     private GameSetService setService;
     @Autowired
     private TeamService teamService;
-
-//    @Autowired
-//    private PlayerService playerService;
+    @Autowired
+    private PlayerService playerService;
 
     @Autowired
     BilliardMatchMapper billiardMatchMapper;
@@ -72,6 +70,22 @@ public class BilliardMatchService implements IBilliardMatchService {
         Staff staff = staffRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
         List<BilliardMatch> matchs = repository.findByStaff_StaffID(id);
+        return billiardMatchMapper.toBilliardMatchResponses(matchs);
+    }
+
+    @Override
+    public BilliardMatchResponse getByPlayerID(Integer id){
+        Player player = playerRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PLAYER_NOT_FOUND));
+        BilliardMatch match = repository.findByPlayerId(id);
+        return billiardMatchMapper.toBilliardMatchResponse(match);
+    }
+
+    @Override
+    public List<BilliardMatchResponse> getByCustomerID(String id) {
+        Customer customer = customerRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+        List<BilliardMatch> matchs = repository.findByCustomerId(id);
         return billiardMatchMapper.toBilliardMatchResponses(matchs);
     }
 
@@ -133,6 +147,13 @@ public class BilliardMatchService implements IBilliardMatchService {
             teamRequest.setName(team.getName());
             teamRequest.setTotalMember(team.getTotalMember());
             Team team1 = teamService.createTeam(teamRequest);
+            for (String name : team.getMemberNames()) {
+                PlayerCreateRequest playerCreateRequest = new PlayerCreateRequest();
+                playerCreateRequest.setName(name);
+                playerCreateRequest.setTeamID(team1.getTeamID());
+                Player player = playerService.createPlayer(playerCreateRequest);
+                team1.addPlayer(player);
+            }
             match.addTeam(team1);
         }
         return billiardMatchMapper.toBilliardMatchResponse(match);

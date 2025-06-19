@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -31,7 +32,7 @@ public class Player {
     private int totalScore;
 
     @Column(name = "createAt")
-    private LocalDate createAt;
+    private LocalDateTime createAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

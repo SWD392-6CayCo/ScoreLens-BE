@@ -69,8 +69,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
     @Value("${jwt.refreshable-duration}") //Đọc từ file application.yaml
     protected long REFRESHABLE_DURATION;
 
-
-
     //--------------------------------------- AUTHENTICATION --------------------------------------------------
     @Override
     public AuthenticationResponseDto authenticate(AuthenticationRequestDto request) {
@@ -99,7 +97,8 @@ public class AuthenticationV2Service implements IAuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponseDtoV2 authenticateV2(AuthenticationRequestDto request) {
+    public record AuthTokens(AuthenticationResponseDtoV2 responseDto, String accessToken, String refreshToken) {}
+    public AuthTokens authenticateV2(AuthenticationRequestDto request) {
         AppUser appUser = appUserService.authenticateUser(request.getEmail(), request.getPassword());
         Object responseUser;
 
@@ -119,13 +118,14 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String accessToken = generateTokenV2(appUser, VALID_DURATION);
         String refreshToken = generateTokenV2(appUser, REFRESHABLE_DURATION);
 
-        return AuthenticationResponseDtoV2.builder()
+         AuthenticationResponseDtoV2 responseDto = AuthenticationResponseDtoV2.builder()
                 .authenticated(true)
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
                 .user(responseUser)
                 .userType(appUser.getUserType())
                 .build();
+         return new AuthTokens(responseDto, accessToken, refreshToken);
     }
 
     //--------------------------------------- LOGOUT -----------------------------------------------------------
@@ -169,7 +169,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
         return signedJWT;
     }
 
-    public AuthenticationResponseDtoV2 refreshTokenV2(RefreshV2Request request) throws ParseException, JOSEException {
+    public AuthTokens refreshTokenV2(RefreshV2Request request) throws ParseException, JOSEException {
         SignedJWT signedJWT = verifyToken(request.getRefreshToken(), true);
 
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
@@ -192,12 +192,13 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String newAccessToken = generateTokenV2(user, VALID_DURATION);
         String newRefreshToken = generateTokenV2(user, REFRESHABLE_DURATION);
 
-        return AuthenticationResponseDtoV2.builder()
+        AuthenticationResponseDtoV2 responseDto = AuthenticationResponseDtoV2.builder()
                 .authenticated(true)
-                .accessToken(newAccessToken)
-                .refreshToken(newRefreshToken)
+//                .accessToken(newAccessToken)
+//                .refreshToken(newRefreshToken)
                 .build();
 
+        return new AuthTokens(responseDto, newAccessToken, newRefreshToken);
     }
 
     public AuthenticationResponseDto refreshToken(RefreshRequest request) throws ParseException, JOSEException {
