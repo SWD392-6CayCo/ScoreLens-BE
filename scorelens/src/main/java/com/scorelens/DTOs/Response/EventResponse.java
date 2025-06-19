@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class EventResponse {
     private int eventID;
-    private int roundID;
+    private int gameSetID;
     private int playerID;
     private boolean scoreValue;
     private boolean isFoul;

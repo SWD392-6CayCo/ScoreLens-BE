@@ -76,13 +76,19 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
-
         <!-- Optionally for JSON message converter nếu dùng JSON message -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
+<!--        map json into object-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+
         <!--        security-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
