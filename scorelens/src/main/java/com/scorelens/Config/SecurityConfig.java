@@ -109,7 +109,8 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:5173"
         ));
-        corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
+        //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
+        corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
 

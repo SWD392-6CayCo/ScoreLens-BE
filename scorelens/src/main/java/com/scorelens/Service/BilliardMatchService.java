@@ -36,18 +36,21 @@ public class BilliardMatchService implements IBilliardMatchService {
     private StaffRepository staffRepo;
     @Autowired
     private CustomerRepo customerRepo;
+    @Autowired
+    private TeamRepository teamRepo;
+    @Autowired
+    private GameSetRepository setRepo;
 
     @Autowired
     private GameSetService setService;
     @Autowired
     private TeamService teamService;
+
 //    @Autowired
 //    private PlayerService playerService;
 
     @Autowired
     BilliardMatchMapper billiardMatchMapper;
-    @Autowired
-    private GameSetService gameSetService;
 
     @Override
     public BilliardMatchResponse getById(Integer id) {
@@ -57,10 +60,29 @@ public class BilliardMatchService implements IBilliardMatchService {
     }
 
     @Override
+    public List<BilliardMatchResponse> getByCustomer(String id){
+        Customer customer = customerRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
+        List<BilliardMatch> matchs = repository.findByCustomer_CustomerID(id);
+        return billiardMatchMapper.toBilliardMatchResponses(matchs);
+    }
+
+    @Override
+    public List<BilliardMatchResponse> getByStaff(String id){
+        Staff staff = staffRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
+        List<BilliardMatch> matchs = repository.findByStaff_StaffID(id);
+        return billiardMatchMapper.toBilliardMatchResponses(matchs);
+    }
+
+    @Override
     public BilliardMatchResponse createMatch(BilliardMatchCreateRequest request) {
         BilliardMatch match = billiardMatchMapper.toBilliardMatch(request);
         if (request.getStaffID() == null && request.getCustomerID() == null) {
             throw new AppException(ErrorCode.ALL_NOT_NULL);
+        }
+        if (request.getStaffID() != null && request.getCustomerID() != null) {
+            throw new AppException(ErrorCode.ALL_NOT_VALUE);
         }
         if (request.getStaffID() == null) {
             BilliardTable table = tableRepo.findById(request.getBilliardTableID())
@@ -95,7 +117,6 @@ public class BilliardMatchService implements IBilliardMatchService {
         match.setStatus(MatchStatus.pending);
         match.setCode(generateRandomCode());
         repository.save(match);
-      //  List<GameSet> gameSets = new ArrayList<>();
         for (int i = 1; i <= match.getTotalSet(); i++) {
             GameSetCreateRequest setRequest = new GameSetCreateRequest();
             setRequest.setBilliardMatchID(match.getBilliardMatchID());
@@ -142,6 +163,12 @@ public class BilliardMatchService implements IBilliardMatchService {
         public Integer delete(Integer id) {
             if (!repository.existsById(id)) {
                 throw new AppException(ErrorCode.MATCH_NOT_FOUND);
+            }
+            for(GameSet set : setRepo.findByBilliardMatch_BilliardMatchID(id)){
+                setService.deleteByMatch(set.getGameSetID());
+            }
+            for(Team team : teamRepo.findByBilliardMatch_BilliardMatchID(id)){
+                teamService.deleteByMatch(team.getTeamID());
             }
             repository.deleteById(id);
             return id;

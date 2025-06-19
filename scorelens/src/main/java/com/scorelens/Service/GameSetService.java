@@ -41,7 +41,7 @@ public class GameSetService implements IGameSetService {
     }
 
     @Override
-    public List<GameSetResponse> getSetsByMatchID(Integer id) {
+    public List<GameSetResponse> getByMatchID(Integer id) {
         BilliardMatch match = matchRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         List<GameSet> sets = gameSetRepository.findByBilliardMatch_BilliardMatchID(id);
@@ -107,5 +107,13 @@ public class GameSetService implements IGameSetService {
         }
         gameSetRepository.deleteById(id);
         return id;
+    }
+
+    @Override
+    public void deleteByMatch(Integer id) {
+        if (!gameSetRepository.existsById(id)) {
+            throw new AppException(ErrorCode.SET_NOT_FOUND);
+        }
+        gameSetRepository.deleteById(id);
     }
 }

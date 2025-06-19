@@ -38,7 +38,7 @@ public class GameSetV1Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Get Game Sets information succesfully")
-                .data(gameSetService.getSetsByMatchID(id))
+                .data(gameSetService.getByMatchID(id))
                 .build();
     }
 
