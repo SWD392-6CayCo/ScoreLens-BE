@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
 import com.scorelens.Entity.ResponseObject;
+import com.scorelens.Security.TokenCookieManager;
 import com.scorelens.Service.AuthenticationService;
 import com.scorelens.Service.AuthenticationV2Service;
 import com.scorelens.Service.CustomerService;
@@ -28,6 +29,7 @@ import java.text.ParseException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationV2Controller {
 
+    TokenCookieManager tokenCookieManager;
     AuthenticationV2Service authenticationService;
     CustomerService customerService;
 
@@ -35,18 +37,11 @@ public class AuthenticationV2Controller {
     ResponseObject authenticate(@RequestBody AuthenticationRequestDto request, HttpServletResponse response) {
         var result = authenticationService.authenticateV2(request);
 
-        Cookie jwtCookie = new Cookie("JWT", result.getAccessToken());
-        jwtCookie.setHttpOnly(true); //Chặn JS truy cập
-        jwtCookie.setSecure(true); //Chỉ truyền qua https
-        jwtCookie.setPath("/"); //áp dụng toàn bộ website
-        jwtCookie.setMaxAge(60*60);
-        jwtCookie.setAttribute("SameSite", "Strict");
-
-        response.addCookie(jwtCookie);
-
+        //lưu refreshtoken & accesstoken vào Cookie
+        tokenCookieManager.addAuthCookies(response, result.accessToken(), result.refreshToken());
         return ResponseObject.builder()
                 .status(1000)
-                .data(result)
+                .data(result.responseDto())
                 .message("Login successfully!!")
                 .build();
     }
@@ -62,9 +57,10 @@ public class AuthenticationV2Controller {
     }
 
     @PostMapping("/logout")
-    ResponseObject logout(@RequestBody LogoutRequestDto request)
+    ResponseObject logout(@RequestBody LogoutRequestDto request, HttpServletResponse response)
             throws ParseException, JOSEException {
         authenticationService.logout(request);
+        tokenCookieManager.clearAuthCookies(response);
         return ResponseObject.builder()
                 .status(1000)
                 .message("Logout succesfully")
@@ -82,12 +78,15 @@ public class AuthenticationV2Controller {
     }
 
     @PostMapping("/refresh")
-    ResponseObject authenticate(@RequestBody RefreshV2Request request)
+    ResponseObject authenticate(@RequestBody RefreshV2Request request, HttpServletResponse response)
             throws ParseException, JOSEException {
         var result = authenticationService.refreshTokenV2(request);
+
+        tokenCookieManager.addAuthCookies(response, result.accessToken(), result.refreshToken());
+
         return ResponseObject.builder()
                 .status(1000)
-                .data(result)
+                .data(result.responseDto())
                 .message("Login successfully!!")
                 .build();
     }
