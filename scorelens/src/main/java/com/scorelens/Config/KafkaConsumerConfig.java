@@ -63,52 +63,5 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-    //    ********************************ai-noti message********************************************************
-//    @Bean
-//    public ConsumerFactory<String, EventRequest> aiNotiConsumerFactory() {
-//        Map<String, Object> props = commonKafkaSSLProps();
-//        JsonDeserializer<EventRequest> deserializer = new JsonDeserializer<>(EventRequest.class);
-//        deserializer.addTrustedPackages("*");
-//
-//        // type headers
-//        deserializer.setRemoveTypeHeaders(false);
-//        deserializer.setUseTypeMapperForKey(false);
-//        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
-//    }
-//
-//
-//    @Bean
-//    public ConcurrentKafkaListenerContainerFactory<String, EventRequest> aiNotiKafkaListenerContainerFactory() {
-//        ConcurrentKafkaListenerContainerFactory<String, EventRequest> factory =
-//                new ConcurrentKafkaListenerContainerFactory<>();
-//        factory.setConsumerFactory(aiNotiConsumerFactory());
-//        return factory;
-//    }
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

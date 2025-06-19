@@ -11,9 +11,14 @@ import org.springframework.stereotype.Service;
 public class KafkaProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
+    private final int partition = 0;
+
     public void sendEvent(String topic, Object object) {
+        kafkaTemplate.send(topic, partition, null, object);
+        kafkaTemplate.flush();
         log.info("Sending message: {}", object);
-        kafkaTemplate.send(topic, object);
     }
+
+
 
 }

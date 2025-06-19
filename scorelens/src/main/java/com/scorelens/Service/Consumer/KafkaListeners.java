@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +39,10 @@ public class KafkaListeners {
 
     // json message
     @KafkaListener(
-            topics = "scorelens",
-            groupId = "scorelens-group",
+            topicPartitions = @TopicPartition(
+                    topic = "scorelens",
+                    partitions = {"0"}
+            ),
             containerFactory = "jsonKafkaListenerContainerFactory"
     )
     public void listenJson(LogMessageRequest message) {
@@ -60,25 +63,14 @@ public class KafkaListeners {
         }
     }
 
-//    @KafkaListener(
-//            topics = "ai-noti",
-//            groupId = "scorelens-group",
-//            containerFactory = "aiNotiKafkaListenerContainerFactory"
-//    )
-//    public void listenAINoti(EventRequest event) throws JsonProcessingException {
-//        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(event);
-//        System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
-//        // Push message lên WebSocket topic "/topic/logging_notification"
-//        notificationService.sendToWebSocket("/topic/logging_notification", json);
-//    }
-
     // tạo event mới và xác định shot event
     public void handlingEvent(EventRequest request) {
         boolean isFoul = request.isFoul();
         boolean scoreValue = request.isScoreValue();
         boolean isUncertain = request.isUncertain();
         //lấy ds event theo round để đếm số shot đã đánh
-        int shotCount = eventService.countEventsGameSetID(request.getGameSetID());
+        int tmp = eventService.countEventsGameSetID(request.getGameSetID());
+        int shotCount = tmp == 0 ?  1 : tmp;
 
         ShotEvent shot = new ShotEvent();
         // nếu AI k chắc chắn => undetected
