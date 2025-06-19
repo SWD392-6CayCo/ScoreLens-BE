@@ -1,5 +1,6 @@
 package com.scorelens.Config;
 
+import com.google.api.Http;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.UserType;
 import org.apache.http.client.methods.HttpGet;
@@ -41,7 +42,7 @@ public class SecurityConfig {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
             "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout",
             "/v*/auth/refresh",
-            "/v*/ping",
+            "/v*/ping"
 
 
     };
@@ -62,8 +63,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.PUT, "/teams/*").permitAll()
-                
-                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole("ADMIN", "MANAGER")
+                .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/staffs").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.GET, "/customers/**").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers(HttpMethod.POST, "/customers/my-profile").hasRole("CUSTOMER")
