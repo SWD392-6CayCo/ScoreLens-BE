@@ -77,5 +77,14 @@ public class EventV1Controller {
                 .build();
     }
 
+    @GetMapping("/game_set/count/{gameSetID}")
+    ResponseObject countEventByGameSetID(@PathVariable int gameSetID) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Events count")
+                .data(eventService.countEventsGameSetID(gameSetID))
+                .build();
+    }
+
 
 }
