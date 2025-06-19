@@ -8,6 +8,8 @@ import com.scorelens.Service.AuthenticationService;
 import com.scorelens.Service.AuthenticationV2Service;
 import com.scorelens.Service.CustomerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +32,18 @@ public class AuthenticationV2Controller {
     CustomerService customerService;
 
     @PostMapping("/login")
-    ResponseObject authenticate(@RequestBody AuthenticationRequestDto request) {
+    ResponseObject authenticate(@RequestBody AuthenticationRequestDto request, HttpServletResponse response) {
         var result = authenticationService.authenticateV2(request);
+
+        Cookie jwtCookie = new Cookie("JWT", result.getAccessToken());
+        jwtCookie.setHttpOnly(true); //Chặn JS truy cập
+        jwtCookie.setSecure(true); //Chỉ truyền qua https
+        jwtCookie.setPath("/"); //áp dụng toàn bộ website
+        jwtCookie.setMaxAge(60*60);
+        jwtCookie.setAttribute("SameSite", "Strict");
+
+        response.addCookie(jwtCookie);
+
         return ResponseObject.builder()
                 .status(1000)
                 .data(result)
