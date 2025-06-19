@@ -1,4 +1,4 @@
-package com.scorelens.Consumer;
+package com.scorelens.Service.Consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,17 +60,17 @@ public class KafkaListeners {
         }
     }
 
-    @KafkaListener(
-            topics = "ai-noti",
-            groupId = "scorelens-group",
-            containerFactory = "aiNotiKafkaListenerContainerFactory"
-    )
-    public void listenAINoti(EventRequest event) throws JsonProcessingException {
-        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(event);
-        System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
-        // Push message lên WebSocket topic "/topic/logging_notification"
-        notificationService.sendToWebSocket("/topic/logging_notification", json);
-    }
+//    @KafkaListener(
+//            topics = "ai-noti",
+//            groupId = "scorelens-group",
+//            containerFactory = "aiNotiKafkaListenerContainerFactory"
+//    )
+//    public void listenAINoti(EventRequest event) throws JsonProcessingException {
+//        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(event);
+//        System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
+//        // Push message lên WebSocket topic "/topic/logging_notification"
+//        notificationService.sendToWebSocket("/topic/logging_notification", json);
+//    }
 
     // tạo event mới và xác định shot event
     public void handlingEvent(EventRequest request) {
