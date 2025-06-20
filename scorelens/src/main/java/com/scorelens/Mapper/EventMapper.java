@@ -11,7 +11,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EventMapper {
 
+    @Mapping(source = "player.playerID", target = "playerID")
+    @Mapping(source = "gameSet.gameSetID", target = "gameSetID")
     EventResponse toEventResponse(Event event);
+
+    @Mapping(source = "playerID", target = "player.playerID")
+    @Mapping(source = "gameSetID", target = "gameSet.gameSetID")
     Event toEvent(EventResponse eventResponse);
 
     @Mapping(source = "playerID", target = "player.playerID")
