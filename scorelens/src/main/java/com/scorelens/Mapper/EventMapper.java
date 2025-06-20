@@ -17,6 +17,9 @@ public interface EventMapper {
     @Mapping(source = "playerID", target = "player.playerID")
     @Mapping(source = "gameSetID", target = "gameSet.gameSetID")
     Event toEventRequest(EventRequest eventRequest);
+
+    @Mapping(source = "player.playerID", target = "playerID")
+    @Mapping(source = "gameSet.gameSetID", target = "gameSetID")
     List<EventResponse> toEventResponses(List<Event> events);
 
 
