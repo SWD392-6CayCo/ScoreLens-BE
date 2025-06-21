@@ -36,6 +36,9 @@ public class BilliardTable {
     @Column(name = "status", length = 30)
     private TableStatus status;
 
+    @Column(name = "qrCode", length = 255)
+    private String qrCode;
+
     @Column(name = "isActive")
     private boolean isActive; //0: available, 1: unavailable
 

@@ -52,4 +52,3 @@ aws:
     region: ${AWS_REGION}
     bucket-name: ${AWS_BUCKET_NAME}
     folder-prefix: ${AWS_FOLDER_PREFIX}
-

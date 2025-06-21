@@ -14,6 +14,7 @@ public class BilliardTableResponse {
     private String name;
     private String description;
     private TableStatus status;
+    private String qrCode;
     private boolean isActive;
 //    private StoreResponse storeResponse;
     private String storeName;

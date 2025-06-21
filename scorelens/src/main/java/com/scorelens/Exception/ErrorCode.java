@@ -44,7 +44,10 @@ public enum ErrorCode {
     //-------------------------- ROUND  -----------------------------------
     ROUND_NOT_FOUND(1016, "Round not found", HttpStatus.NOT_FOUND),
     SET_NOT_FOUND(1016, "GameSet not found", HttpStatus.NOT_FOUND),
+    CREATE_TABLE_FAILED(1005, "Create table failed",HttpStatus.BAD_REQUEST),
 
+    //-------------------------- AWS S3 -----------------------------------
+    DELETE_FILE_FAILED(1005, "Delete file from s3 failed",HttpStatus.BAD_REQUEST),
 
     //-------------------------- PLAYER  -----------------------------------
     PLAYER_NOT_FOUND(1017, "Player not found", HttpStatus.NOT_FOUND),

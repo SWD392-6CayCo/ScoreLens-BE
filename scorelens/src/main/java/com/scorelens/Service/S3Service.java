@@ -1,5 +1,7 @@
 package com.scorelens.Service;
 
+import com.scorelens.Exception.AppException;
+import com.scorelens.Exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,7 +34,7 @@ public class S3Service {
     @Value("${aws.s3.folder-prefix}")
     private String folderPrefix;
 
-    // Helper: Add prefix to the key
+    // Add prefix to the key
     private String buildKey(String keyName) {
         return folderPrefix + "/" + keyName;
     }
@@ -45,6 +48,24 @@ public class S3Service {
             uuidFileName += "." + extension;
         }
         return uuidFileName;
+    }
+
+    //qr code: extension-> png, jpeg
+    public String generateUniqueFileName(String extension) {
+        String uuidFileName = UUID.randomUUID().toString();
+        if (extension != null && !extension.isEmpty()) {
+            uuidFileName += "." + extension;
+        }
+        return uuidFileName;
+    }
+
+    // key from url
+    private String extractKeyFromUrl(String url) {
+        int index = url.indexOf("qr/");
+        if (index == -1) {
+            throw new IllegalArgumentException("Invalid S3 URL format: " + url);
+        }
+        return url.substring(index);
     }
 
 
@@ -70,6 +91,28 @@ public class S3Service {
         }
     }
 
+    //Create - qr code: contentType: "image/png", extension: png
+    public String uploadFile(byte[] data, String contentType, String extension) {
+        try {
+
+            String keyName = buildKey(generateUniqueFileName(extension));
+            // Upload lên S3
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(keyName)
+                            .contentType(contentType)
+                            .build(),
+                    RequestBody.fromBytes(data)
+            );
+            // Trả public URL
+            return getFileUrl(keyName);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload file: " + e.getMessage());
+        }
+    }
+
+
     // Upload with specific key (used for update)
     public String uploadFile(String keyName, MultipartFile file) {
         try {
@@ -93,8 +136,6 @@ public class S3Service {
             throw new RuntimeException("Failed to upload file: " + e.getMessage());
         }
     }
-
-
 
     // Read - Get public URL for the file (if bucket is public)
     public String getFileUrl(String keyName) {
@@ -133,5 +174,23 @@ public class S3Service {
                 .map(S3Object::key)
                 .collect(Collectors.toList());
     }
+
+
+    public void deleteQrCodeFromS3(String qrCodeUrl, String tableID) {
+        if (qrCodeUrl == null || qrCodeUrl.isEmpty()) {
+            return;
+        }
+        try {
+            String s3Key = extractKeyFromUrl(qrCodeUrl);
+            String tmp = deleteFile(s3Key);
+            log.info("Successfully deleted file: {}", tmp);
+        } catch (Exception e) {
+            log.error("Failed to delete QR code from S3 for table {}: {}", tableID, e.getMessage());
+            //AppException để rollback transaction DB
+            throw new AppException(ErrorCode.DELETE_FILE_FAILED);
+        }
+    }
+
+
 }
 
