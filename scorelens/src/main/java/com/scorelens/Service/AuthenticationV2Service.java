@@ -169,13 +169,45 @@ public class AuthenticationV2Service implements IAuthenticationService {
         return signedJWT;
     }
 
-    public AuthTokens refreshTokenV2(RefreshV2Request request) throws ParseException, JOSEException {
-        SignedJWT signedJWT = verifyToken(request.getRefreshToken(), true);
+//    public AuthTokens refreshTokenV2(RefreshV2Request request) throws ParseException, JOSEException {
+//        SignedJWT signedJWT = verifyToken(request.getRefreshToken(), true);
+//
+//        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+//        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+//
+//        //Blacklist refresh token cũ
+//        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+//                .id(jti)
+//                .expiryTime(expiryTime)
+//                .build();
+//        invalidatedTokenRepository.save(invalidatedToken);
+//
+//        String email = signedJWT.getJWTClaimsSet().getSubject();
+//        AppUser user = staffRepo.findByEmail(email)
+//                .map(s -> (AppUser) s)
+//                .orElseGet(() -> customerRepo.findByEmail(email)
+//                        .map(c -> (AppUser) c)
+//                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST)));
+//
+//        String newAccessToken = generateTokenV2(user, VALID_DURATION);
+//        String newRefreshToken = generateTokenV2(user, REFRESHABLE_DURATION);
+//
+//        AuthenticationResponseDtoV2 responseDto = AuthenticationResponseDtoV2.builder()
+//                .authenticated(true)
+////                .accessToken(newAccessToken)
+////                .refreshToken(newRefreshToken)
+//                .build();
+//
+//        return new AuthTokens(responseDto, newAccessToken, newRefreshToken);
+//    }
+
+    public AuthTokens refreshTokenV2(String refreshToken) throws ParseException, JOSEException {
+        SignedJWT signedJWT = verifyToken(refreshToken, true);
 
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        //Blacklist refresh token cũ
+        // Blacklist token cũ
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                 .id(jti)
                 .expiryTime(expiryTime)
@@ -194,12 +226,11 @@ public class AuthenticationV2Service implements IAuthenticationService {
 
         AuthenticationResponseDtoV2 responseDto = AuthenticationResponseDtoV2.builder()
                 .authenticated(true)
-//                .accessToken(newAccessToken)
-//                .refreshToken(newRefreshToken)
                 .build();
 
         return new AuthTokens(responseDto, newAccessToken, newRefreshToken);
     }
+
 
     public AuthenticationResponseDto refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signJWT = verifyToken(request.getAccessToken(), true);
