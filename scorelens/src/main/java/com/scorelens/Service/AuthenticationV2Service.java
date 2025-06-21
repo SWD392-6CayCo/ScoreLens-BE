@@ -129,21 +129,23 @@ public class AuthenticationV2Service implements IAuthenticationService {
     }
 
     //--------------------------------------- LOGOUT -----------------------------------------------------------
-    public void logout(LogoutRequestDto request) throws ParseException, JOSEException {
-        try {
-            var signToken = verifyToken(request.getToken(), true);
+    public void logout(String accessToken, String refreshToken) throws ParseException, JOSEException {
+        blacklistToken(accessToken);
+        blacklistToken(refreshToken);
+    }
 
-            String jti = signToken.getJWTClaimsSet().getJWTID();
-            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+    private void blacklistToken(String token) throws ParseException, JOSEException {
+        SignedJWT signedJWT = verifyToken(token, true); // Dùng `true` để không check thời gian quá chặt
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
+        // Chỉ blacklist nếu chưa hết hạn
+        if (!invalidatedTokenRepository.existsById(jti)) {
             InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                     .id(jti)
                     .expiryTime(expiryTime)
                     .build();
-
             invalidatedTokenRepository.save(invalidatedToken);
-        } catch (AppException e){
-            log.info("Token is already expired");
         }
     }
 

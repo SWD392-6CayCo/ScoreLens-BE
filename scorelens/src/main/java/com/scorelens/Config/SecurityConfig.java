@@ -54,6 +54,12 @@ public class SecurityConfig {
             "/customers/all",
             "/staffs",
     };
+    private final String[] PERMISSION_ENDPOINTS = {
+            "/permissions/"
+    };
+    private final String[] ROLE_ENDPOINTS = {
+            "/roles/"
+    };
 
     @Autowired
     @Lazy
@@ -63,15 +69,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
+                .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "v*/teams/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/v*/billiardmatches").permitAll()
-                .requestMatchers(HttpMethod.GET, "/staffs").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.GET, "/customers/**").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.POST, "/customers/my-profile").hasRole("CUSTOMER")
+
                 .anyRequest().authenticated());
 
 //                .anyRequest().permitAll());

@@ -10,10 +10,12 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {RoleMapper.class})
 public interface StaffMapper {
     @Mapping(source = "manager", target = "manager")
+    @Mapping(source = "roles", target = "roles")
     StaffResponseDto toDto(Staff staff);
+
     List<StaffResponseDto> toDto(List<Staff> staffList);
 
     @Mapping(target = "manager", ignore = true)

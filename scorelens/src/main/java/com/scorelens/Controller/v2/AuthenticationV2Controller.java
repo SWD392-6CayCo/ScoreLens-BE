@@ -54,9 +54,11 @@ public class AuthenticationV2Controller {
     }
 
     @PostMapping("/logout")
-    ResponseObject logout(@RequestBody LogoutRequestDto request, HttpServletResponse response)
+    ResponseObject logout(@CookieValue("AccessToken") String accessToken,
+                          @CookieValue("RefreshToken") String refreshToken,
+                          HttpServletResponse response)
             throws ParseException, JOSEException {
-        authenticationService.logout(request);
+        authenticationService.logout(accessToken, refreshToken);
         tokenCookieManager.clearAuthCookies(response);
         return ResponseObject.builder()
                 .status(1000)

@@ -73,7 +73,9 @@ public class StaffService implements IStaffService {
     //    --------------------------------------------------------------------------
 
     //    ---------------------------- GET ALL -----------------------------------
+
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_STAFF_LIST')")
     public List<StaffResponseDto> getAllStaff() {
         List<Staff> staffList = staffRepository.findAll();
         if (staffList.isEmpty()) {
@@ -97,7 +99,7 @@ public class StaffService implements IStaffService {
     //    ---------------------------- CREATE STAFF-----------------------------------
     @Transactional
     @Override
-    @PreAuthorize("hasAuthority('CREATE_STAFF')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE_STAFF')")
     public StaffResponseDto createStaff(StaffCreateRequestDto staffCreateRequestDto) {
         Set<String> roles = staffCreateRequestDto.getRoles();
         String r = roles.stream().findFirst()
@@ -145,7 +147,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- UPDATE STAFF-----------------------------------
     @Override
-    @PostAuthorize("hasAuthority('UPDATE_STAFF') or returnObject.email == authentication.name")
+    @PostAuthorize("hasAuthority('UPDATE_STAFF_DETAIL') or returnObject.email == authentication.name")
         public StaffResponseDto updateStaff(String id, StaffUpdateRequestDto requestDto) {
         // Tìm nhân viên theo ID
         Staff existingStaff = staffRepository.findById(id).orElseThrow(
@@ -185,6 +187,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- DELETE STAFF-----------------------------------
     @Override
+    @PreAuthorize("hasAuthority('DELETE_STAFF')")
     public boolean deleteStaff(String id) {
         if(staffRepository.existsById(id)) {
             staffRepository.deleteById(id);
@@ -195,6 +198,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- BAN/UNBANED STAFF-----------------------------------
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_STAFF_STATUS')")
     public boolean updateStaffStatus(String id, String status) {
         boolean check = true;
         Staff c = staffRepository.findById(id).orElseThrow(
@@ -212,6 +216,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- UPDATE PASSWORD-----------------------------------
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_STAFF_PASSWORD')")
     public boolean updatePassword (String id, ChangePasswordRequestDto requestDto){
         boolean check = false;
         Staff s = staffRepository.findById(id).orElseThrow(

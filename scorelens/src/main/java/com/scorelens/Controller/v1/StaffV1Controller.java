@@ -80,7 +80,6 @@ public class StaffV1Controller {
     }
 
     //    ---------------------------------------- DELETE ------------------------------------------------
-    @PreAuthorize("hasAuthority('DELETE_STAFF')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseObject> deleteStaff(@PathVariable String id) {
         boolean deleted = staffService.deleteStaff(id);
