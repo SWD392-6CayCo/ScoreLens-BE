@@ -47,7 +47,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- GET ---------------------------------
     @Override
-    @PreAuthorize("hasAuthority('GET_USER_LIST')")
+    @PreAuthorize("hasAuthority('GET_CUSTOMER_LIST')")
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
         if(customers.isEmpty()){
@@ -57,7 +57,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    @PostAuthorize("returnObject.email == authentication.name")
+    @PreAuthorize("hasAuthority('GET_CUSTOMER_DETAIL')")
     public CustomerResponseDto findById(String id) {
                 Optional<Customer> optionalCus = customerRepo.findById(id);
         if (optionalCus.isEmpty()) {
@@ -73,6 +73,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @PostAuthorize("returnObject.email == authentication.name")
     public CustomerResponseDto getMyProfile() {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName(); //authentication.name là email
