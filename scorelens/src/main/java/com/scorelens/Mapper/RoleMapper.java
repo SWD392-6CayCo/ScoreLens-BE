@@ -8,9 +8,15 @@ import com.scorelens.Entity.Role;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.Set;
+
 @Mapper(componentModel = "spring")
 public interface RoleMapper {
     @Mapping(target = "permissions", ignore = true)
     Role toRole(RoleRequest request);
+
+    @Mapping(target = "permissions", ignore = true)
     RoleResponse toRoleResponse(Role role);
+
+    Set<RoleResponse> toRoleResponseSet(Set<Role> roles);
 }

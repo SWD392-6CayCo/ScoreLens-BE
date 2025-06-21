@@ -1,5 +1,6 @@
 package com.scorelens.Config;
 
+import com.google.api.Http;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.UserType;
 import org.apache.http.client.methods.HttpGet;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,9 +41,9 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-            "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout",
-            "/v*/auth/refresh",
-            "/v*/ping",
+            "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout", "/v*/auth/refresh",
+//            "/v*/",
+            "/v*/ping"
 
 
     };
@@ -52,6 +54,12 @@ public class SecurityConfig {
             "/customers/all",
             "/staffs",
     };
+    private final String[] PERMISSION_ENDPOINTS = {
+            "/permissions/"
+    };
+    private final String[] ROLE_ENDPOINTS = {
+            "/roles/"
+    };
 
     @Autowired
     @Lazy
@@ -61,12 +69,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.PUT, "/teams/*").permitAll()
-                
-                .requestMatchers(HttpMethod.GET, "/staffs/all").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.POST, "/staffs").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.GET, "/customers/**").hasAnyRole("ADMIN", "MANAGER")
-                .requestMatchers(HttpMethod.POST, "/customers/my-profile").hasRole("CUSTOMER")
+                .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
+                .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "v*/teams/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches").permitAll()
+
                 .anyRequest().authenticated());
 
 //                .anyRequest().permitAll());
@@ -77,7 +87,9 @@ public class SecurityConfig {
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
-        http.csrf(AbstractHttpConfigurer::disable);
+        http.csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults());
+
 
         return http.build();
     }

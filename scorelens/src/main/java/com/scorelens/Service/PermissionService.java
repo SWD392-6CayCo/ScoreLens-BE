@@ -33,4 +33,10 @@ public class PermissionService {
     public void delete(String permission){
         permissionRepository.deleteById(permission);
     }
+
+    public PermissionResponse getPermission(String permissionName) {
+        Permission permission = permissionRepository.findById(permissionName)
+                .orElseThrow(() -> new IllegalArgumentException("Permission not found"));
+        return permissionMapper.toPermissionResponse(permission);
+    }
 }

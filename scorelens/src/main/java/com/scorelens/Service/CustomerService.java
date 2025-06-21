@@ -47,7 +47,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- GET ---------------------------------
     @Override
-    @PreAuthorize("hasAuthority('GET_USER_LIST')")
+    @PreAuthorize("hasAuthority('GET_CUSTOMER_LIST')")
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
         if(customers.isEmpty()){
@@ -57,7 +57,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    @PostAuthorize("returnObject.email == authentication.name")
+    @PreAuthorize("hasAuthority('GET_CUSTOMER_DETAIL')")
     public CustomerResponseDto findById(String id) {
                 Optional<Customer> optionalCus = customerRepo.findById(id);
         if (optionalCus.isEmpty()) {
@@ -73,6 +73,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
+    @PostAuthorize("returnObject.email == authentication.name")
     public CustomerResponseDto getMyProfile() {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName(); //authentication.name là email
@@ -83,6 +84,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- DELETE ---------------------------------
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE_CUSTOMER')")
     public boolean deleteById(String id) {
         if(customerRepo.existsById(id)) {
             customerRepo.deleteById(id);
@@ -93,6 +95,9 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- UPDATE ---------------------------------
     @Override
+    @PostAuthorize("hasRole('ADMIN') " +
+            "or returnObject.email == authentication.name " +
+            "or hasAuthority('UPDATE_CUSTOMER_DETAIL')")
     public CustomerResponseDto updateCustomer(String id, CustomerUpdateRequestDto requestDto) {
         //Lấy ra Customer cần update
         Customer customer = customerRepo.findById(id).orElseThrow(
@@ -139,6 +144,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- UPDATE STATUS BANED/UNBANED ---------------------------------
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_CUSTOMER_STATUS')")
     public boolean updateCustomerStatus(String id, String status) {
         boolean check = true;
         Customer c = customerRepo.findById(id).orElseThrow(
@@ -155,6 +161,7 @@ public class CustomerService implements ICustomerService {
 
     //    ---------------------------- UPDATE PASSWORD-----------------------------------
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_CUSTOMER_PASSWORD')")
     public boolean updatePassword (String id, ChangePasswordRequestDto requestDto){
         boolean check = false;
         Customer c = customerRepo.findById(id).orElseThrow(

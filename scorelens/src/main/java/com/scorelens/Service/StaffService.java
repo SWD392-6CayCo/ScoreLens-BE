@@ -18,6 +18,7 @@ import com.scorelens.Repository.StaffRepository;
 import com.scorelens.Service.Interface.IStaffService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,9 +35,11 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Slf4j
 public class StaffService implements IStaffService {
     @Autowired
     StaffRepository staffRepository;
@@ -53,20 +56,26 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- GET BY ID -----------------------------------
     @Override
+    @PostAuthorize("hasAnyRole('ADMIN', 'MANAGER') or returnObject.email == authentication.name")
     public StaffResponseDto getStaffById(String id) {
         Optional<Staff> optionalStaff = staffRepository.findById(id);
         if (optionalStaff.isEmpty()) {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
         Staff staff = optionalStaff.get();
+        var responseDto = staffMapper.toDto(staff);
+                String returnObjectName = responseDto.getEmail(); // assuming getName() exists
+        String authenticatedName = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("returnObject.email = {}, authentication.name = {}", returnObjectName, authenticatedName);
 
-        return staffMapper.toDto(staff);
+        return responseDto;
     }
     //    --------------------------------------------------------------------------
 
     //    ---------------------------- GET ALL -----------------------------------
+
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_STAFF_LIST')")
     public List<StaffResponseDto> getAllStaff() {
         List<Staff> staffList = staffRepository.findAll();
         if (staffList.isEmpty()) {
@@ -90,17 +99,18 @@ public class StaffService implements IStaffService {
     //    ---------------------------- CREATE STAFF-----------------------------------
     @Transactional
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE_STAFF')")
     public StaffResponseDto createStaff(StaffCreateRequestDto staffCreateRequestDto) {
-        StaffRole role = staffCreateRequestDto.getRole();
+        Set<String> roles = staffCreateRequestDto.getRoles();
+        String r = roles.stream().findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("No role provided"));
+        boolean roleExists = roleRepository.existsById(r);
+        if (!roleExists) {
+            throw new IllegalArgumentException("Role " + r + " does not exist in the system.");
+        }
+        String prefix = r.substring(0, 2).toUpperCase();
 
-        String prefix = switch (role) {
-            case STAFF -> "S";
-            case MANAGER -> "M";
-            case ADMIN -> "A";
-            default -> throw new IllegalArgumentException("Invalid staff role");
-        };
-
-        // Lock row and increment
+//        // Lock row and increment
         IDSequence sequence = idSequenceRepository.findAndLockByRolePrefix(prefix);
         Long nextNumber = sequence.getLastNumber() + 1;
         sequence.setLastNumber(nextNumber);
@@ -128,8 +138,8 @@ public class StaffService implements IStaffService {
 
         //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
         staff.setPassword(passwordEncoder.encode(staffCreateRequestDto.getPassword()));
-        var roles = roleRepository.findAllById(staffCreateRequestDto.getRoles());
-        staff.setRoles(new HashSet<>(roles));
+        var roleList = roleRepository.findAllById(roles);
+        staff.setRoles(new HashSet<>(roleList));
         staffRepository.save(staff);
 
         return staffMapper.toDto(staffRepository.save(staff));
@@ -137,7 +147,8 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- UPDATE STAFF-----------------------------------
     @Override
-    public StaffResponseDto updateStaff(String id, StaffUpdateRequestDto requestDto) {
+    @PostAuthorize("hasAuthority('UPDATE_STAFF_DETAIL') or returnObject.email == authentication.name")
+        public StaffResponseDto updateStaff(String id, StaffUpdateRequestDto requestDto) {
         // Tìm nhân viên theo ID
         Staff existingStaff = staffRepository.findById(id).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXIST)
@@ -176,6 +187,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- DELETE STAFF-----------------------------------
     @Override
+    @PreAuthorize("hasAuthority('DELETE_STAFF')")
     public boolean deleteStaff(String id) {
         if(staffRepository.existsById(id)) {
             staffRepository.deleteById(id);
@@ -186,6 +198,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- BAN/UNBANED STAFF-----------------------------------
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_STAFF_STATUS')")
     public boolean updateStaffStatus(String id, String status) {
         boolean check = true;
         Staff c = staffRepository.findById(id).orElseThrow(
@@ -203,6 +216,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- UPDATE PASSWORD-----------------------------------
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_STAFF_PASSWORD')")
     public boolean updatePassword (String id, ChangePasswordRequestDto requestDto){
         boolean check = false;
         Staff s = staffRepository.findById(id).orElseThrow(

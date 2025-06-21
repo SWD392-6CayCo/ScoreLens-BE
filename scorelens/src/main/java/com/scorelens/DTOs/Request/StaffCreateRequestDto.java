@@ -50,7 +50,6 @@ public class StaffCreateRequestDto implements Serializable {
     @Size(min = 6, message = ValidationMessages.PASSWORD_LENGTH)
     String password;
 
-    StaffRole role;
     Set<String> roles;
     String managerID;
 }

@@ -50,12 +50,12 @@ public class Staff implements AppUser {
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "role", length = 20)
 //    StaffRole role; // STAFF, MANAGER, ADMIN
+    @ManyToMany
     @JoinTable(
             name = "staff_roles",
             joinColumns = @JoinColumn(name = "staff_staffID", referencedColumnName = "staffID"),
             inverseJoinColumns = @JoinColumn(name = "roles_name", referencedColumnName = "name")
     )
-    @ManyToMany
     Set<Role> roles;
 
     @Column(name = "createAt")
