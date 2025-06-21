@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IDSequence {
     @Id
-    @Column(name = "rolePrefix", length = 1)
+    @Column(name = "rolePrefix", length = 2)
     private String rolePrefix; // S, M, A
 
     @Column(name = "lastNumber", nullable = false)

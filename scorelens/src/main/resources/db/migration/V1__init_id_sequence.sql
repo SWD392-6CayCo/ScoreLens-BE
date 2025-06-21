@@ -1,7 +1,7 @@
 -- V1__init_id_sequence.sql
 
 CREATE TABLE IF NOT EXISTS IDSequence (
-    rolePrefix VARCHAR(1) PRIMARY KEY,
+    rolePrefix VARCHAR(2) PRIMARY KEY,
     lastNumber BIGINT NOT NULL
     );
 

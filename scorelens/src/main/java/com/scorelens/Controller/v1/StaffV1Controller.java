@@ -8,6 +8,7 @@ import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.StaffService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Tag(name = "Staff", description = "Quản lý Admin, Manager và Staff")
 @RestController
 @RequestMapping("v1/staffs")
@@ -25,7 +27,7 @@ public class StaffV1Controller {
     StaffService staffService;
 
     //    ---------------------------------------- GET ----------------------------------------
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAuthority('GET_STAFF_LIST')")
     @GetMapping()
     public ResponseObject getAllStaff() {
         List<StaffResponseDto> staffs = staffService.getAllStaff();
@@ -35,8 +37,6 @@ public class StaffV1Controller {
                 .message("Get all staffs successfully")
                 .build();
     }
-
-    @PostAuthorize("returnObject.email == authentication.name")
     @GetMapping("/{id}")
     public ResponseObject getStaffById(@PathVariable String id) {
         StaffResponseDto staff = staffService.getStaffById(id);
@@ -80,6 +80,7 @@ public class StaffV1Controller {
     }
 
     //    ---------------------------------------- DELETE ------------------------------------------------
+    @PreAuthorize("hasAuthority('DELETE_STAFF')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseObject> deleteStaff(@PathVariable String id) {
         boolean deleted = staffService.deleteStaff(id);
