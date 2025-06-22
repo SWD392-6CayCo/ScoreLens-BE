@@ -15,10 +15,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -57,9 +54,11 @@ public class AuthenticationV2Controller {
     }
 
     @PostMapping("/logout")
-    ResponseObject logout(@RequestBody LogoutRequestDto request, HttpServletResponse response)
+    ResponseObject logout(@CookieValue("AccessToken") String accessToken,
+                          @CookieValue("RefreshToken") String refreshToken,
+                          HttpServletResponse response)
             throws ParseException, JOSEException {
-        authenticationService.logout(request);
+        authenticationService.logout(accessToken, refreshToken);
         tokenCookieManager.clearAuthCookies(response);
         return ResponseObject.builder()
                 .status(1000)
@@ -77,10 +76,26 @@ public class AuthenticationV2Controller {
                 .build();
     }
 
+//    @PostMapping("/refresh")
+//    ResponseObject authenticate(@RequestBody RefreshV2Request request, HttpServletResponse response)
+//            throws ParseException, JOSEException {
+//        var result = authenticationService.refreshTokenV2(request);
+//
+//        tokenCookieManager.addAuthCookies(response, result.accessToken(), result.refreshToken());
+//
+//        return ResponseObject.builder()
+//                .status(1000)
+//                .data(result.responseDto())
+//                .message("Login successfully!!")
+//                .build();
+//    }
+
     @PostMapping("/refresh")
-    ResponseObject authenticate(@RequestBody RefreshV2Request request, HttpServletResponse response)
+    public ResponseObject authenticate(@CookieValue("RefreshToken") String refreshToken,
+                                       HttpServletResponse response)
             throws ParseException, JOSEException {
-        var result = authenticationService.refreshTokenV2(request);
+
+        var result = authenticationService.refreshTokenV2(refreshToken);
 
         tokenCookieManager.addAuthCookies(response, result.accessToken(), result.refreshToken());
 
@@ -90,5 +105,6 @@ public class AuthenticationV2Controller {
                 .message("Login successfully!!")
                 .build();
     }
+
 
 }

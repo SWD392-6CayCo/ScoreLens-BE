@@ -35,6 +35,15 @@ public class RoleV1Controller {
                 .build();
     }
 
+    @GetMapping("/{roleName}")
+    ResponseObject getRole(@PathVariable String roleName){
+        return ResponseObject.builder()
+                .status(1000)
+                .data(roleService.getRole(roleName))
+                .message("Roles retrieved successfully")
+                .build();
+    }
+
     @DeleteMapping("/{roleName}")
     ResponseObject delete(@PathVariable String roleName){
         roleService.delete(roleName);

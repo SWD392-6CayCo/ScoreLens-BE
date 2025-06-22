@@ -26,6 +26,15 @@ public class PermissionV1Controller {
                 .build();
     }
 
+    @GetMapping("/{permissionName}")
+    ResponseObject getPermission(@PathVariable("permissionName") String permissionName){
+        return ResponseObject.builder()
+                .status(1000)
+                .data(permissionService.getPermission(permissionName))
+                .message("Permission retrieved successfully")
+                .build();
+    }
+
     @GetMapping
     ResponseObject getAll(){
         return ResponseObject.builder()

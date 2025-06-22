@@ -87,7 +87,7 @@ public class KafkaListeners {
         shot.setPlayer(String.format("PLAYER %d", request.getPlayerID()));
         shot.setResult(result.name());
 
-//        gửi thông báo qua kafka bằng topic: shot_event
+//        gửi thông báo qua web socket bằng topic: shot_event
         messagingTemplate.convertAndSend("/topic/shot_event", shot);
     }
 

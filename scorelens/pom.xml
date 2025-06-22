@@ -46,7 +46,27 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
 
     <dependencies>
 
-<!--        real time chat-->
+<!--        Zxing: qrcode-->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+
+<!--        aws s3-->
+        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/s3 -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.31.68</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--        real time chat-->
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
