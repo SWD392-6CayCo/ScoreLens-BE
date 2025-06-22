@@ -1,11 +1,15 @@
 package com.scorelens.DTOs.Request;
 
+import com.scorelens.Enums.KafkaCode;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProducerRequest {
-    private String producerName;
-    private int playerID;
-    private int gameSetID;
+    private KafkaCode code;
+    private Object data;
 
 }

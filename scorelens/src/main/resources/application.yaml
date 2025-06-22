@@ -36,6 +36,15 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    # Producer config
+    producer:
+      retries: 3                             # Retry 3 lần nếu lỗi
+      properties:
+        retry.backoff.ms: 1000               # Thời gian giữa các lần retry
+        connections.max.idle.ms: 30000      # Idle connection timeout
+        max.block.ms: 5000                   # Block tối đa khi Kafka chưa sẵn sàng
+        request.timeout.ms: 3000             # Thời gian chờ broker trả lời
+      acks: all                               # Confirm tất cả broker nhận message
 springdoc:
   swagger-ui:
     enable: true

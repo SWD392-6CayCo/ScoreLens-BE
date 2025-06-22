@@ -2,11 +2,12 @@ package com.scorelens.Service.Consumer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scorelens.DTOs.Request.EventRequest;
-import com.scorelens.DTOs.Request.LogMessageRequest;
-import com.scorelens.DTOs.Request.ShotEvent;
+import com.scorelens.Config.KafKaHeartBeat;
+import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.EventResponse;
+import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Enums.ShotResult;
+import com.scorelens.Enums.WebSocketCode;
 import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.EventService;
 import com.scorelens.Service.NotificationService;
@@ -37,22 +38,24 @@ public class KafkaListeners {
 
     WebSocketService webSocketService;
 
+    KafKaHeartBeat kafkaHeartBeat;
+
     //nhận json message
     @KafkaListener(
             topicPartitions = @TopicPartition(
                     topic = "scorelens",
                     partitions = {"0"}
             ),
-            containerFactory = "jsonKafkaListenerContainerFactory"
+            containerFactory = "StringKafkaListenerContainerFactory"
     )
-    public void listenJson(LogMessageRequest message) {
+    public void listenJson(String message) {
         try {
-            String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(message);
-            System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
+            LogMessageRequest logMessage = mapper.readValue(message, LogMessageRequest.class);
+            System.out.println("Received JSON message via SSL KafkaListener:\n" + message);
             // Push message lên WebSocket topic "/topic/logging_notification"
-            webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), json);
+            webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), message);
             // lấy event
-            EventRequest event = message.getDetails();
+            EventRequest event = logMessage.getDetails();
             //tạo mới 1 event theo player và round
             EventResponse e = eventService.addEvent(event);
             log.info("New event is added: {}", e);
@@ -64,7 +67,24 @@ public class KafkaListeners {
     }
 
     // nhận heart beat từ fastapi
+    @KafkaListener(
+            topicPartitions = @TopicPartition(
+                    topic = "ping",
+                    partitions = {"0"}
+            ),
+            containerFactory = "StringKafkaListenerContainerFactory"
+    )
+    public void listenCommunication(String message) {
+        try {
+            ProducerRequest request = mapper.readValue(message, ProducerRequest.class);
+            System.out.println("Received Communication via SSL KafkaListener:\n" + message);
 
+            handlingKafkaCode(request.getCode());
+
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse ProducerRequest: {}", message, e);
+        }
+    }
 
     // tạo event mới và xác định shot event
     public void handlingEvent(EventRequest request) {
@@ -92,6 +112,28 @@ public class KafkaListeners {
 
 //        gửi thông báo qua web socket bằng topic: shot_event
         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue(), shot);
+    }
+
+    //xử lí enum KafkaCode
+    public void handlingKafkaCode(KafkaCode code){
+        try {
+            switch (code){
+                case RUNNING:
+                    kafkaHeartBeat.stop();
+                    kafkaHeartBeat.updateLastConfirmedTime();
+                    webSocketService.sendToWebSocket(
+                            "/topic/notification",
+                            new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
+                    );
+                    break;
+
+                default:
+                    System.out.println("Unknown code.");
+
+            }
+        } catch (IllegalArgumentException e){
+            System.out.println("Invalid KafkaCode: " + code);
+        }
     }
 
 

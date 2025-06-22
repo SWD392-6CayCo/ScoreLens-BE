@@ -2,6 +2,7 @@ package com.scorelens.Config;
 
 import com.scorelens.DTOs.Request.EventRequest;
 import com.scorelens.DTOs.Request.LogMessageRequest;
+import com.scorelens.DTOs.Request.ProducerRequest;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,8 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "scorelens-group");
         // deserializer cho key và value của kafka
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+//        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put("security.protocol", "SSL");
         props.put("ssl.truststore.location", "certs/client.truststore.jks");
@@ -39,27 +41,39 @@ public class KafkaConsumerConfig {
         return props;
     }
 
-//    ********************************           CONSUMER           ********************************************************
+//    ********************************           JsonCONSUMER           ********************************************************
 
-    //    ********************************json message********************************************************
+    //    //    ********************************json message********************************************************
+//    @Bean
+//    public ConsumerFactory<String, LogMessageRequest> jsonConsumerFactory() {
+//        Map<String, Object> props = commonKafkaSSLProps();
+//        JsonDeserializer<LogMessageRequest> deserializer = new JsonDeserializer<>(LogMessageRequest.class);
+//        deserializer.addTrustedPackages("*");
+//
+//        // type headers
+//        deserializer.setRemoveTypeHeaders(false);
+//        deserializer.setUseTypeMapperForKey(false);
+//        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+//    }
+//
+//
+//    @Bean
+//    public ConcurrentKafkaListenerContainerFactory<String, LogMessageRequest> jsonKafkaListenerContainerFactory() {
+//        ConcurrentKafkaListenerContainerFactory<String, LogMessageRequest> factory =
+//                new ConcurrentKafkaListenerContainerFactory<>();
+//        factory.setConsumerFactory(jsonConsumerFactory());
+//        return factory;
+//    }
     @Bean
-    public ConsumerFactory<String, LogMessageRequest> jsonConsumerFactory() {
-        Map<String, Object> props = commonKafkaSSLProps();
-        JsonDeserializer<LogMessageRequest> deserializer = new JsonDeserializer<>(LogMessageRequest.class);
-        deserializer.addTrustedPackages("*");
-
-        // type headers
-        deserializer.setRemoveTypeHeaders(false);
-        deserializer.setUseTypeMapperForKey(false);
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+    public ConsumerFactory<String, String> StringConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(commonKafkaSSLProps());
     }
 
-
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, LogMessageRequest> jsonKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, LogMessageRequest> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, String> StringKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(jsonConsumerFactory());
+        factory.setConsumerFactory(StringConsumerFactory());
         return factory;
     }
 
