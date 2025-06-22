@@ -7,8 +7,10 @@ import com.scorelens.DTOs.Request.LogMessageRequest;
 import com.scorelens.DTOs.Request.ShotEvent;
 import com.scorelens.DTOs.Response.EventResponse;
 import com.scorelens.Enums.ShotResult;
+import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.EventService;
 import com.scorelens.Service.NotificationService;
+import com.scorelens.Service.WebSocketService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,15 +31,13 @@ import java.time.LocalTime;
 @Slf4j
 public class KafkaListeners {
 
-    private final NotificationService notificationService;
-
-    private final ObjectMapper mapper = new ObjectMapper();
+    ObjectMapper mapper = new ObjectMapper();
 
     EventService eventService;
 
-    SimpMessagingTemplate messagingTemplate;
+    WebSocketService webSocketService;
 
-    // json message
+    //nhận json message
     @KafkaListener(
             topicPartitions = @TopicPartition(
                     topic = "scorelens",
@@ -50,18 +50,21 @@ public class KafkaListeners {
             String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(message);
             System.out.println("Received JSON message via SSL KafkaListener:\n" + json);
             // Push message lên WebSocket topic "/topic/logging_notification"
-            notificationService.sendToWebSocket("/topic/logging_notification", json);
+            webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), json);
             // lấy event
             EventRequest event = message.getDetails();
             //tạo mới 1 event theo player và round
             EventResponse e = eventService.addEvent(event);
-            log.info("New event is added: ", e);
+            log.info("New event is added: {}", e);
             //xử lí shot và gửi msg qua websocket
             handlingEvent(event);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
     }
+
+    // nhận heart beat từ fastapi
+
 
     // tạo event mới và xác định shot event
     public void handlingEvent(EventRequest request) {
@@ -88,7 +91,7 @@ public class KafkaListeners {
         shot.setResult(result.name());
 
 //        gửi thông báo qua web socket bằng topic: shot_event
-        messagingTemplate.convertAndSend("/topic/shot_event", shot);
+        webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue(), shot);
     }
 
 
