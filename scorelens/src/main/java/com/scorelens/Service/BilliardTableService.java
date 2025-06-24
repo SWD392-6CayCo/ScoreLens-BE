@@ -96,8 +96,7 @@ public class BilliardTableService implements IBilliardTableService {
         //thay đổi table code theo tên đã update
         billiardTable.setTableCode(generateID(request.getName()));
         billiardTableRepo.save(billiardTable);
-        BilliardTableResponse response = billiardTableMapper.toBilliardTableResponse(billiardTable);
-        return response;
+        return billiardTableMapper.toBilliardTableResponse(billiardTable);
     }
 
     @Override
@@ -106,8 +105,7 @@ public class BilliardTableService implements IBilliardTableService {
                 .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
         billiardTable.setStatus(TableStatus.valueOf(status));
         billiardTableRepo.save(billiardTable);
-        BilliardTableResponse response = billiardTableMapper.toBilliardTableResponse(billiardTable);
-        return response;
+        return billiardTableMapper.toBilliardTableResponse(billiardTable);
     }
 
 

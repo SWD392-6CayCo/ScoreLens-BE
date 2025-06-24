@@ -41,29 +41,6 @@ public class KafkaConsumerConfig {
         return props;
     }
 
-//    ********************************           JsonCONSUMER           ********************************************************
-
-    //    //    ********************************json message********************************************************
-//    @Bean
-//    public ConsumerFactory<String, LogMessageRequest> jsonConsumerFactory() {
-//        Map<String, Object> props = commonKafkaSSLProps();
-//        JsonDeserializer<LogMessageRequest> deserializer = new JsonDeserializer<>(LogMessageRequest.class);
-//        deserializer.addTrustedPackages("*");
-//
-//        // type headers
-//        deserializer.setRemoveTypeHeaders(false);
-//        deserializer.setUseTypeMapperForKey(false);
-//        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
-//    }
-//
-//
-//    @Bean
-//    public ConcurrentKafkaListenerContainerFactory<String, LogMessageRequest> jsonKafkaListenerContainerFactory() {
-//        ConcurrentKafkaListenerContainerFactory<String, LogMessageRequest> factory =
-//                new ConcurrentKafkaListenerContainerFactory<>();
-//        factory.setConsumerFactory(jsonConsumerFactory());
-//        return factory;
-//    }
     @Bean
     public ConsumerFactory<String, String> StringConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(commonKafkaSSLProps());

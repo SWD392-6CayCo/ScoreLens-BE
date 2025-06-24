@@ -38,8 +38,7 @@ public class StoreService implements IStoreService {
             throw new AppException(ErrorCode.STORE_EXIST);
         }
         Store store = storeMapper.toStore(storeRequest);
-        StoreResponse storeResponse = storeMapper.toStoreResponse(storeRepo.save(store));
-        return storeResponse;
+        return storeMapper.toStoreResponse(storeRepo.save(store));
     }
 
     @Override
@@ -62,8 +61,7 @@ public class StoreService implements IStoreService {
                 .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
         storeMapper.updateStore(updateStore, storeRequest);
         storeRepo.save(updateStore);
-        StoreResponse storeResponse = storeMapper.toStoreResponse(updateStore);
-        return storeResponse;
+        return storeMapper.toStoreResponse(updateStore);
     }
 
     @Override
@@ -72,8 +70,7 @@ public class StoreService implements IStoreService {
                 .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
         updateStore.setStatus(status);
         storeRepo.save(updateStore);
-        StoreResponse storeResponse = storeMapper.toStoreResponse(updateStore);
-        return storeResponse;
+        return storeMapper.toStoreResponse(updateStore);
     }
 
 
