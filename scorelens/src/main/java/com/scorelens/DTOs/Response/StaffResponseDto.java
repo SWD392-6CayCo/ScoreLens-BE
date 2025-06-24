@@ -41,4 +41,5 @@ public class StaffResponseDto implements Serializable {
     LocalDate updateAt;
     StatusType status;
     Staff manager;
+    StoreResponse store;
 }

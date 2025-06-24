@@ -101,7 +101,8 @@ class StaffServiceTest {
                 "Go Cong City",
                 StatusType.active,
                 Arrays.asList("ADMIN"),
-                null // managerID null
+                null, // managerID null
+                null  // storeID null
         );
         
         when(staffRepository.findById(staffId)).thenReturn(Optional.of(existingStaff));
@@ -136,7 +137,8 @@ class StaffServiceTest {
                 "Go Cong City",
                 StatusType.active,
                 Arrays.asList("ADMIN"),
-                managerId
+                managerId,
+                null // storeID null
         );
         
         when(staffRepository.findById(staffId)).thenReturn(Optional.of(existingStaff));
@@ -169,7 +171,8 @@ class StaffServiceTest {
                 "Go Cong City",
                 StatusType.active,
                 Arrays.asList("ADMIN"),
-                invalidManagerId
+                invalidManagerId,
+                null // storeID null
         );
         
         when(staffRepository.findById(staffId)).thenReturn(Optional.of(existingStaff));
