@@ -26,6 +26,11 @@ public class UserValidatorService implements IUserValidatorService {
 
     @Override
     public void validatePhoneUnique(String phone, String currentPhone){
+        // Nếu phone là null thì không cần validate
+        if (phone == null) {
+            return;
+        }
+
         boolean isPhoneTaken = (!phone.equals(currentPhone)) &&
                 (customerRepo.existsByPhoneNumber(phone) || staffRepo.existsByPhoneNumber(phone));
         if(isPhoneTaken){
@@ -39,7 +44,7 @@ public class UserValidatorService implements IUserValidatorService {
         if (customerRepo.existsByEmail(email) || staffRepo.existsByEmail(email)) {
             throw new AppException(ErrorCode.EMAIL_EXSITED);
         }
-        if (customerRepo.existsByPhoneNumber(phone) || staffRepo.existsByPhoneNumber(phone)) {
+        if (phone != null && (customerRepo.existsByPhoneNumber(phone) || staffRepo.existsByPhoneNumber(phone))) {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
     }

@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -31,6 +33,10 @@ public class Store {
     //bidirectional one to many
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BilliardTable> billiardTables = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+            , fetch = FetchType.LAZY)
+    private Set<Staff> staffs = new HashSet<>();
 
     // Helper method
     public void addTable(BilliardTable table) {

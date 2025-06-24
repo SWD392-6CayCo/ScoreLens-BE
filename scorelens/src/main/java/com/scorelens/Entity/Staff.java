@@ -68,6 +68,10 @@ public class Staff implements AppUser {
     @Column(name = "status", length = 10)
     StatusType status; // active, inactive
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storeid", nullable = false)
+    Store store;
+
     @Override
     public String getId() {
         return staffID;
