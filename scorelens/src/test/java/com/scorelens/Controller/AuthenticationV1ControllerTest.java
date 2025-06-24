@@ -49,14 +49,15 @@ public class AuthenticationV1ControllerTest {
 
         // Mock response
         CustomerResponseDto response = new CustomerResponseDto(
-                "test-id",
+                "",
                 "blackpro hehe",
                 "testRegis2@gmail.com",
                 null,
                 null,
                 LocalDate.now(),
                 null,
-                "normal"
+                "normal",
+                "active"
         );
 
         Mockito.when(customerService.createCustomer(any())).thenReturn(response);
@@ -94,7 +95,8 @@ public class AuthenticationV1ControllerTest {
                 LocalDate.of(2000, 1, 1),
                 LocalDate.now(),
                 null,
-                "normal"
+                "normal",
+                "active"
         );
 
         Mockito.when(customerService.createCustomer(any())).thenReturn(response);

@@ -167,6 +167,12 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
             <artifactId>mockito-inline</artifactId>
             <version>5.2.0</version> <scope>test</scope>
         </dependency>
+        <!-- H2 Database for testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!--        oauth2 resource server-->
         <!--        including nimbus-->
         <dependency>

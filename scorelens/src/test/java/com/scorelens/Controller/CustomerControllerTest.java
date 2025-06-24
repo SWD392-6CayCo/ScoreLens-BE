@@ -53,7 +53,8 @@ public class CustomerControllerTest {
                 null,
                 LocalDate.now(),
                 null,
-                "normal"
+                "normal",
+                "active"
         );
 
         Mockito.when(customerService.createCustomer(any())).thenReturn(response);
