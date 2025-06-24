@@ -17,11 +17,11 @@ public class Player {
     @Column(name = "playerID")
     private int playerID;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teamID", nullable = false)
     private Team team;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customerID")
     private Customer customer;
 

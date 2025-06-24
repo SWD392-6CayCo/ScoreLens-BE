@@ -146,14 +146,15 @@ public class BilliardMatchService implements IBilliardMatchService {
             teamRequest.setBilliardMatchID(match.getBilliardMatchID());
             teamRequest.setName(team.getName());
             teamRequest.setTotalMember(team.getTotalMember());
+            teamRequest.setMemberNames(team.getMemberNames());
             Team team1 = teamService.createTeam(teamRequest);
-            for (String name : team.getMemberNames()) {
-                PlayerCreateRequest playerCreateRequest = new PlayerCreateRequest();
-                playerCreateRequest.setName(name);
-                playerCreateRequest.setTeamID(team1.getTeamID());
-                Player player = playerService.createPlayer(playerCreateRequest);
-                team1.addPlayer(player);
-            }
+//            for (String name : team.getMemberNames()) {
+//                PlayerCreateRequest playerCreateRequest = new PlayerCreateRequest();
+//                playerCreateRequest.setName(name);
+//                playerCreateRequest.setTeamID(team1.getTeamID());
+//                Player player = playerService.createPlayer(playerCreateRequest);
+//                team1.addPlayer(player);
+//            }
             match.addTeam(team1);
         }
         return billiardMatchMapper.toBilliardMatchResponse(match);

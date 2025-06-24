@@ -1,7 +1,5 @@
 package com.scorelens.DTOs.Response;
 
-import com.scorelens.Entity.BilliardMatch;
-import com.scorelens.Entity.Player;
 import com.scorelens.Enums.ResultStatus;
 import lombok.Getter;
 import lombok.Setter;

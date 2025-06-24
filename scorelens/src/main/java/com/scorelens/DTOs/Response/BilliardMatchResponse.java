@@ -1,13 +1,9 @@
 package com.scorelens.DTOs.Response;
 
-import com.scorelens.Entity.BilliardTable;
-import com.scorelens.Entity.Customer;
-import com.scorelens.Entity.Mode;
-import com.scorelens.Entity.Staff;
-import com.scorelens.Enums.MatchStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.scorelens.Enums.MatchStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +20,7 @@ public class BilliardMatchResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer totalSet;
-    private String status;
+    private MatchStatus status;
     private String code;
 
     private List<GameSetResponse> sets;

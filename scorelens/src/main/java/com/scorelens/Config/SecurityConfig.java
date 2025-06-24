@@ -119,7 +119,9 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "https://localhost:5173",
+                "https://score-lens.vercel.app"
         ));
         //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
         corsConfiguration.setAllowCredentials(true);
