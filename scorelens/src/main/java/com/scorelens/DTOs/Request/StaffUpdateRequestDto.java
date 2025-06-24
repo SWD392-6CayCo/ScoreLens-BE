@@ -49,4 +49,5 @@ public class StaffUpdateRequestDto implements Serializable {
     List<String> roles;
 
     String managerID;
+    String storeID;
 }

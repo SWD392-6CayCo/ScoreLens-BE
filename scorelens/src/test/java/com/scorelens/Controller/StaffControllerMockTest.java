@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scorelens.Controller.v1.StaffV1Controller;
 import com.scorelens.DTOs.Request.StaffUpdateRequestDto;
 import com.scorelens.DTOs.Response.StaffResponseDto;
-import com.scorelens.DTOs.Response.StoreResponse;
+import com.scorelens.DTOs.Response.StoreBasicResponse;
+import com.scorelens.DTOs.Response.StaffBasicResponse;
 import com.scorelens.Enums.StatusType;
 import com.scorelens.Service.StaffService;
 import org.junit.jupiter.api.Test;
@@ -42,12 +43,13 @@ class StaffControllerMockTest {
     @WithMockUser(roles = "ADMIN")
     void testGetStaffByIdReturnsStore() throws Exception {
         // Given
-        StoreResponse storeResponse = new StoreResponse();
-        storeResponse.setStoreID("TEST_STORE");
-        storeResponse.setName("Test Store");
-        storeResponse.setAddress("Test Address");
-        storeResponse.setStatus("active");
-        storeResponse.setDescription("Test Description");
+        StoreBasicResponse storeResponse = new StoreBasicResponse(
+                "TEST_STORE",
+                "Test Store",
+                "Test Address",
+                "active",
+                "Test Description"
+        );
 
         StaffResponseDto staffResponse = new StaffResponseDto(
                 "TEST_STAFF",
@@ -86,12 +88,13 @@ class StaffControllerMockTest {
     @WithMockUser(roles = "ADMIN")
     void testUpdateStaffWithStore() throws Exception {
         // Given
-        StoreResponse storeResponse = new StoreResponse();
-        storeResponse.setStoreID("UPDATE_STORE");
-        storeResponse.setName("Update Store");
-        storeResponse.setAddress("Update Address");
-        storeResponse.setStatus("active");
-        storeResponse.setDescription("Update Description");
+        StoreBasicResponse storeResponse = new StoreBasicResponse(
+                "2358214f-af77-4a21-868f-b623d65bf61c",
+                "KAT Billiard",
+                "Quận 12, TPHCM",
+                "activate",
+                "KAT Billiard - place to play by your style"
+        );
 
         StaffResponseDto staffResponse = new StaffResponseDto(
                 "UPDATE_STAFF",
@@ -116,7 +119,8 @@ class StaffControllerMockTest {
                 "Updated Address",
                 StatusType.active,
                 Arrays.asList("STAFF"),
-                null
+                null, // managerID
+                "2358214f-af77-4a21-868f-b623d65bf61c" // storeID
         );
 
         when(staffService.updateStaff(eq("UPDATE_STAFF"), any(StaffUpdateRequestDto.class)))
@@ -133,8 +137,10 @@ class StaffControllerMockTest {
                 .andExpect(jsonPath("$.data.name").value("Updated Staff"))
                 .andExpect(jsonPath("$.data.email").value("updated@gmail.com"))
                 .andExpect(jsonPath("$.data.store").exists())
-                .andExpect(jsonPath("$.data.store.storeID").value("UPDATE_STORE"))
-                .andExpect(jsonPath("$.data.store.name").value("Update Store"));
+                .andExpect(jsonPath("$.data.store.storeID").value("2358214f-af77-4a21-868f-b623d65bf61c"))
+                .andExpect(jsonPath("$.data.store.name").value("KAT Billiard"))
+                .andExpect(jsonPath("$.data.store.address").value("Quận 12, TPHCM"))
+                .andExpect(jsonPath("$.data.store.status").value("activate"));
     }
 
     @Test

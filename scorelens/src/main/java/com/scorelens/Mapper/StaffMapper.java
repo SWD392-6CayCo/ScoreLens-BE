@@ -10,7 +10,7 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {RoleMapper.class, StoreMapper.class})
+@Mapper(componentModel = "spring", uses = {RoleMapper.class, StoreBasicMapper.class, StaffBasicMapper.class})
 public interface StaffMapper {
     @Mapping(source = "manager", target = "manager")
     @Mapping(source = "roles", target = "roles")

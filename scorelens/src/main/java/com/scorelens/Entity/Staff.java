@@ -69,7 +69,7 @@ public class Staff implements AppUser {
     StatusType status; // active, inactive
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "storeid", nullable = false)
+    @JoinColumn(name = "storeid", nullable = true)
     Store store;
 
     @Override

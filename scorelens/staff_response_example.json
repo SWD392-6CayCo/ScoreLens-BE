@@ -31,27 +31,17 @@
       "staffID": "MG0000001",
       "name": "Manager Name",
       "email": "manager@gmail.com",
-      "phoneNumber": "0123456789"
+      "phoneNumber": "0123456789",
+      "dob": "01-01-1980",
+      "address": "Manager Address",
+      "status": "active"
     },
     "store": {
       "storeID": "STORE001",
       "name": "Main Store",
       "address": "123 Main Street, Ho Chi Minh City",
       "status": "active",
-      "description": "Main billiard store location",
-      "billiardTables": [
-        {
-          "billardTableID": "TABLE001",
-          "tableCode": "T001",
-          "tableType": "POOL",
-          "name": "Pool Table 1",
-          "description": "Standard pool table",
-          "status": "AVAILABLE",
-          "qrCode": "https://example.com/qr/TABLE001",
-          "isActive": true,
-          "storeID": "STORE001"
-        }
-      ]
+      "description": "Main billiard store location"
     }
   }
 }
