@@ -2,10 +2,7 @@ package com.scorelens.Service;
 
 import com.scorelens.DTOs.Request.PlayerCreateRequest;
 import com.scorelens.DTOs.Request.PlayerUpdateRequest;
-import com.scorelens.DTOs.Request.TeamCreateRequest;
 import com.scorelens.DTOs.Response.PlayerResponse;
-import com.scorelens.DTOs.Response.TeamResponse;
-import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.Player;
 import com.scorelens.Entity.Team;
@@ -20,7 +17,6 @@ import com.scorelens.Service.Interface.IPlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

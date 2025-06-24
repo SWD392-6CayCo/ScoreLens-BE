@@ -1,13 +1,16 @@
 package com.scorelens.Service;
 
+import com.scorelens.DTOs.Request.PlayerCreateRequest;
 import com.scorelens.DTOs.Request.TeamCreateRequest;
 import com.scorelens.DTOs.Request.TeamUpdateRequest;
 import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Entity.BilliardMatch;
+import com.scorelens.Entity.Player;
 import com.scorelens.Entity.Team;
 import com.scorelens.Enums.ResultStatus;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
+import com.scorelens.Mapper.PlayerMapper;
 import com.scorelens.Mapper.TeamMapper;
 import com.scorelens.Repository.BilliardMatchRepository;
 import com.scorelens.Repository.TeamRepository;
@@ -23,9 +26,11 @@ public class TeamService implements ITeamService {
 
     @Autowired
     private TeamRepository teamRepository;
-
     @Autowired
     private BilliardMatchRepository matchRepository;
+
+    @Autowired
+    private PlayerService playerService;
 
     @Autowired
     TeamMapper teamMapper;
@@ -34,6 +39,11 @@ public class TeamService implements ITeamService {
     public TeamResponse getById(Integer id) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
+        for (Player p : team.getPlayers()) {
+            System.out.println("PlayerID: " + p.getPlayerID() + ", TeamID: " +
+                    (p.getTeam() != null ? p.getTeam().getTeamID() : "null"));
+        }
+
         return teamMapper.toTeamResponse(team);
     }
 
@@ -57,7 +67,15 @@ public class TeamService implements ITeamService {
         team.setCreateAt(LocalDateTime.now());
         team.setStatus(ResultStatus.draw);
         team.setBilliardMatch(match);
-
+        teamRepository.save(team);
+        for (String name : request.getMemberNames()) {
+            PlayerCreateRequest playerCreateRequest = new PlayerCreateRequest();
+            playerCreateRequest.setName(name);
+            playerCreateRequest.setTeamID(team.getTeamID());
+            Player player = playerService.createPlayer(playerCreateRequest);
+            player.setTeam(team);
+            team.addPlayer(player);
+        }
         return teamRepository.save(team);
     }
 
