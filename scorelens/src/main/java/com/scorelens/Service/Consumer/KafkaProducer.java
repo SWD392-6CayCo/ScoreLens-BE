@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +28,8 @@ public class KafkaProducer {
 
     private final KafKaHeartBeat kafKaHeartBeat;
 
-    private final String aiTopic = "ai-noti";
+//    @Value("${spring.kafka.producer.topic}")
+    private final String ja_to_py_topic = "ja_to_py";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -48,8 +48,8 @@ public class KafkaProducer {
         if (kafKaHeartBeat.isRunning()) {
             try {
                 String message = objectMapper.writeValueAsString(new ProducerRequest(KafkaCode.RUNNING, "Heart beat checking"));
-                kafkaTemplate.send(aiTopic, partition, null, message);
-                log.info("Sent kafka message: {} to topic: {}", message, aiTopic);
+                kafkaTemplate.send(ja_to_py_topic, partition, null, message);
+                log.info("Sent kafka message: {} to topic: {}", message, ja_to_py_topic);
 
                 webSocketService.sendToWebSocket(
                         "/topic/notification",

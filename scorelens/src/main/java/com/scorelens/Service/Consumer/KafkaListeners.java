@@ -22,7 +22,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 
-
 import java.time.LocalTime;
 
 
@@ -40,36 +39,10 @@ public class KafkaListeners {
 
     KafKaHeartBeat kafkaHeartBeat;
 
-    //nhận json message
+    // msg từ fastapi
     @KafkaListener(
             topicPartitions = @TopicPartition(
-                    topic = "scorelens",
-                    partitions = {"0"}
-            ),
-            containerFactory = "StringKafkaListenerContainerFactory"
-    )
-    public void listenJson(String message) {
-        try {
-            LogMessageRequest logMessage = mapper.readValue(message, LogMessageRequest.class);
-            System.out.println("Received JSON message via SSL KafkaListener:\n" + message);
-            // Push message lên WebSocket topic "/topic/logging_notification"
-            webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), message);
-            // lấy event
-            EventRequest event = logMessage.getDetails();
-            //tạo mới 1 event theo player và round
-            EventResponse e = eventService.addEvent(event);
-            log.info("New event is added: {}", e);
-            //xử lí shot và gửi msg qua websocket
-            handlingEvent(event);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // nhận heart beat từ fastapi
-    @KafkaListener(
-            topicPartitions = @TopicPartition(
-                    topic = "ping",
+                    topic = "py_to_ja",
                     partitions = {"0"}
             ),
             containerFactory = "StringKafkaListenerContainerFactory"
@@ -78,11 +51,59 @@ public class KafkaListeners {
         try {
             ProducerRequest request = mapper.readValue(message, ProducerRequest.class);
             System.out.println("Received Communication via SSL KafkaListener:\n" + message);
+            log.info("KafkaCode received: {}", request.getCode());
+            log.info("Data type: {}", request.getData().getClass());
 
-            handlingKafkaCode(request.getCode());
+            handlingKafkaCode(request);
 
         } catch (JsonProcessingException e) {
             log.error("Failed to parse ProducerRequest: {}", message, e);
+        }
+    }
+
+    //xử lí enum KafkaCode
+    private void handlingKafkaCode(ProducerRequest request) {
+        KafkaCode code = request.getCode();
+        try {
+            switch (code) {
+                case RUNNING:
+                    kafkaHeartBeat.stop();
+                    kafkaHeartBeat.updateLastConfirmedTime();
+                    webSocketService.sendToWebSocket(
+                            "/topic/notification",
+                            new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
+                    );
+                    break;
+                case LOGGING:
+                    try {
+                        // Convert data (LinkedHashMap) -> LogMessageRequest
+                        LogMessageRequest lmr = mapper.convertValue(request.getData(), LogMessageRequest.class);
+                        log.info("LogMessageRequest converted: {}", lmr);
+                        // Push message lên WebSocket topic "/topic/logging_notification"
+                        webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), request);
+                        // lấy event
+                        EventRequest event = lmr.getDetails();
+                        if (event != null) {
+                            //tạo mới 1 event theo player và round
+                            EventResponse e = eventService.addEvent(event);
+                            log.info("New event is added: {}", e);
+                            //xử lí shot và gửi msg qua websocket
+                            handlingEvent(event);
+                        } else {
+                            log.warn("No event details found in LogMessageRequest.");
+                        }
+                    } catch (Exception e) {
+                        log.error("Error while processing LOGGING message: {}", e.getMessage(), e);
+                    }
+                    break;
+
+
+                default:
+                    System.out.println("Unknown code.");
+
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid KafkaCode: " + code);
         }
     }
 
@@ -93,7 +114,7 @@ public class KafkaListeners {
         boolean isUncertain = request.isUncertain();
         //lấy ds event theo round để đếm số shot đã đánh
         int tmp = eventService.countEventsGameSetID(request.getGameSetID());
-        int shotCount = tmp == 0 ?  1 : tmp;
+        int shotCount = tmp == 0 ? 1 : tmp;
 
         ShotEvent shot = new ShotEvent();
         // nếu AI k chắc chắn => undetected
@@ -113,29 +134,6 @@ public class KafkaListeners {
 //        gửi thông báo qua web socket bằng topic: shot_event
         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue(), shot);
     }
-
-    //xử lí enum KafkaCode
-    public void handlingKafkaCode(KafkaCode code){
-        try {
-            switch (code){
-                case RUNNING:
-                    kafkaHeartBeat.stop();
-                    kafkaHeartBeat.updateLastConfirmedTime();
-                    webSocketService.sendToWebSocket(
-                            "/topic/notification",
-                            new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
-                    );
-                    break;
-
-                default:
-                    System.out.println("Unknown code.");
-
-            }
-        } catch (IllegalArgumentException e){
-            System.out.println("Invalid KafkaCode: " + code);
-        }
-    }
-
 
 
 }

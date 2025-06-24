@@ -38,6 +38,7 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     # Producer config
     producer:
+      topic: ai-noti
       retries: 3                             # Retry 3 lần nếu lỗi
       properties:
         retry.backoff.ms: 1000               # Thời gian giữa các lần retry
