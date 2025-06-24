@@ -128,7 +128,7 @@ public class StaffService implements IStaffService {
         staff.setCreateAt(LocalDate.now());
         staff.setStatus(StatusType.active);
 
-        if(staffCreateRequestDto.getManagerID() != null) {
+        if(staffCreateRequestDto.getManagerID() != null && !staffCreateRequestDto.getManagerID().trim().isEmpty()) {
             Staff manager = staffRepository.findById(staffCreateRequestDto.getManagerID())
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
             staff.setManager(manager);
@@ -151,7 +151,7 @@ public class StaffService implements IStaffService {
         public StaffResponseDto updateStaff(String id, StaffUpdateRequestDto requestDto) {
         // Tìm nhân viên theo ID
         Staff existingStaff = staffRepository.findById(id).orElseThrow(
-                () -> new AppException(ErrorCode.USER_NOT_EXIST)
+                () -> new AppException(ErrorCode.STAFF_NOT_EXIST)
         );
 
         // Kiểm tra Email & Phonenumber đã được dùng bởi người khác chưa
@@ -159,8 +159,11 @@ public class StaffService implements IStaffService {
         userValidatorService.validateEmailUnique(requestDto.getEmail(), existingStaff.getEmail());
 
         //Kiểm tra xem có managerID hay chưa
-        Staff manager = staffRepository.findById(requestDto.getManagerID())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+        Staff manager = null;
+        if (requestDto.getManagerID() != null && !requestDto.getManagerID().trim().isEmpty()) {
+            manager = staffRepository.findById(requestDto.getManagerID())
+                    .orElseThrow(() -> new AppException(ErrorCode.MANAGER_NOT_EXIST));
+        }
 
         staffMapper.updateStaff(existingStaff, requestDto);
 
@@ -178,10 +181,16 @@ public class StaffService implements IStaffService {
         existingStaff.setStatus(requestDto.getStatus());
         existingStaff.setDob(requestDto.getDob());
         existingStaff.setUpdateAt(LocalDate.now());
-        existingStaff.setManager(manager);
+
+        // Chỉ set manager khi manager không null
+        if (manager != null) {
+            existingStaff.setManager(manager);
+        } else {
+            existingStaff.setManager(null);
+        }
 
         // Lưu và trả về kết quả
-        //staffRepository.save(existingStaff);
+        staffRepository.save(existingStaff);
         return staffMapper.toDto(existingStaff);
     }
 

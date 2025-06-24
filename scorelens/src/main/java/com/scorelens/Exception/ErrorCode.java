@@ -22,6 +22,8 @@ public enum ErrorCode {
     INVALID_STATUS(1005, "Status must be active or inactive", HttpStatus.BAD_REQUEST),
     INVALID_DOB(1098, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     NAME_LENGTH(1097, "Name must be at least {min}", HttpStatus.BAD_REQUEST),
+    MANAGER_NOT_EXIST(1100, "Not found manager manage staff", HttpStatus.NOT_FOUND),
+    STAFF_NOT_EXIST(1101, "Staff not found", HttpStatus.NOT_FOUND),
     // USER PASSWORD
     NOT_MATCH_PASSWORD(1006, "Password do not match", HttpStatus.BAD_REQUEST),
     DUPLICATED_PASSWORD(1007, "New password is duplicated to old password", HttpStatus.CONFLICT),
@@ -66,7 +68,7 @@ public enum ErrorCode {
 
     TEAM_NOT_NULL(1023, "Team set up requires a list of teams", HttpStatus.BAD_REQUEST),
     ALL_NOT_NULL(1025, "Either staffID or customerID is not null", HttpStatus.BAD_REQUEST),
-    ALL_NOT_VALUE(1025, "Either staffID or customerID is not null", HttpStatus.BAD_REQUEST)
+    ALL_NOT_VALUE(1025, "Either staffID or customerID is not null", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

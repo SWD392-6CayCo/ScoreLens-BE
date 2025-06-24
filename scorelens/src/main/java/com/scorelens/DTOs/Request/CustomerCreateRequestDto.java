@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.scorelens.Constants.RegexConstants;
 import com.scorelens.Constants.ValidationMessages;
 import com.scorelens.Validation.DobConstraint;
+import com.scorelens.Validation.PhoneConstraint;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -27,11 +28,8 @@ public class CustomerCreateRequestDto implements Serializable {
             message = ValidationMessages.EMAIL_DOMAIN
     )
     private final String email;
-
-    @Pattern(
-            regexp = RegexConstants.VIETNAMESE_PHONE,
-            message = ValidationMessages.PHONE_FORMAT
-    )
+    
+    @PhoneConstraint(message = ValidationMessages.PHONE_FORMAT)
     private final String phoneNumber;
 
     @NotBlank(message = ValidationMessages.PASSWORD_REQUIRED)
