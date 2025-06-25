@@ -6,6 +6,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -15,6 +16,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class CookieJwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -78,7 +80,14 @@ public class CookieJwtAuthenticationFilter extends OncePerRequestFilter {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (TOKEN_COOKIE_NAME.equals(cookie.getName())) {
-                    return cookie.getValue();
+                    String value = cookie.getValue();
+                    // Kiểm tra cookie không null và không rỗng
+                    if (value != null && !value.trim().isEmpty()) {
+                        log.debug("Found AccessToken cookie with value: {}", value.substring(0, Math.min(10, value.length())) + "...");
+                        return value;
+                    } else {
+                        log.debug("Found AccessToken cookie but value is empty or null");
+                    }
                 }
             }
         }
