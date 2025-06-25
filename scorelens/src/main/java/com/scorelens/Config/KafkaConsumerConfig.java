@@ -1,17 +1,15 @@
 package com.scorelens.Config;
 
-import com.scorelens.DTOs.Request.EventRequest;
-import com.scorelens.DTOs.Request.LogMessageRequest;
-import com.scorelens.DTOs.Request.ProducerRequest;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,24 +18,42 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
+
+    @Value("${spring.kafka.ssl.trust-store-location}")
+    private String truststoreLocation;
+
+    @Value("${spring.kafka.ssl.trust-store-password}")
+    private String truststorePassword;
+
+    @Value("${spring.kafka.ssl.key-store-location}")
+    private String keystoreLocation;
+
+    @Value("${spring.kafka.ssl.key-store-password}")
+    private String keystorePassword;
+
+    @Value("${spring.kafka.ssl.key-password}")
+    private String keyPassword;
+
 //    *******************************kafka config************************************************************
 
     private Map<String, Object> commonKafkaSSLProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka-5c346d1-kafka-scorelens.f.aivencloud.com:26036");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "scorelens-group");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         // deserializer cho key và value của kafka
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 //        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put("security.protocol", "SSL");
-        props.put("ssl.truststore.location", "certs/client.truststore.jks");
-        props.put("ssl.truststore.password", "123456");
+        props.put("ssl.truststore.location", truststoreLocation);
+        props.put("ssl.truststore.password", truststorePassword);
         props.put("ssl.keystore.type", "PKCS12");
-        props.put("ssl.keystore.location", "certs/client.keystore.p12");
-        props.put("ssl.keystore.password", "123456");
-        props.put("ssl.key.password", "123456");
+        props.put("ssl.keystore.location", keystoreLocation);
+        props.put("ssl.keystore.password", keystorePassword);
+        props.put("ssl.key.password", keyPassword);
         return props;
     }
 

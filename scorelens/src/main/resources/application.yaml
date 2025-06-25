@@ -28,6 +28,7 @@ spring:
       key-store-location: ${KAFKA_KEYSTORE_LOCATION}
       key-store-password: ${KAFKA_KEYSTORE_PASSWORD}
       key-store-type: ${KAFKA_KEYSTORE_TYPE}
+      key-password: ${KAFKA_KEY_PASSWORD}
       trust-store-location: ${KAFKA_TRUSTSTORE_LOCATION}
       trust-store-password: ${KAFKA_TRUSTSTORE_PASSWORD}
       trust-store-type: ${KAFKA_TRUSTSTORE_TYPE}
