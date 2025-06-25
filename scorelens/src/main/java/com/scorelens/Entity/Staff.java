@@ -72,6 +72,9 @@ public class Staff implements AppUser {
     @JoinColumn(name = "storeid", nullable = true)
     Store store;
 
+    @Column(name = "imageUrl", length = 500)
+    String imageUrl; // URL của ảnh trên S3
+
     @Override
     public String getId() {
         return staffID;

@@ -29,4 +29,5 @@ public class CustomerResponseDto implements Serializable {
     private final LocalDate updateAt;
     private final String type;
     private final String status;
+    private final String imageUrl;
 }

@@ -40,4 +40,5 @@ public class StaffResponseDto implements Serializable {
     StatusType status;
     StaffBasicResponse manager;
     StoreBasicResponse store;
+    String imageUrl;
 }

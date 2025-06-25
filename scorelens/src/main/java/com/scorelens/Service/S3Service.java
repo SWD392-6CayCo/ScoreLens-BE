@@ -34,6 +34,9 @@ public class S3Service {
     @Value("${aws.s3.folder-prefix}")
     private String folderPrefix;
 
+    @Value("${aws.s3.avt-folder-prefix}")
+    private String avtFolderPrefix;
+
     // Add prefix to the key
     private String buildKey(String keyName) {
         return folderPrefix + "/" + keyName;
@@ -91,6 +94,38 @@ public class S3Service {
         }
     }
 
+    // Upload file with custom folder prefix
+    public String uploadFile(MultipartFile file, String customFolderPrefix) {
+        try {
+            // Generate unique filename
+            String fileName = generateUniqueFileName(file);
+            String keyName = customFolderPrefix + "/" + fileName;
+
+            // Upload to S3
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(keyName)
+                            .contentType(file.getContentType())
+                            .build(),
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
+            );
+
+            // Return public URL directly without buildKey()
+            return String.format("https://%s.s3.%s.amazonaws.com/%s",
+                    bucketName,
+                    region.id(),
+                    keyName);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file: " + e.getMessage());
+        }
+    }
+
+    // Upload customer avatar to 'avt' folder
+    public String uploadCustomerAvatar(MultipartFile file) {
+        return uploadFile(file, avtFolderPrefix);
+    }
+
     //Create - qr code: contentType: "image/png", extension: png
     public String uploadFile(byte[] data, String contentType, String extension) {
         try {
@@ -142,7 +177,7 @@ public class S3Service {
         return String.format("https://%s.s3.%s.amazonaws.com/%s",
                 bucketName,
                 region.id(),
-                keyName);
+                buildKey(keyName));
     }
 
     // Update - Overwrite the existing file by uploading a new one with the same key
