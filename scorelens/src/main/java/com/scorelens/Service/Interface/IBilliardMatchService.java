@@ -3,12 +3,8 @@ package com.scorelens.Service.Interface;
 
 import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
 import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
+import com.scorelens.DTOs.Request.ScoreRequest;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
-import com.scorelens.Entity.BilliardMatch;
-import com.scorelens.Entity.Customer;
-import com.scorelens.Entity.Player;
-import com.scorelens.Exception.AppException;
-import com.scorelens.Exception.ErrorCode;
 
 import java.util.List;
 
@@ -21,5 +17,8 @@ public interface IBilliardMatchService {
         List<BilliardMatchResponse> getByStaff(String id);
         BilliardMatchResponse getByPlayerID(Integer id);
         List<BilliardMatchResponse> getByCustomerID(String id);
+        BilliardMatchResponse updateScore(ScoreRequest request);
+        BilliardMatchResponse forfeit(Integer id, Integer teamID);
+        BilliardMatchResponse cancel(Integer id);
 
 }

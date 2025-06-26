@@ -60,6 +60,15 @@ public class GameSetV1Controller {
                         .build();
     }
 
+    @PutMapping("/cancel/{id}")
+    public ResponseObject updateSet(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Cancel GameSet sucessfully")
+                .data(gameSetService.cancel(id))
+                .build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseObject deleteSet(@PathVariable Integer id) {
         return ResponseObject.builder()

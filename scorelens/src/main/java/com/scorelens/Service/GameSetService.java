@@ -9,11 +9,13 @@ import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.GameSet;
 import com.scorelens.Entity.Team;
 import com.scorelens.Enums.MatchStatus;
+import com.scorelens.Enums.ResultStatus;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.GameSetMapper;
 import com.scorelens.Repository.BilliardMatchRepository;
 import com.scorelens.Repository.GameSetRepository;
+import com.scorelens.Repository.TeamRepository;
 import com.scorelens.Service.Interface.IGameSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,10 +28,17 @@ public class GameSetService implements IGameSetService {
 
     @Autowired
     private GameSetRepository gameSetRepository;
-
     @Autowired
     private BilliardMatchRepository matchRepository;
+    @Autowired
+    private TeamRepository teamRepository;
 
+    @Autowired
+    private TeamSetService tsService;
+
+
+    @Autowired
+    TeamSetService teamSetService;
     @Autowired
     private GameSetMapper gameSetMapper;
 
@@ -115,5 +124,22 @@ public class GameSetService implements IGameSetService {
             throw new AppException(ErrorCode.SET_NOT_FOUND);
         }
         gameSetRepository.deleteById(id);
+    }
+
+    @Override
+    public GameSetResponse cancel(Integer id) {
+        GameSet gameSet = gameSetRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
+        gameSet.setStatus(MatchStatus.cancelled);
+        gameSetRepository.save(gameSet);
+        return gameSetMapper.toGameSetResponse(gameSet);
+    }
+
+    public String completeSet(Integer id) {
+        GameSet gameSet = gameSetRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
+        gameSet.setStatus(MatchStatus.completed);
+        gameSetRepository.save(gameSet);
+        return "GameSet with ID " + id + " has been completed";
     }
 }
