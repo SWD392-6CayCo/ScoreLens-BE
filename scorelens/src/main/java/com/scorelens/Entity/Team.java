@@ -45,4 +45,12 @@ public class Team {
         players.add(player);
         player.setTeam(this);
     }
+
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TeamSet> tss = new ArrayList<>();
+
+    public void addTeamSet(TeamSet teamSet) {
+        tss.add(teamSet);
+        teamSet.setTeam(this);
+    }
 }

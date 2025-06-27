@@ -7,6 +7,7 @@ import com.scorelens.DTOs.Response.StaffResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.IDSequence;
 import com.scorelens.Entity.Staff;
+import com.scorelens.Entity.Store;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.StatusType;
 import com.scorelens.Exception.AppException;
@@ -15,6 +16,7 @@ import com.scorelens.Mapper.StaffMapper;
 import com.scorelens.Repository.IDSequenceRepository;
 import com.scorelens.Repository.RoleRepository;
 import com.scorelens.Repository.StaffRepository;
+import com.scorelens.Repository.StoreRepo;
 import com.scorelens.Service.Interface.IStaffService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -53,6 +55,8 @@ public class StaffService implements IStaffService {
     PasswordEncoder passwordEncoder;
     @Autowired
     UserValidatorService userValidatorService;
+    @Autowired
+    StoreRepo storeRepo;
 
     //    ---------------------------- GET BY ID -----------------------------------
     @Override
@@ -134,6 +138,13 @@ public class StaffService implements IStaffService {
             staff.setManager(manager);
         }
 
+        // Set store cho staff
+        if(staffCreateRequestDto.getStoreID() != null && !staffCreateRequestDto.getStoreID().trim().isEmpty()) {
+            Store store = storeRepo.findById(staffCreateRequestDto.getStoreID())
+                    .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
+            staff.setStore(store);
+        }
+
         //upload ảnh...
 
         //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
@@ -187,6 +198,17 @@ public class StaffService implements IStaffService {
             existingStaff.setManager(manager);
         } else {
             existingStaff.setManager(null);
+        }
+
+        // Xử lý store
+        if (requestDto.getStoreID() != null && !requestDto.getStoreID().trim().isEmpty()) {
+            Store store = storeRepo.findById(requestDto.getStoreID())
+                    .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
+            existingStaff.setStore(store);
+        } else {
+            // Nếu storeID là null hoặc empty, có thể giữ nguyên store hiện tại hoặc set null
+            // Tùy vào business logic, ở đây tôi sẽ giữ nguyên store hiện tại
+            // existingStaff.setStore(null); // Uncomment nếu muốn clear store
         }
 
         // Lưu và trả về kết quả

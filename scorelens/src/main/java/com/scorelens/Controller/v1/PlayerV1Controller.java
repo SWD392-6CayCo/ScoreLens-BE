@@ -54,8 +54,17 @@ public class PlayerV1Controller {
     public ResponseObject updatePlayer(@PathVariable Integer id, @RequestBody PlayerUpdateRequest request) {
         return ResponseObject.builder()
                 .status(1000)
-                .message("Update Team information successfully")
+                .message("Update Player information successfully")
                 .data(playerService.updatePlayer(id, request))
+                .build();
+    }
+
+    @PutMapping("/save/{id}")
+    public ResponseObject saveCustomer(@PathVariable Integer id, @RequestBody String info) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Update Player information successfully")
+                .data(playerService.updateCustomer(id, info))
                 .build();
     }
 

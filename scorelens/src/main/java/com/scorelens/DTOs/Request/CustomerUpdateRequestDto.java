@@ -40,4 +40,5 @@ public class CustomerUpdateRequestDto implements Serializable {
     LocalDate dob;
 
     String managerID;
+    String imageUrl;
 }

@@ -3,6 +3,7 @@ package com.scorelens.Controller.v1;
 import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
 import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
 import com.scorelens.DTOs.Request.GameSetCreateRequest;
+import com.scorelens.DTOs.Request.ScoreRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.BilliardMatchService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -88,6 +89,33 @@ public class BilliardMatchV1Controller {
                 .build();
     }
 
+    @PutMapping("/score")
+    public ResponseObject updateScore(@RequestBody ScoreRequest request) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Update score successfully")
+                .data(billiardMatchService.updateScore(request))
+                .build();
+    }
+
+    @PutMapping("/forfeit/{id}")
+    public ResponseObject forfeit(@PathVariable Integer id, @RequestBody Integer teamID) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Team with ID " + teamID + " has been forfeited")
+                .data(billiardMatchService.forfeit(id,teamID))
+                .build();
+    }
+
+    @PutMapping("/cancel/{id}")
+    public ResponseObject cancel(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Cancel Match successfully")
+                .data(billiardMatchService.cancel(id))
+                .build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseObject deleteMatch(@PathVariable Integer id) {
         return ResponseObject.builder()
@@ -95,6 +123,11 @@ public class BilliardMatchV1Controller {
                         .message("Match with ID " + id + " has been deleted")
                         .data(billiardMatchService.delete(id))
                         .build();
+    }
+
+    @DeleteMapping()
+    public void deleteAll() {
+        billiardMatchService.deleteAll();
     }
 }
 

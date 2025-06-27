@@ -52,4 +52,5 @@ public class StaffCreateRequestDto implements Serializable {
 
     Set<String> roles;
     String managerID;
+    String storeID;
 }

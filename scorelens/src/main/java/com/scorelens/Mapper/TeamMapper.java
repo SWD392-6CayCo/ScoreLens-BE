@@ -8,7 +8,7 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {PlayerMapper.class})
+@Mapper(componentModel = "spring", uses = {PlayerMapper.class, TeamSetMapper.class})
 public interface TeamMapper {
 
 //    @Mapping(target = "teamID", ignore = true)

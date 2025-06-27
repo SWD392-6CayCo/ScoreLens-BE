@@ -3,14 +3,12 @@ package com.scorelens.Mapper;
 import com.scorelens.DTOs.Request.GameSetCreateRequest;
 import com.scorelens.DTOs.Request.GameSetUpdateRequest;
 import com.scorelens.DTOs.Response.GameSetResponse;
-import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Entity.GameSet;
-import com.scorelens.Entity.Team;
 import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { TeamSetMapper.class })
 public interface GameSetMapper {
 
 //    @Mapping(target = "gameSetID", ignore = true)
