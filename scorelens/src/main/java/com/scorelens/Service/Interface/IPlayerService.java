@@ -14,13 +14,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IPlayerService {
-    public List<PlayerResponse> getAllPlayers();
-    public List<PlayerResponse> getByTeam(Integer id);
-    public PlayerResponse getPlayerById(int id);
+    List<PlayerResponse> getAllPlayers();
+    List<PlayerResponse> getByTeam(Integer id);
+    PlayerResponse getPlayerById(int id);
 
-    public Player createPlayer(PlayerCreateRequest request);
+    Player createPlayer(PlayerCreateRequest request);
 
-    public PlayerResponse updatePlayer(Integer id, PlayerUpdateRequest request);
-    public Integer delete(Integer id) ;
-    public void deletePlayer(int id) ;
+    PlayerResponse updatePlayer(Integer id, PlayerUpdateRequest request);
+    Integer delete(Integer id);
+    void deletePlayer(int id);
+    PlayerResponse updateCustomer(Integer id, String info);
+
 }

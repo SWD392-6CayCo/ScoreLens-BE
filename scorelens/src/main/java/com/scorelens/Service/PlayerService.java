@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.eclipse.collections.impl.block.factory.StringPredicates.matches;
+
 @Service
 public class PlayerService implements IPlayerService {
 
@@ -93,5 +95,23 @@ public class PlayerService implements IPlayerService {
     @Override
     public void deletePlayer(int id) {
         playerRepo.deleteById(id);
+    }
+
+    @Override
+    public PlayerResponse updateCustomer(Integer id, String info) {   // email or phone number
+        Player player = playerRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PLAYER_NOT_FOUND));
+        if (info.matches("\\d+")){
+            Customer c = customerRepo.findByPhoneNumber(info)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+            player.setCustomer(c);
+            player.setName(c.getName());
+        }else{
+            Customer c = customerRepo.findByEmail(info)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+            player.setCustomer(c);
+            player.setName(c.getName());
+        }
+        return playerMapper.toDto(playerRepo.save(player));
     }
 }

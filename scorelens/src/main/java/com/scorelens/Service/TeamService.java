@@ -1,6 +1,7 @@
 package com.scorelens.Service;
 
 import com.scorelens.DTOs.Request.PlayerCreateRequest;
+import com.scorelens.DTOs.Request.ScoreRequest;
 import com.scorelens.DTOs.Request.TeamCreateRequest;
 import com.scorelens.DTOs.Request.TeamUpdateRequest;
 import com.scorelens.DTOs.Response.TeamResponse;
@@ -13,6 +14,7 @@ import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.PlayerMapper;
 import com.scorelens.Mapper.TeamMapper;
 import com.scorelens.Repository.BilliardMatchRepository;
+import com.scorelens.Repository.PlayerRepo;
 import com.scorelens.Repository.TeamRepository;
 import com.scorelens.Service.Interface.ITeamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,8 @@ public class TeamService implements ITeamService {
     private TeamRepository teamRepository;
     @Autowired
     private BilliardMatchRepository matchRepository;
+    @Autowired
+    private PlayerRepo playerRepo;
 
     @Autowired
     private PlayerService playerService;
@@ -110,5 +114,13 @@ public class TeamService implements ITeamService {
             throw new AppException(ErrorCode.TEAM_NOT_FOUND);
         }
         teamRepository.deleteById(id);
+    }
+
+    public String scoreValue(Integer id) {
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
+        team.setTotalScore(team.getTotalScore() + 1);
+        teamRepository.save(team);
+        return "Team" + team.getName() + " has just scored";
     }
 }
