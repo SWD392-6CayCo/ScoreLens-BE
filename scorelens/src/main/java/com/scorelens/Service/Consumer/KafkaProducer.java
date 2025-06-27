@@ -73,6 +73,9 @@ public class KafkaProducer {
         }
     }
 
+    public void startStream(Object o){
+        sendEvent(new ProducerRequest(KafkaCode.START_STREAM, o));
+    }
 
 
 }

@@ -104,6 +104,8 @@ public class KafkaListeners {
                     webSocketService.sendToWebSocket(
                             "/topic/notification",
                             new WebsocketReq(WebSocketCode.WARNING, "Delete Event count: " + deleteCount));
+                    break;
+
 
 
 

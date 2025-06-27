@@ -6,5 +6,6 @@ public enum KafkaCode {
     DELETE_PLAYER,
     DELETE_GAME_SET,
     DELETE_CONFIRM,
+    START_STREAM,
 
 }
