@@ -1,8 +1,10 @@
 ### 🔸 Example JSON for InformationRequest
 ```json
 {
-  "code": "RUNNING",
+  "code": "START_STREAM",
   "data": {
+    "cameraUrl": "alskhjasdoifuwea",
+    "gameSetID": 82,
     "teams": [
       {
         "teamID": 0,
