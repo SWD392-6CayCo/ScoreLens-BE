@@ -1,5 +1,7 @@
 package com.scorelens.Controller.v1;
 
+
+import com.scorelens.DTOs.Request.InformationRequest;
 import com.scorelens.DTOs.Request.ProducerRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.Consumer.KafkaProducer;
@@ -19,15 +21,24 @@ import org.springframework.web.bind.annotation.*;
 public class KafkaProducerController {
 
     KafkaProducer kafkaProducer;
-    String topic = "ai-noti";
 
     @PostMapping("/send")
     public ResponseObject send(@RequestBody ProducerRequest request) {
-        kafkaProducer.sendEvent(topic, request);
+        kafkaProducer.sendEvent(request);
         return ResponseObject.builder()
                 .status(1000)
                 .message("Successfully sent message")
                 .build();
     }
+
+    @PostMapping("/send/information")
+    public ResponseObject sendInfomation(@RequestBody InformationRequest request) {
+        kafkaProducer.sendEvent(request);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Successfully sent message")
+                .build();
+    }
+
 
 }

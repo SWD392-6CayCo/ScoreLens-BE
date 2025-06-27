@@ -15,6 +15,7 @@ public class BilliardTableResponse {
     private String description;
     private TableStatus status;
     private String qrCode;
+    private String cameraUrl;
     private boolean isActive;
     private String storeID;
 }

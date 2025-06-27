@@ -12,6 +12,7 @@ public class BilliardTableRequest {
     private String name;
     private String description;
     private TableStatus status;
+    private String cameraUrl;
     private boolean isActive;
     private String storeID;
 }
