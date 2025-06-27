@@ -12,13 +12,15 @@ import java.util.List;
 @NoArgsConstructor
 public class InformationRequest {
 
-    KafkaCode code;
+    private KafkaCode code;
     private Information data;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Information {
+        private String cameraUrl;
+        private int gameSetID;
         private List<Team> teams;
     }
 
