@@ -50,6 +50,11 @@ public enum ErrorCode {
 
     //-------------------------- AWS S3 -----------------------------------
     DELETE_FILE_FAILED(1005, "Delete file from s3 failed",HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_FAILED(1026, "File upload failed", HttpStatus.BAD_REQUEST),
+    FILE_DELETE_FAILED(1027, "File delete failed", HttpStatus.BAD_REQUEST),
+    FILE_EMPTY(1028, "File is empty", HttpStatus.BAD_REQUEST),
+    FILE_TOO_LARGE(1029, "File size exceeds maximum limit (5MB)", HttpStatus.BAD_REQUEST),
+    INVALID_FILE_TYPE(1030, "Invalid file type. Only images are allowed", HttpStatus.BAD_REQUEST),
 
     //-------------------------- PLAYER  -----------------------------------
     PLAYER_NOT_FOUND(1017, "Player not found", HttpStatus.NOT_FOUND),

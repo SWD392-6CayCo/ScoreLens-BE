@@ -1,0 +1,47 @@
+{
+  "status": 1000,
+  "message": "Staff found",
+  "data": {
+    "staffID": "ST0000001",
+    "name": "Blackpro",
+    "email": "blackpro2k4@gmail.com",
+    "phoneNumber": "0344017063",
+    "dob": "26-10-2004",
+    "address": "Go Cong City",
+    "roles": [
+      {
+        "name": "ADMIN",
+        "description": "Administrator role",
+        "permissions": [
+          {
+            "name": "CREATE_STAFF",
+            "description": "Permission to create staff"
+          },
+          {
+            "name": "UPDATE_STAFF",
+            "description": "Permission to update staff"
+          }
+        ]
+      }
+    ],
+    "createAt": "24-06-2025",
+    "updateAt": "24-06-2025",
+    "status": "active",
+    "manager": {
+      "staffID": "MG0000001",
+      "name": "Manager Name",
+      "email": "manager@gmail.com",
+      "phoneNumber": "0123456789",
+      "dob": "01-01-1980",
+      "address": "Manager Address",
+      "status": "active"
+    },
+    "store": {
+      "storeID": "STORE001",
+      "name": "Main Store",
+      "address": "123 Main Street, Ho Chi Minh City",
+      "status": "active",
+      "description": "Main billiard store location"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "createStaffRequest": {
+    "name": "Test Staff",
+    "email": "teststaff@gmail.com",
+    "phoneNumber": "0123456789",
+    "dob": "01-01-1990",
+    "address": "Test Address",
+    "password": "123456",
+    "roles": ["STAFF"],
+    "managerID": null,
+    "storeID": "2358214f-af77-4a21-868f-b623d65bf61c"
+  },
+  "updateStaffRequest": {
+    "name": "Updated Staff",
+    "email": "updatedstaff@gmail.com",
+    "phoneNumber": "0987654321",
+    "dob": "15-05-1995",
+    "address": "Updated Address",
+    "status": "active",
+    "roles": ["ADMIN"],
+    "managerID": null,
+    "storeID": "2358214f-af77-4a21-868f-b623d65bf61c"
+  },
+  "expectedResponse": {
+    "status": 1000,
+    "message": "Success",
+    "data": {
+      "staffID": "ST0000001",
+      "name": "Test Staff",
+      "email": "teststaff@gmail.com",
+      "phoneNumber": "0123456789",
+      "dob": "01-01-1990",
+      "address": "Test Address",
+      "roles": [
+        {
+          "name": "STAFF",
+          "description": "Staff role"
+        }
+      ],
+      "createAt": "24-06-2025",
+      "updateAt": "24-06-2025",
+      "status": "active",
+      "manager": null,
+      "store": {
+        "storeID": "2358214f-af77-4a21-868f-b623d65bf61c",
+        "name": "KAT Billiard",
+        "address": "Quận 12, TPHCM",
+        "status": "activate",
+        "description": "KAT Billiard - place to play by your style"
+      }
+    }
+  }
+}

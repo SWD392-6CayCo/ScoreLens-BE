@@ -60,6 +60,9 @@ public class Customer implements AppUser {
     @Column(name = "status", length = 10)
     StatusType status; //active, inactive
 
+    @Column(name = "imageUrl", length = 500)
+    String imageUrl; // URL của ảnh trên S3
+
     @Override
     public String getId() {
         return customerID;
