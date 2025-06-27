@@ -69,6 +69,8 @@ public enum ErrorCode {
     TEAM_NOT_NULL(1023, "Team set up requires a list of teams", HttpStatus.BAD_REQUEST),
     ALL_NOT_NULL(1025, "Either staffID or customerID is not null", HttpStatus.BAD_REQUEST),
     ALL_NOT_VALUE(1025, "Either staffID or customerID is not null", HttpStatus.BAD_REQUEST),
+
+    KAFKA_SEND_FAILED(1005, "Send kafka message failed", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

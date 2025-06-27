@@ -9,12 +9,15 @@ import com.scorelens.Mapper.EventMapper;
 import com.scorelens.Repository.EventRepo;
 import com.scorelens.Repository.GameSetRepository;
 import com.scorelens.Repository.PlayerRepo;
+import com.scorelens.Service.Consumer.KafkaProducer;
 import com.scorelens.Service.Interface.IEventService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,17 +27,15 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventService implements IEventService {
 
-    @Autowired
     EventRepo eventRepo;
 
-    @Autowired
     EventMapper eventMapper;
 
-    @Autowired
     GameSetRepository gameSetRepo;
 
-    @Autowired
     PlayerRepo playerRepo;
+
+    KafkaProducer kafkaProducer;
 
 
     @Override
@@ -81,6 +82,11 @@ public class EventService implements IEventService {
         if (events.isEmpty())
             throw new AppException(ErrorCode.NULL_EVENT_PLAYERID);
         eventRepo.deleteAll(events);
+        try {
+            kafkaProducer.deleteEventByPlayer(playerID);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.KAFKA_SEND_FAILED);
+        }
         return true;
     }
 
@@ -90,6 +96,11 @@ public class EventService implements IEventService {
         if (events.isEmpty())
             throw new AppException(ErrorCode.NULL_EVENT_GAMESETID);
         eventRepo.deleteAll(events);
+        try {
+            kafkaProducer.deleteEventByGameSet(gameSetID);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.KAFKA_SEND_FAILED);
+        }
         return true;
     }
 

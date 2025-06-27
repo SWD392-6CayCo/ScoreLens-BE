@@ -34,10 +34,19 @@ public class KafkaProducer {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void sendEvent(String topic, Object object) {
-        kafkaTemplate.send(topic, partition, null, object);
+
+    public void sendEvent(Object object) {
+        kafkaTemplate.send(ja_to_py_topic, partition, null, object);
         kafkaTemplate.flush();
-        log.info("Sending message: {}", object);
+        log.info("Sent kafka message: {} to topic: {}", object, ja_to_py_topic);
+    }
+
+    public void deleteEventByPlayer(Object object) {
+        sendEvent(new ProducerRequest(KafkaCode.DELETE_PLAYER, object));
+    }
+
+    public void deleteEventByGameSet(Object object) {
+        sendEvent(new ProducerRequest(KafkaCode.DELETE_GAME_SET, object));
     }
 
     //cứ mỗi 10s, hàm sẽ run 1 lần
@@ -48,9 +57,7 @@ public class KafkaProducer {
         if (kafKaHeartBeat.isRunning()) {
             try {
                 String message = objectMapper.writeValueAsString(new ProducerRequest(KafkaCode.RUNNING, "Heart beat checking"));
-                kafkaTemplate.send(ja_to_py_topic, partition, null, message);
-                log.info("Sent kafka message: {} to topic: {}", message, ja_to_py_topic);
-
+                sendEvent(message);
                 webSocketService.sendToWebSocket(
                         "/topic/notification",
                         new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")

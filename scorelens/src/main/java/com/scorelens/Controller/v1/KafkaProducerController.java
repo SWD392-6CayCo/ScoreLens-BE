@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.*;
 public class KafkaProducerController {
 
     KafkaProducer kafkaProducer;
-    String topic = "ai-noti";
 
     @PostMapping("/send")
     public ResponseObject send(@RequestBody ProducerRequest request) {
-        kafkaProducer.sendEvent(topic, request);
+        kafkaProducer.sendEvent(request);
         return ResponseObject.builder()
                 .status(1000)
                 .message("Successfully sent message")

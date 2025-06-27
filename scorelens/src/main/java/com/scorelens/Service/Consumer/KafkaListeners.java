@@ -18,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -47,22 +48,23 @@ public class KafkaListeners {
             ),
             containerFactory = "StringKafkaListenerContainerFactory"
     )
-    public void listenCommunication(String message) {
+    public void listenCommunication(String message, Acknowledgment ack) {
         try {
             ProducerRequest request = mapper.readValue(message, ProducerRequest.class);
             System.out.println("Received Communication via SSL KafkaListener:\n" + message);
             log.info("KafkaCode received: {}", request.getCode());
             log.info("Data type: {}", request.getData().getClass());
 
-            handlingKafkaCode(request);
+            handlingKafkaCode(request, ack);
 
+            ack.acknowledge(); // commit offset sau khi xử lý xong
         } catch (JsonProcessingException e) {
             log.error("Failed to parse ProducerRequest: {}", message, e);
         }
     }
 
     //xử lí enum KafkaCode
-    private void handlingKafkaCode(ProducerRequest request) {
+    private void handlingKafkaCode(ProducerRequest request, Acknowledgment ack) {
         KafkaCode code = request.getCode();
         try {
             switch (code) {
@@ -78,13 +80,14 @@ public class KafkaListeners {
                     try {
                         // Convert data (LinkedHashMap) -> LogMessageRequest
                         LogMessageRequest lmr = mapper.convertValue(request.getData(), LogMessageRequest.class);
+                        ack.acknowledge(); // commit offset sau khi xử lý xong
                         log.info("LogMessageRequest converted: {}", lmr);
                         // Push message lên WebSocket topic "/topic/logging_notification"
                         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), request);
                         // lấy event
                         EventRequest event = lmr.getDetails();
                         if (event != null) {
-                            //tạo mới 1 event theo player và round
+                            //tạo mới 1 event theo player và gameset
                             EventResponse e = eventService.addEvent(event);
                             log.info("New event is added: {}", e);
                             //xử lí shot và gửi msg qua websocket
@@ -96,6 +99,12 @@ public class KafkaListeners {
                         log.error("Error while processing LOGGING message: {}", e.getMessage(), e);
                     }
                     break;
+                case DELETE_CONFIRM:
+                    int deleteCount = (Integer) request.getData();
+                    webSocketService.sendToWebSocket(
+                            "/topic/notification",
+                            new WebsocketReq(WebSocketCode.WARNING, "Delete Event count: " + deleteCount));
+
 
 
                 default:
@@ -107,12 +116,12 @@ public class KafkaListeners {
         }
     }
 
-    // tạo event mới và xác định shot event
+    // xác định shot event
     public void handlingEvent(EventRequest request) {
         boolean isFoul = request.isFoul();
         boolean scoreValue = request.isScoreValue();
         boolean isUncertain = request.isUncertain();
-        //lấy ds event theo round để đếm số shot đã đánh
+        //lấy ds event theo gameset để đếm số shot đã đánh
         int tmp = eventService.countEventsGameSetID(request.getGameSetID());
         int shotCount = tmp == 0 ? 1 : tmp;
 
