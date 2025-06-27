@@ -11,6 +11,8 @@ import com.scorelens.Repository.TeamSetRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -43,5 +45,15 @@ public class TeamSetService {
         TeamSet ts = teamSetRepo.findByGameSetAndTeam(gs,t);
         ts.setTotalScore(score);
         return teamSetRepo.save(ts);
+    }
+
+    public List<Integer> deleteBySet(int gameSetID) {
+        List<TeamSet> tss = teamSetRepo.findByGameSet_GameSetID(gameSetID);
+        List<Integer> ids = new ArrayList<Integer>();
+        for (TeamSet ts : tss) {
+            teamSetRepo.deleteById(ts.getTeamSetID());
+            ids.add(ts.getTeamSetID());
+        }
+        return ids;
     }
 }

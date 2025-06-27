@@ -98,7 +98,6 @@ public class GameSetService implements IGameSetService {
 
         gameSet.setRaceTo(request.getRaceTo());
         gameSet.setWinner(request.getWinner());
-        gameSet.setEndTime(LocalDateTime.now());
         if(request.getStatus().equals(MatchStatus.ongoing)) {
             gameSet.setStatus(MatchStatus.ongoing);
         }else if(request.getStatus().equals(MatchStatus.completed)) {
@@ -135,11 +134,22 @@ public class GameSetService implements IGameSetService {
         return gameSetMapper.toGameSetResponse(gameSet);
     }
 
-    public String completeSet(Integer id) {
+//    public String completeSet(Integer id) {
+//        GameSet gameSet = gameSetRepository.findById(id)
+//                .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
+//        gameSet.setStatus(MatchStatus.completed);
+//        gameSetRepository.save(gameSet);
+//        return "GameSet with ID " + id + " has been completed";
+//    }
+
+    public String startSet(int id){
         GameSet gameSet = gameSetRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
-        gameSet.setStatus(MatchStatus.completed);
+        gameSet.setStartTime(LocalDateTime.now());
+        gameSet.setStatus(MatchStatus.ongoing);
         gameSetRepository.save(gameSet);
-        return "GameSet with ID " + id + " has been completed";
+        return "GameSet no " + gameSet.getGameSetNo() + " has been started";
     }
+
+
 }

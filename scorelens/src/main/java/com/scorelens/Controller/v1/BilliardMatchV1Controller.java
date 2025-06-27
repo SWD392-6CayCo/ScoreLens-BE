@@ -124,5 +124,10 @@ public class BilliardMatchV1Controller {
                         .data(billiardMatchService.delete(id))
                         .build();
     }
+
+    @DeleteMapping()
+    public void deleteAll() {
+        billiardMatchService.deleteAll();
+    }
 }
 

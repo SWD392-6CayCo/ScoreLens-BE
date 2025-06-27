@@ -20,5 +20,6 @@ public interface IBilliardMatchService {
         BilliardMatchResponse updateScore(ScoreRequest request);
         BilliardMatchResponse forfeit(Integer id, Integer teamID);
         BilliardMatchResponse cancel(Integer id);
+        void deleteAll();
 
 }

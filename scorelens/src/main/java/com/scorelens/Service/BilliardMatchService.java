@@ -186,13 +186,25 @@ public class BilliardMatchService implements IBilliardMatchService {
             throw new AppException(ErrorCode.MATCH_NOT_FOUND);
         }
         for(GameSet set : setRepo.findByBilliardMatch_BilliardMatchID(id)){
+            teamSetService.deleteBySet(set.getGameSetID());
             setService.deleteByMatch(set.getGameSetID());
         }
         for(Team team : teamRepo.findByBilliardMatch_BilliardMatchID(id)){
+            for(Player player : team.getPlayers()){
+                playerService.deletePlayer(player.getPlayerID());
+            }
             teamService.deleteByMatch(team.getTeamID());
         }
         repository.deleteById(id);
         return id;
+    }
+
+    @Override
+    public void deleteAll(){
+        List<BilliardMatch> matchs = repository.findAll();
+        for (BilliardMatch match : matchs) {
+            delete(match.getBilliardMatchID());
+        }
     }
 
     @Override
@@ -335,13 +347,22 @@ public class BilliardMatchService implements IBilliardMatchService {
                     .findFirst()
                     .orElseThrow();
 
-            // set total current set
+            // set current set
             teamSetService.updateTeamSet(winningTeam.getTeamID(), currentSet.getGameSetID(), winningTeam.getTotalScore());
+            currentSet.setStatus(MatchStatus.forfeited);
+            currentSet.setEndTime(LocalDateTime.now());
+            currentSet.setWinner(winningTeam.getName());
+            setRepo.save(currentSet);
 
             // update score cac set chua dau = raceTo
             for (GameSet set : match.getSets()) {
                 if (set.getStatus() == MatchStatus.pending) {
+                    set.setStatus(MatchStatus.forfeited);
+                    set.setStartTime(LocalDateTime.now());
+                    set.setEndTime(LocalDateTime.now());
+                    set.setWinner(winningTeam.getName());
                     teamSetService.updateTeamSet(winningTeam.getTeamID(), set.getGameSetID(), set.getRaceTo());
+                    setRepo.save(set);
                 }
             }
 
