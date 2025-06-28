@@ -105,6 +105,13 @@ public class KafkaProducer {
         info.setSets(gsList);
 
         //map team and player
+        List<InformationRequest.Team> teamList = getTeamList(response);
+        info.setTeams(teamList);
+        req.setData(info);
+        return req;
+    }
+
+    private static List<InformationRequest.Team> getTeamList(BilliardMatchResponse response) {
         List<InformationRequest.Team> teamList = new ArrayList<>();
 
         for (TeamResponse t : response.getTeams()) {
@@ -120,9 +127,7 @@ public class KafkaProducer {
             tmp.setPlayers(player);
             teamList.add(tmp);
         }
-        info.setTeams(teamList);
-        req.setData(info);
-        return req;
+        return teamList;
     }
 
 
