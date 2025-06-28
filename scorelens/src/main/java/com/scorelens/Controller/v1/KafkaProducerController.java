@@ -33,7 +33,7 @@ public class KafkaProducerController {
     }
 
     @PostMapping("/send/information")
-    public ResponseObject sendInfomation(@RequestBody InformationRequest request) {
+    public ResponseObject sendInformation(@RequestBody InformationRequest request) {
         kafkaProducer.sendEvent(request);
         return ResponseObject.builder()
                 .status(1000)

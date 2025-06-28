@@ -20,8 +20,15 @@ public class InformationRequest {
     @NoArgsConstructor
     public static class Information {
         private String cameraUrl;
-        private int gameSetID;
+        private List<GameSet> sets;
         private List<Team> teams;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class GameSet{
+        private int gameSetID;
     }
 
     @Data

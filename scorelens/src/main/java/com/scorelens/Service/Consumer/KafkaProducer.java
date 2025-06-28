@@ -4,16 +4,25 @@ package com.scorelens.Service.Consumer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scorelens.Config.KafKaHeartBeat;
+import com.scorelens.DTOs.Request.InformationRequest;
 import com.scorelens.DTOs.Request.ProducerRequest;
 import com.scorelens.DTOs.Request.WebsocketReq;
+import com.scorelens.DTOs.Response.BilliardMatchResponse;
+import com.scorelens.DTOs.Response.GameSetResponse;
+import com.scorelens.DTOs.Response.PlayerResponse;
+import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Enums.WebSocketCode;
+import com.scorelens.Service.BilliardTableService;
 import com.scorelens.Service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +37,14 @@ public class KafkaProducer {
 
     private final KafKaHeartBeat kafKaHeartBeat;
 
-//    @Value("${spring.kafka.producer.topic}")
+    //    @Value("${spring.kafka.producer.topic}")
     private final String ja_to_py_topic = "ja_to_py";
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private BilliardTableService billiardTableService;
 
 
     public void sendEvent(Object object) {
@@ -73,8 +85,44 @@ public class KafkaProducer {
         }
     }
 
-    public void startStream(Object o){
-        sendEvent(new ProducerRequest(KafkaCode.START_STREAM, o));
+    // gửi thông tin qua python
+    public InformationRequest sendToPy(BilliardMatchResponse response) {
+        InformationRequest req = new InformationRequest();
+        req.setCode(KafkaCode.START_STREAM);
+
+        //set camera url
+        InformationRequest.Information info = new InformationRequest.Information();
+        String cameraUrl = billiardTableService.findBilliardTableById(response.getBilliardTableID()).getCameraUrl();
+        info.setCameraUrl(cameraUrl);
+
+        //map game set
+        List<InformationRequest.GameSet> gsList = new ArrayList<>();
+        for (GameSetResponse g : response.getSets()) {
+            InformationRequest.GameSet gs = new InformationRequest.GameSet();
+            gs.setGameSetID(g.getGameSetID());
+            gsList.add(gs);
+        }
+        info.setSets(gsList);
+
+        //map team and player
+        List<InformationRequest.Team> teamList = new ArrayList<>();
+
+        for (TeamResponse t : response.getTeams()) {
+            InformationRequest.Team tmp = new InformationRequest.Team();
+            tmp.setTeamID(t.getTeamID());
+
+            List<InformationRequest.Player> player = new ArrayList<>();
+            for (PlayerResponse p : t.getPlayers()) {
+                InformationRequest.Player tmpP = new InformationRequest.Player();
+                tmpP.setPlayerID(p.getPlayerID());
+                player.add(tmpP);
+            }
+            tmp.setPlayers(player);
+            teamList.add(tmp);
+        }
+        info.setTeams(teamList);
+        req.setData(info);
+        return req;
     }
 
 

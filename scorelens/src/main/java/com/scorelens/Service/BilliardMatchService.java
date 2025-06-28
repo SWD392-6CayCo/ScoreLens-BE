@@ -9,6 +9,7 @@ import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.BilliardMatchMapper;
 import com.scorelens.Repository.*;
+import com.scorelens.Service.Consumer.KafkaProducer;
 import com.scorelens.Service.Interface.IBilliardMatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,9 @@ public class BilliardMatchService implements IBilliardMatchService {
 
     @Autowired
     BilliardMatchMapper billiardMatchMapper;
+
+    @Autowired
+    KafkaProducer producer;
 
     @Override
     public BilliardMatchResponse getById(Integer id) {
@@ -156,7 +160,13 @@ public class BilliardMatchService implements IBilliardMatchService {
                 gs.addTeamSet(tss);
             }
         }
-        return billiardMatchMapper.toBilliardMatchResponse(match);
+        BilliardMatchResponse response = billiardMatchMapper.toBilliardMatchResponse(match);
+
+        //gửi thông tin trận đấu cho py
+        InformationRequest req = producer.sendToPy(response);
+        producer.sendEvent(req);
+
+        return response;
     }
 
     private String generateRandomCode() {
