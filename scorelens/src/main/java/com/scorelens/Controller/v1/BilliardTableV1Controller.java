@@ -3,6 +3,7 @@ package com.scorelens.Controller.v1;
 import com.scorelens.DTOs.Request.BilliardTableRequest;
 import com.scorelens.DTOs.Response.StoreResponse;
 import com.scorelens.Entity.ResponseObject;
+import com.scorelens.Enums.TableStatus;
 import com.scorelens.Service.BilliardTableService;
 import com.scorelens.Service.StoreService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,7 +64,7 @@ public class BilliardTableV1Controller {
     }
 
     @PutMapping("/status/{id}")
-    public ResponseObject updateTableStatus(@PathVariable String id, @RequestParam String status) {
+    public ResponseObject updateTableStatus(@PathVariable String id, @RequestParam TableStatus status) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Table is updated")

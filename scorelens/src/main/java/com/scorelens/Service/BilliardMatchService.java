@@ -53,6 +53,9 @@ public class BilliardMatchService implements IBilliardMatchService {
     @Autowired
     KafkaProducer producer;
 
+    @Autowired
+    BilliardTableService billiardTableService;
+
     @Override
     public BilliardMatchResponse getById(Integer id) {
         BilliardMatch match = repository.findById(id)
@@ -165,6 +168,9 @@ public class BilliardMatchService implements IBilliardMatchService {
         //gửi thông tin trận đấu cho py
         InformationRequest req = producer.sendToPy(response);
         producer.sendEvent(req);
+
+        //set table status: inUse
+        billiardTableService.setInUse(String.valueOf(match.getBilliardMatchID()));
 
         return response;
     }
@@ -406,6 +412,8 @@ public class BilliardMatchService implements IBilliardMatchService {
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         match.setStatus(MatchStatus.cancelled);
         repository.save(match);
+        //free table
+        billiardTableService.setAvailable(String.valueOf(match.getBilliardMatchID()));
         return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 
@@ -414,6 +422,8 @@ public class BilliardMatchService implements IBilliardMatchService {
         BilliardMatch match = repository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         match.setStatus(MatchStatus.completed);
+        //free table
+        billiardTableService.setAvailable(String.valueOf(match.getBilliardMatchID()));
         repository.save(match);
         return "Match with ID " + id + " has been completed";
     }
