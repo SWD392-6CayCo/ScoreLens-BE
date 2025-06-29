@@ -1,6 +1,5 @@
 package com.scorelens.DTOs.Response;
 
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,10 +8,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectResponseDto {
-    boolean valid;
-//    boolean isAuth;
-//    String userID;
-//    String username;
-//    String role;
+public class IntrospectV2ResponseDto {
+    boolean isAuth;
+    String userID;
+    String username;
+    String role;
 }
