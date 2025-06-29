@@ -42,12 +42,10 @@ public class BilliardTableV2Controller {
         //add match to table when table is in use
         for (BilliardTableResponse table : response) {
             if (table.getStatus().equals(TableStatus.inUse)) {
-                List<BilliardMatchResponse> inUseRS = billiardMatchService.getByTableID(table.getBillardTableID());
-                for (BilliardMatchResponse match : inUseRS) {
-                    if (match.getStatus().equals(MatchStatus.ongoing)) {
-                        table.setMatchResponse(match);
-                    }
-
+                BilliardMatchResponse tmp =
+                        billiardMatchService.getOnGoingMatch(table.getBillardTableID());
+                if (tmp != null) {
+                    table.setMatchResponse(tmp);
                 }
             }
         }

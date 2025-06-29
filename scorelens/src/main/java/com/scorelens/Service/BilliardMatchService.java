@@ -57,6 +57,12 @@ public class BilliardMatchService implements IBilliardMatchService {
         return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 
+    public BilliardMatchResponse getOnGoingMatch(String billiardTableID){
+        return billiardMatchMapper.toBilliardMatchResponse(
+                repository.findByTableAndOngoing(billiardTableID)
+        );
+    }
+
     public List<BilliardMatchResponse> getByTableID(String tableID) {
         List<BilliardMatch> matchs = repository.findAllByBillardTable_BillardTableID(tableID);
         if (matchs.isEmpty()) {

@@ -45,4 +45,8 @@ public interface BilliardMatchRepository extends JpaRepository<BilliardMatch, In
 //    List<BilliardMatch> findByCustomerId(@Param("id") String id);
 
     List<BilliardMatch> findAllByBillardTable_BillardTableID(String billardTableID);
+
+    @Query("SELECT m FROM BilliardMatch m WHERE m.billardTable.billardTableID = :tableId AND m.status = 'ongoing'")
+    BilliardMatch findByTableAndOngoing(@Param("tableId") String tableId);
+
 }
