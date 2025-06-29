@@ -31,6 +31,7 @@ public class BilliardMatchV1Controller {
 
     KafkaProducer producer;
 
+
     @GetMapping("/{id}")
     public ResponseObject getById(@PathVariable Integer id) {
         return ResponseObject.builder()
@@ -79,9 +80,11 @@ public class BilliardMatchV1Controller {
     @PostMapping
     public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
         BilliardMatchResponse response = billiardMatchService.createMatch(request);
+        //cam ai check
+        producer.sendHeartbeat();
 
         //gửi thông tin trận đấu cho py
-        InformationRequest req = producer.sendToPy(response);
+        InformationRequest req = producer.receiveInfomation(response);
         producer.sendEvent(req);
 
         //set table status: inUse

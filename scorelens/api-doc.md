@@ -3,8 +3,15 @@
 {
   "code": "START_STREAM",
   "data": {
-    "cameraUrl": "alskhjasdoifuwea",
-    "gameSetID": 82,
+    "cameraUrl": "rtsp://192.168.1.100/stream",
+    "sets": [
+      {
+        "gameSetID": 1
+      },
+      {
+        "gameSetID": 2
+      }
+    ],
     "teams": [
       {
         "teamID": 0,
@@ -12,6 +19,10 @@
           {
             "playerID": 0,
             "name": "Player A"
+          },
+          {
+            "playerID": 1,
+            "name": "Player B"
           }
         ]
       },
@@ -19,12 +30,17 @@
         "teamID": 1,
         "players": [
           {
-            "playerID": 1,
-            "name": "Player B"
+            "playerID": 2,
+            "name": "Player C"
+          },
+          {
+            "playerID": 3,
+            "name": "Player D"
           }
         ]
       }
     ]
   }
 }
+
 

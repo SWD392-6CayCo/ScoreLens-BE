@@ -57,18 +57,12 @@ public class BilliardMatchService implements IBilliardMatchService {
         return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 
+    @Override
     public BilliardMatchResponse getOnGoingMatch(String billiardTableID){
+        //k check null, neu null thi van tra ve null
         return billiardMatchMapper.toBilliardMatchResponse(
                 repository.findByTableAndOngoing(billiardTableID)
         );
-    }
-
-    public List<BilliardMatchResponse> getByTableID(String tableID) {
-        List<BilliardMatch> matchs = repository.findAllByBillardTable_BillardTableID(tableID);
-        if (matchs.isEmpty()) {
-            throw new AppException(ErrorCode.MATCH_NOT_FOUND);
-        }
-        return billiardMatchMapper.toBilliardMatchResponses(matchs);
     }
 
     @Override
@@ -171,11 +165,7 @@ public class BilliardMatchService implements IBilliardMatchService {
                 gs.addTeamSet(tss);
             }
         }
-        BilliardMatchResponse response = billiardMatchMapper.toBilliardMatchResponse(match);
-
-
-
-        return response;
+        return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 
     private String generateRandomCode() {
