@@ -21,5 +21,7 @@ public interface IBilliardMatchService {
         BilliardMatchResponse forfeit(Integer id, Integer teamID);
         BilliardMatchResponse cancel(Integer id);
         void deleteAll();
+        String completeMatch(Integer id);
+        BilliardMatchResponse getOnGoingMatch(String billiardTableID);
 
 }

@@ -86,7 +86,7 @@ public class KafkaProducer {
     }
 
     // gửi thông tin qua python
-    public InformationRequest sendToPy(BilliardMatchResponse response) {
+    public InformationRequest receiveInfomation(BilliardMatchResponse response) {
         InformationRequest req = new InformationRequest();
         req.setCode(KafkaCode.START_STREAM);
 

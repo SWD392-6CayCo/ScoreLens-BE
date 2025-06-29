@@ -1,6 +1,7 @@
 package com.scorelens.Service;
 
 import com.scorelens.DTOs.Request.BilliardTableRequest;
+import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.DTOs.Response.BilliardTableResponse;
 import com.scorelens.Entity.BilliardTable;
 import com.scorelens.Entity.Store;
@@ -143,8 +144,9 @@ public class BilliardTableService implements IBilliardTableService {
     @Override
     public List<BilliardTableResponse> getTablesByStore(String storeID) {
         List<BilliardTable> list = billiardTableRepo.findAllByStore_StoreID(storeID);
+        List<BilliardTableResponse> response = billiardTableMapper.toBilliardTableResponsesList(list);
         if (list.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
-        return billiardTableMapper.toBilliardTableResponsesList(list);
+        return response;
     }
 
 
