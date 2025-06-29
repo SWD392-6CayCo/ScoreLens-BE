@@ -395,6 +395,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
                         .userID(null)
                         .username(null)
                         .role(null)
+                        .userType(null)
                         .build();
             }
 
@@ -411,6 +412,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
                         .userID(null)
                         .username(null)
                         .role(null)
+                        .userType(null)
                         .build();
             }
 
@@ -424,11 +426,15 @@ public class AuthenticationV2Service implements IAuthenticationService {
             // Extract role from scope (e.g., "ROLE_ADMIN DELETE_CUSTOMER..." -> "ADMIN")
             String role = extractRoleFromScope(scope);
 
+            // Determine userType based on userID or find user in database
+            UserType userType = determineUserType(userID);
+
             return IntrospectV2ResponseDto.builder()
                     .isAuth(true)
                     .userID(userID)
                     .username(username)
                     .role(role)
+                    .userType(userType)
                     .build();
 
         } catch (Exception e) {
@@ -437,6 +443,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
                     .userID(null)
                     .username(null)
                     .role(null)
+                    .userType(null)
                     .build();
         }
     }
@@ -458,6 +465,28 @@ public class AuthenticationV2Service implements IAuthenticationService {
                 // Remove "ROLE_" prefix and return the role
                 return part.substring(5); // "ROLE_ADMIN" -> "ADMIN"
             }
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine user type based on userID
+     * Check if userID exists in Customer or Staff table
+     */
+    private UserType determineUserType(String userID) {
+        if (userID == null || userID.isEmpty()) {
+            return null;
+        }
+
+        // Check if user exists in Customer table
+        if (customerRepo.findById(userID).isPresent()) {
+            return UserType.CUSTOMER;
+        }
+
+        // Check if user exists in Staff table
+        if (staffRepo.findById(userID).isPresent()) {
+            return UserType.STAFF;
         }
 
         return null;

@@ -1,5 +1,6 @@
 package com.scorelens.DTOs.Response;
 
+import com.scorelens.Enums.UserType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,4 +14,5 @@ public class IntrospectV2ResponseDto {
     String userID;
     String username;
     String role;
+    UserType userType;
 }
