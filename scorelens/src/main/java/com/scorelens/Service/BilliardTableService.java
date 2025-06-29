@@ -100,12 +100,27 @@ public class BilliardTableService implements IBilliardTableService {
     }
 
     @Override
-    public BilliardTableResponse updateBilliardTable(String billiardTableID, String status) {
+    public BilliardTableResponse updateBilliardTable(String billiardTableID, TableStatus status) {
         BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)
                 .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
-        billiardTable.setStatus(TableStatus.valueOf(status));
+        billiardTable.setStatus(status);
         billiardTableRepo.save(billiardTable);
         return billiardTableMapper.toBilliardTableResponse(billiardTable);
+    }
+
+    @Override
+    public void setInUse(String billiardTableID) {
+        updateBilliardTable(billiardTableID, TableStatus.inUse);
+    }
+
+    @Override
+    public void setAvailable(String billiardTableID) {
+        updateBilliardTable(billiardTableID, TableStatus.available);
+    }
+
+    @Override
+    public void setUnderMaintenance(String billiardTableID) {
+        updateBilliardTable(billiardTableID, TableStatus.underMaintainance);
     }
 
 
