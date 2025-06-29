@@ -50,17 +50,19 @@ public class BilliardMatchService implements IBilliardMatchService {
     @Autowired
     BilliardMatchMapper billiardMatchMapper;
 
-    @Autowired
-    KafkaProducer producer;
-
-    @Autowired
-    BilliardTableService billiardTableService;
-
     @Override
     public BilliardMatchResponse getById(Integer id) {
         BilliardMatch match = repository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         return billiardMatchMapper.toBilliardMatchResponse(match);
+    }
+
+    public List<BilliardMatchResponse> getByTableID(String tableID) {
+        List<BilliardMatch> matchs = repository.findAllByBillardTable_BillardTableID(tableID);
+        if (matchs.isEmpty()) {
+            throw new AppException(ErrorCode.MATCH_NOT_FOUND);
+        }
+        return billiardMatchMapper.toBilliardMatchResponses(matchs);
     }
 
     @Override
@@ -165,12 +167,7 @@ public class BilliardMatchService implements IBilliardMatchService {
         }
         BilliardMatchResponse response = billiardMatchMapper.toBilliardMatchResponse(match);
 
-        //gửi thông tin trận đấu cho py
-        InformationRequest req = producer.sendToPy(response);
-        producer.sendEvent(req);
 
-        //set table status: inUse
-        billiardTableService.setInUse(String.valueOf(match.getBilliardMatchID()));
 
         return response;
     }
@@ -412,19 +409,20 @@ public class BilliardMatchService implements IBilliardMatchService {
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         match.setStatus(MatchStatus.cancelled);
         repository.save(match);
-        //free table
-        billiardTableService.setAvailable(String.valueOf(match.getBilliardMatchID()));
         return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 
 
+    @Override
     public String completeMatch(Integer id) {
-        BilliardMatch match = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+        BilliardMatch match = findMatchByID(id);
         match.setStatus(MatchStatus.completed);
-        //free table
-        billiardTableService.setAvailable(String.valueOf(match.getBilliardMatchID()));
         repository.save(match);
         return "Match with ID " + id + " has been completed";
+    }
+
+    public BilliardMatch findMatchByID(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
     }
 }

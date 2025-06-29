@@ -1,11 +1,12 @@
 package com.scorelens.Controller.v1;
 
-import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
-import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
-import com.scorelens.DTOs.Request.GameSetCreateRequest;
-import com.scorelens.DTOs.Request.ScoreRequest;
+import com.scorelens.DTOs.Request.*;
+import com.scorelens.DTOs.Response.BilliardMatchResponse;
+import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.BilliardMatchService;
+import com.scorelens.Service.BilliardTableService;
+import com.scorelens.Service.Consumer.KafkaProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,10 @@ public class BilliardMatchV1Controller {
 
     @Autowired
     BilliardMatchService billiardMatchService;
+
+    BilliardTableService billiardTableService;
+
+    KafkaProducer producer;
 
     @GetMapping("/{id}")
     public ResponseObject getById(@PathVariable Integer id) {
@@ -73,10 +78,18 @@ public class BilliardMatchV1Controller {
 
     @PostMapping
     public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
+        BilliardMatchResponse response = billiardMatchService.createMatch(request);
+
+        //gửi thông tin trận đấu cho py
+        InformationRequest req = producer.sendToPy(response);
+        producer.sendEvent(req);
+
+        //set table status: inUse
+        billiardTableService.setInUse(String.valueOf(response.getBilliardMatchID()));
         return ResponseObject.builder()
                 .status(1000)
                 .message("Create new Match successfully")
-                .data(billiardMatchService.createMatch(request))
+                .data(response)
                 .build();
     }
 
@@ -109,10 +122,25 @@ public class BilliardMatchV1Controller {
 
     @PutMapping("/cancel/{id}")
     public ResponseObject cancel(@PathVariable Integer id) {
+        BilliardMatchResponse response = billiardMatchService.cancel(id);
+        //free table
+        billiardTableService.setAvailable(String.valueOf(response.getBilliardMatchID()));
         return ResponseObject.builder()
                 .status(1000)
                 .message("Cancel Match successfully")
                 .data(billiardMatchService.cancel(id))
+                .build();
+    }
+
+    @PutMapping("/complete/{id}")
+    public ResponseObject complete(@PathVariable Integer id) {
+        BilliardMatch match = billiardMatchService.findMatchByID(id);
+        //free table
+        billiardTableService.setAvailable(String.valueOf(match.getBilliardMatchID()));
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Match is currently completed")
+                .data(billiardMatchService.completeMatch(id))
                 .build();
     }
 

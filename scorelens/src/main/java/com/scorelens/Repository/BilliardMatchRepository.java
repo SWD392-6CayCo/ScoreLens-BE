@@ -43,4 +43,6 @@ public interface BilliardMatchRepository extends JpaRepository<BilliardMatch, In
 //        WHERE p.customerid = :id
 //        """, nativeQuery = true)
 //    List<BilliardMatch> findByCustomerId(@Param("id") String id);
+
+    List<BilliardMatch> findAllByBillardTable_BillardTableID(String billardTableID);
 }

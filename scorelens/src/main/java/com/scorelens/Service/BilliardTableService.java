@@ -43,8 +43,6 @@ public class BilliardTableService implements IBilliardTableService {
 
     String webUrl = "https://score-lens.vercel.app/";
 
-    BilliardMatchService billiardMatchService;
-
     @Override
     @Transactional
     public BilliardTableResponse createBilliardTable(BilliardTableRequest request) {
@@ -147,13 +145,6 @@ public class BilliardTableService implements IBilliardTableService {
     public List<BilliardTableResponse> getTablesByStore(String storeID) {
         List<BilliardTable> list = billiardTableRepo.findAllByStore_StoreID(storeID);
         List<BilliardTableResponse> response = billiardTableMapper.toBilliardTableResponsesList(list);
-        //add match to table when table is in use
-        for (BilliardTableResponse table : response) {
-            if (table.getStatus().equals(TableStatus.inUse)){
-                BilliardMatchResponse rs = billiardMatchService.getById(Integer.parseInt(table.getBillardTableID()));
-                table.setMatchResponse(rs);
-            }
-        }
         if (list.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
         return response;
     }
