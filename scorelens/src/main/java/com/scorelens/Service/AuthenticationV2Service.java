@@ -421,11 +421,14 @@ public class AuthenticationV2Service implements IAuthenticationService {
             String userID = signedJWT.getJWTClaimsSet().getStringClaim("userID");
             String scope = signedJWT.getJWTClaimsSet().getStringClaim("scope");
 
+            // Extract role from scope (e.g., "ROLE_ADMIN DELETE_CUSTOMER..." -> "ADMIN")
+            String role = extractRoleFromScope(scope);
+
             return IntrospectV2ResponseDto.builder()
                     .isAuth(true)
                     .userID(userID)
                     .username(username)
-                    .role(scope)
+                    .role(role)
                     .build();
 
         } catch (Exception e) {
@@ -436,5 +439,27 @@ public class AuthenticationV2Service implements IAuthenticationService {
                     .role(null)
                     .build();
         }
+    }
+
+    /**
+     * Extract role from scope string
+     * Input: "ROLE_ADMIN DELETE_CUSTOMER GET_STAFF_LIST UPDATE_STAFF_DETAIL..."
+     * Output: "ADMIN"
+     */
+    private String extractRoleFromScope(String scope) {
+        if (scope == null || scope.isEmpty()) {
+            return null;
+        }
+
+        // Split scope by spaces and find the ROLE_ prefix
+        String[] scopeParts = scope.split(" ");
+        for (String part : scopeParts) {
+            if (part.startsWith("ROLE_")) {
+                // Remove "ROLE_" prefix and return the role
+                return part.substring(5); // "ROLE_ADMIN" -> "ADMIN"
+            }
+        }
+
+        return null;
     }
 }
