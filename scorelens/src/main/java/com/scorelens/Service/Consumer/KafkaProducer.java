@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,8 @@ public class KafkaProducer {
     private final WebSocketService webSocketService;
 
     private final KafKaHeartBeat kafKaHeartBeat;
+
+    private final HeartbeatService heartbeatService;
 
     //    @Value("${spring.kafka.producer.topic}")
     private final String ja_to_py_topic = "ja_to_py";
@@ -74,6 +77,16 @@ public class KafkaProducer {
                         "/topic/notification",
                         new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")
                 );
+
+                //sau 10s neu py k gui msg
+                CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking();
+                future.thenAccept(result -> {
+                    if (result) {
+                        log.info("Heartbeat OK");
+                    } else {
+                        log.warn("Heartbeat Timeout");
+                    }
+                });
             } catch (JsonProcessingException e) {
                 log.error("Failed to serialize heartbeat message", e);
             }
@@ -86,7 +99,7 @@ public class KafkaProducer {
     }
 
     // gửi thông tin qua python
-    public InformationRequest receiveInfomation(BilliardMatchResponse response) {
+    public InformationRequest sendInformation(BilliardMatchResponse response) {
         InformationRequest req = new InformationRequest();
         req.setCode(KafkaCode.START_STREAM);
 
@@ -129,6 +142,5 @@ public class KafkaProducer {
         }
         return teamList;
     }
-
 
 }

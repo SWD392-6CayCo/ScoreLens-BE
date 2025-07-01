@@ -423,4 +423,11 @@ public class BilliardMatchService implements IBilliardMatchService {
         return repository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
     }
+
+    public String startMatch(int billiardMatchID){
+        BilliardMatch m = findMatchByID(billiardMatchID);
+        m.setStatus(MatchStatus.ongoing);
+        repository.save(m);
+        return "Match with ID " + billiardMatchID + " has been started";
+    }
 }

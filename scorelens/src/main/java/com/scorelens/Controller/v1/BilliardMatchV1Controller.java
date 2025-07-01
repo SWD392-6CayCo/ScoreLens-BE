@@ -85,7 +85,7 @@ public class BilliardMatchV1Controller {
         producer.sendHeartbeat();
 
         //gửi thông tin trận đấu cho py
-        InformationRequest req = producer.receiveInfomation(response);
+        InformationRequest req = producer.sendInformation(response);
         producer.sendEvent(req);
 
         //set table status: inUse

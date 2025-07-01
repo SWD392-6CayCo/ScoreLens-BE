@@ -142,6 +142,7 @@ public class GameSetService implements IGameSetService {
 //        return "GameSet with ID " + id + " has been completed";
 //    }
 
+    @Override
     public String startSet(int id){
         GameSet gameSet = gameSetRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));

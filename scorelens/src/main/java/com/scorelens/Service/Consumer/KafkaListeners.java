@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.time.LocalTime;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -39,6 +40,8 @@ public class KafkaListeners {
     WebSocketService webSocketService;
 
     KafKaHeartBeat kafkaHeartBeat;
+
+    HeartbeatService heartbeatService;
 
     // msg từ fastapi
     @KafkaListener(
@@ -71,6 +74,9 @@ public class KafkaListeners {
                 case RUNNING:
                     kafkaHeartBeat.stop();
                     kafkaHeartBeat.updateLastConfirmedTime();
+                    //xac nhan da nhan res tu py
+                    CompletableFuture<Boolean> tmp = heartbeatService.confirmHeartbeat();
+                    log.info("CompletableFuture: {}", tmp);
                     webSocketService.sendToWebSocket(
                             "/topic/notification",
                             new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
@@ -145,6 +151,7 @@ public class KafkaListeners {
 //        gửi thông báo qua web socket bằng topic: shot_event
         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue(), shot);
     }
+
 
 
 }
