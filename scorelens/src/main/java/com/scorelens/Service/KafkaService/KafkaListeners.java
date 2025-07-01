@@ -28,8 +28,6 @@ public class KafkaListeners {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    EventService eventService;
-
     WebSocketService webSocketService;
 
     KafKaHeartBeat kafkaHeartBeat;
@@ -53,7 +51,7 @@ public class KafkaListeners {
             log.info("KafkaCode received: {}", request.getCode());
             log.info("Data type: {}", request.getData().getClass());
 
-            handlingKafkaCode(request, ack);
+            handlingKafkaCode(request);
 
             ack.acknowledge(); // commit offset sau khi xử lý xong
         } catch (JsonProcessingException e) {
@@ -62,7 +60,7 @@ public class KafkaListeners {
     }
 
     //xử lí enum KafkaCode
-    private void handlingKafkaCode(ProducerRequest request, Acknowledgment ack) {
+    private void handlingKafkaCode(ProducerRequest request) {
         KafkaCode code = request.getCode();
         try {
             switch (code) {
@@ -78,7 +76,7 @@ public class KafkaListeners {
                     );
                     break;
                 case LOGGING:
-                    eventProcessorService.processEvent(request, ack);
+                    eventProcessorService.processEvent(request);
                     break;
                 case DELETE_CONFIRM:
                     int deleteCount = (Integer) request.getData();

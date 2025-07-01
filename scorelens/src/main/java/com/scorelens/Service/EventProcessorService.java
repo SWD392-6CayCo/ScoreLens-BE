@@ -6,6 +6,7 @@ import com.scorelens.DTOs.Response.EventResponse;
 import com.scorelens.Entity.GameSet;
 import com.scorelens.Enums.ShotResult;
 import com.scorelens.Enums.WebSocketTopic;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class EventProcessorService {
 
     final Map<Integer, Boolean> gameSetStartedMap = new ConcurrentHashMap<>();
@@ -36,7 +37,8 @@ public class EventProcessorService {
      * Xử lý 1 Kafka message gửi về, parse thành event, log, start gameSet & match nếu cần
      * Lưu game set và match đã ongoing để check, set 1 lần, tối ưu performance
      */
-    public void processEvent(ProducerRequest request, Acknowledgment ack) {
+    @Transactional
+    public void processEvent(ProducerRequest request) {
         try {
             // Convert data (LinkedHashMap) -> LogMessageRequest
             LogMessageRequest lmr = mapper.convertValue(request.getData(), LogMessageRequest.class);
@@ -80,7 +82,6 @@ public class EventProcessorService {
             //xử lí shot và gửi msg qua websocket
             handlingEvent(event);
 
-            ack.acknowledge();
         } catch (Exception ex) {
             log.error("Error while processing LOGGING message: {}", ex.getMessage());
         }
