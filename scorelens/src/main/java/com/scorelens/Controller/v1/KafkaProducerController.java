@@ -5,7 +5,7 @@ import com.scorelens.DTOs.Request.InformationRequest;
 import com.scorelens.DTOs.Request.ProducerRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.KafkaCode;
-import com.scorelens.Service.Consumer.KafkaProducer;
+import com.scorelens.Service.KafkaService.KafkaProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.scorelens.Service.Consumer;
+package com.scorelens.Service.KafkaService;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;

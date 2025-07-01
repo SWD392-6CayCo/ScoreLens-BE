@@ -1,4 +1,4 @@
-package com.scorelens.Service.Consumer;
+package com.scorelens.Service.KafkaService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,6 @@ import com.scorelens.Enums.ShotResult;
 import com.scorelens.Enums.WebSocketCode;
 import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.EventService;
-import com.scorelens.Service.NotificationService;
 import com.scorelens.Service.WebSocketService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 

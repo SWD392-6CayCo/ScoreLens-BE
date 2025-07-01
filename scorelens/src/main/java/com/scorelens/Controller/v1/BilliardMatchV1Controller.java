@@ -7,7 +7,7 @@ import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.MatchStatus;
 import com.scorelens.Service.BilliardMatchService;
 import com.scorelens.Service.BilliardTableService;
-import com.scorelens.Service.Consumer.KafkaProducer;
+import com.scorelens.Service.KafkaService.KafkaProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.scorelens.Service.Consumer;
+package com.scorelens.Service.KafkaService;
 
 import com.scorelens.DTOs.Request.WebsocketReq;
 import com.scorelens.Enums.WebSocketCode;
