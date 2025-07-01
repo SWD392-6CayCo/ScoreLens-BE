@@ -89,7 +89,7 @@ public class BilliardMatchV1Controller {
         producer.sendEvent(req);
 
         //set table status: inUse
-        billiardTableService.setInUse(String.valueOf(response.getBilliardMatchID()));
+        billiardTableService.setInUse(String.valueOf(response.getBilliardTableID()));
         return ResponseObject.builder()
                 .status(1000)
                 .message("Create new Match successfully")
