@@ -40,7 +40,7 @@ public class EventProcessorService {
         try {
             // Convert data (LinkedHashMap) -> LogMessageRequest
             LogMessageRequest lmr = mapper.convertValue(request.getData(), LogMessageRequest.class);
-            ack.acknowledge(); // commit offset sau khi xử lý xong
+
             log.info("LogMessageRequest converted: {}", lmr);
 
             // Push message lên WebSocket topic "/topic/logging_notification"
