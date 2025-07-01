@@ -101,6 +101,9 @@ public class PlayerService implements IPlayerService {
     public PlayerResponse updateCustomer(Integer id, String info) {   // email or phone number
         Player player = playerRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PLAYER_NOT_FOUND));
+        if (player.getCustomer() != null) {
+            throw new AppException(ErrorCode.PLAYER_SAVED);
+        }
         if (info.matches("\\d+")){
             Customer c = customerRepo.findByPhoneNumber(info)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));

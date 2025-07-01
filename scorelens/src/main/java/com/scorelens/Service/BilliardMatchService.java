@@ -5,6 +5,7 @@ import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.Entity.*;
 import com.scorelens.Enums.MatchStatus;
 import com.scorelens.Enums.ResultStatus;
+import com.scorelens.Enums.TableStatus;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.BilliardMatchMapper;
@@ -100,6 +101,9 @@ public class BilliardMatchService implements IBilliardMatchService {
         if (request.getStaffID() == null) {
             BilliardTable table = tableRepo.findById(request.getBilliardTableID())
                     .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+            if(!table.getStatus().equals(TableStatus.available)) {
+                throw new AppException(ErrorCode.TABLE_NOT_AVAILABLE);
+            }
             Mode mode = modeRepo.findById(request.getModeID())
                     .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
             Customer customer = customerRepo.findById(request.getCustomerID())
@@ -282,9 +286,11 @@ public class BilliardMatchService implements IBilliardMatchService {
             Team winningTeam = null;
             if (sorted.size() >= 2 && sorted.get(0).getValue().equals(sorted.get(1).getValue())) {
                 // draw -> cho team thang bang total score
-                winningTeam = match.getTeams().stream()
-                        .max(Comparator.comparingInt(Team::getTotalScore))
-                        .orElse(null);
+//                winningTeam = match.getTeams().stream()
+//                        .max(Comparator.comparingInt(Team::getTotalScore))
+//                        .orElse(null);
+                winningTeam = null;
+
             } else if (!sorted.isEmpty()) {
                 winningTeam = sorted.get(0).getKey();
             }
@@ -299,6 +305,19 @@ public class BilliardMatchService implements IBilliardMatchService {
                     } else {
                         t.setStatus(ResultStatus.lose);
                     }
+                    teamRepo.save(t);
+
+                    // Update status cho tung player
+                    for (Player p : t.getPlayers()) {
+                        p.setStatus(t.getStatus());
+                        playerRepo.save(p);
+                    }
+                }
+            }else{
+                match.setWinner(null);
+                // Update status cho tung team
+                for (Team t : match.getTeams()) {
+                    t.setStatus(ResultStatus.draw);
                     teamRepo.save(t);
 
                     // Update status cho tung player

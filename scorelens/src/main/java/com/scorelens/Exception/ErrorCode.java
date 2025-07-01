@@ -40,7 +40,7 @@ public enum ErrorCode {
     STORE_NOT_FOUND(1013, "Store Not Found", HttpStatus.NOT_FOUND),
     //-------------------------- BILLIARD STORE -----------------------------------
     TABLE_NOT_FOUND(1014, "Table not found", HttpStatus.NOT_FOUND),
-
+    TABLE_NOT_AVAILABLE(1014, "Table not available", HttpStatus.BAD_REQUEST),
     //-------------------------- BILLIARD MATCH -----------------------------------
     MATCH_NOT_FOUND(1015,"Match not found", HttpStatus.NOT_FOUND),
     //-------------------------- ROUND  -----------------------------------
@@ -58,7 +58,7 @@ public enum ErrorCode {
 
     //-------------------------- PLAYER  -----------------------------------
     PLAYER_NOT_FOUND(1017, "Player not found", HttpStatus.NOT_FOUND),
-
+    PLAYER_SAVED(1017, "Player was saved as the other customer", HttpStatus.BAD_REQUEST),
     //-------------------------- EVENT  -----------------------------------
     NULL_EVENT(1018, "Event is null", HttpStatus.BAD_REQUEST),
     NULL_EVENT_PLAYERID(1019, "No data matched with this player", HttpStatus.BAD_REQUEST),
