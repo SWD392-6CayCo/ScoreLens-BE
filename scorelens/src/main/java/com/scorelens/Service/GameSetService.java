@@ -59,6 +59,12 @@ public class GameSetService implements IGameSetService {
         return gameSetMapper.toSetResponseList(sets);
     }
 
+    public List<GameSet> getByMatch(int id) {
+        BilliardMatch match = matchRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+        return gameSetRepository.findByBilliardMatch_BilliardMatchID(id);
+    }
+
     @Override
     public GameSetResponse createSet(GameSetCreateRequest request) {
         BilliardMatch match = matchRepository.findById(request.getBilliardMatchID())
@@ -154,6 +160,8 @@ public class GameSetService implements IGameSetService {
         log.info("GameSet no " + gameSet.getGameSetNo() + " has been started");
         return gameSet;
     }
+
+
 
 
 }

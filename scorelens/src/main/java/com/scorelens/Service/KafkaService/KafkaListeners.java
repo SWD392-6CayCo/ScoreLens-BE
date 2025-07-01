@@ -4,16 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.*;
-import com.scorelens.DTOs.Response.EventResponse;
-import com.scorelens.Entity.GameSet;
 import com.scorelens.Enums.KafkaCode;
-import com.scorelens.Enums.ShotResult;
 import com.scorelens.Enums.WebSocketCode;
-import com.scorelens.Enums.WebSocketTopic;
-import com.scorelens.Service.BilliardMatchService;
-import com.scorelens.Service.EventService;
-import com.scorelens.Service.GameSetService;
-import com.scorelens.Service.WebSocketService;
+import com.scorelens.Service.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +17,6 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 
-import java.time.LocalTime;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -44,9 +36,7 @@ public class KafkaListeners {
 
     HeartbeatService heartbeatService;
 
-    GameSetService gameSetService;
-
-    BilliardMatchService billiardMatchService;
+    EventProcessorService eventProcessorService;
 
     // msg từ fastapi
     @KafkaListener(
@@ -88,39 +78,7 @@ public class KafkaListeners {
                     );
                     break;
                 case LOGGING:
-                    try {
-                        // Convert data (LinkedHashMap) -> LogMessageRequest
-                        LogMessageRequest lmr = mapper.convertValue(request.getData(), LogMessageRequest.class);
-                        ack.acknowledge(); // commit offset sau khi xử lý xong
-                        log.info("LogMessageRequest converted: {}", lmr);
-
-                        // Push message lên WebSocket topic "/topic/logging_notification"
-                        webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), request);
-
-                        // lấy event
-                        EventRequest event = lmr.getDetails();
-                        if (event != null) {
-
-                            //tạo mới 1 event theo player và gameset
-                            EventResponse e = eventService.addEvent(event);
-
-                            //update trạng thái ongoing cho gameSet
-                            GameSet startGs = gameSetService.startSet(event.getGameSetID());
-                            log.info("Starting gameSet with id: {}", startGs.getGameSetID());
-
-                            //update trạng thái ongoing cho match
-                            String startMatch = billiardMatchService.startMatch(startGs.getBilliardMatch().getBilliardMatchID());
-                            log.info(startMatch);
-
-                            log.info("New event is added: {}", e);
-                            //xử lí shot và gửi msg qua websocket
-                            handlingEvent(event);
-                        } else {
-                            log.warn("No event details found in LogMessageRequest.");
-                        }
-                    } catch (Exception e) {
-                        log.error("Error while processing LOGGING message: {}", e.getMessage(), e);
-                    }
+                    eventProcessorService.processEvent(request, ack);
                     break;
                 case DELETE_CONFIRM:
                     int deleteCount = (Integer) request.getData();
@@ -140,35 +98,6 @@ public class KafkaListeners {
             System.out.println("Invalid KafkaCode: " + code);
         }
     }
-
-    // xác định shot event
-    public void handlingEvent(EventRequest request) {
-        boolean isFoul = request.isFoul();
-        boolean scoreValue = request.isScoreValue();
-        boolean isUncertain = request.isUncertain();
-        //lấy ds event theo gameset để đếm số shot đã đánh
-        int tmp = eventService.countEventsGameSetID(request.getGameSetID());
-        int shotCount = tmp == 0 ? 1 : tmp;
-
-        ShotEvent shot = new ShotEvent();
-        // nếu AI k chắc chắn => undetected
-        ShotResult result = isUncertain ? ShotResult.UNDETECTED
-                // AI chắc chắn shot đánh foul
-                : (isFoul ? ShotResult.MISSED
-                // AI chắc chắn shot scored
-                : (scoreValue ? ShotResult.SCORED
-                // nếu không xác định
-                : ShotResult.UNKNOWN));
-
-        shot.setTime(LocalTime.now());
-        shot.setShot(String.format("SHOT #%02d", shotCount));
-        shot.setPlayer(String.format("PLAYER %d", request.getPlayerID()));
-        shot.setResult(result.name());
-
-//        gửi thông báo qua web socket bằng topic: shot_event
-        webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue(), shot);
-    }
-
 
 
 }

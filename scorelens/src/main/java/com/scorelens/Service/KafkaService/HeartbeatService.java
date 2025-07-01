@@ -30,7 +30,7 @@ public class HeartbeatService {
                     // Xử lý timeout => send noti to websocket
                     webSocketService.sendToWebSocket(
                             "/topic/notification",
-                            new WebsocketReq(WebSocketCode.WARNING, "Lost connection to AI Camera")
+                            new WebsocketReq(WebSocketCode.WARNING, "AI Camera connection error")
                     );
                     return false;
                 });

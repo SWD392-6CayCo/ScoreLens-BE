@@ -32,6 +32,8 @@ public class BilliardMatchV1Controller {
 
     KafkaProducer producer;
 
+    GameSetV1Controller gameSetController;
+
 
     @GetMapping("/{id}")
     public ResponseObject getById(@PathVariable Integer id) {
@@ -149,6 +151,17 @@ public class BilliardMatchV1Controller {
                 .status(1000)
                 .message("Match is currently completed")
                 .data(billiardMatchService.completeMatch(id))
+                .build();
+    }
+
+    @PutMapping("manual/{id}")
+    public ResponseObject manualUpdateMatch(@PathVariable Integer id) {
+        BilliardMatch match = billiardMatchService.findMatchByID(id);
+        String manualMatch = billiardMatchService.startMatch(match.getBilliardMatchID());
+        ResponseObject tmp = gameSetController.manualUpdateSet(match.getBilliardMatchID());
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Match's information manually successfully")
                 .build();
     }
 
