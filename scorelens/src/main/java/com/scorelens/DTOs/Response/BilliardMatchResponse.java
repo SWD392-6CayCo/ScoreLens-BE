@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BilliardMatchResponse {
+public class    BilliardMatchResponse {
     private Integer billiardMatchID;
     private String billiardTableID;
     private Integer modeID;

@@ -4,6 +4,7 @@ import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.ResponseObject;
+import com.scorelens.Enums.MatchStatus;
 import com.scorelens.Service.BilliardMatchService;
 import com.scorelens.Service.BilliardTableService;
 import com.scorelens.Service.Consumer.KafkaProducer;
@@ -107,10 +108,14 @@ public class BilliardMatchV1Controller {
 
     @PutMapping("/score")
     public ResponseObject updateScore(@RequestBody ScoreRequest request) {
+        BilliardMatchResponse rs = billiardMatchService.updateScore(request);
+        if (rs.getStatus().equals(MatchStatus.completed))
+            //free table
+            billiardTableService.setAvailable(String.valueOf(rs.getBilliardMatchID()));
         return ResponseObject.builder()
                 .status(1000)
                 .message("Update score successfully")
-                .data(billiardMatchService.updateScore(request))
+                .data(rs)
                 .build();
     }
 
