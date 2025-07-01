@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.EventResponse;
+import com.scorelens.Entity.GameSet;
 import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Enums.ShotResult;
 import com.scorelens.Enums.WebSocketCode;
 import com.scorelens.Enums.WebSocketTopic;
+import com.scorelens.Service.BilliardMatchService;
 import com.scorelens.Service.EventService;
+import com.scorelens.Service.GameSetService;
 import com.scorelens.Service.WebSocketService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +43,10 @@ public class KafkaListeners {
     KafKaHeartBeat kafkaHeartBeat;
 
     HeartbeatService heartbeatService;
+
+    GameSetService gameSetService;
+
+    BilliardMatchService billiardMatchService;
 
     // msg từ fastapi
     @KafkaListener(
@@ -86,13 +93,25 @@ public class KafkaListeners {
                         LogMessageRequest lmr = mapper.convertValue(request.getData(), LogMessageRequest.class);
                         ack.acknowledge(); // commit offset sau khi xử lý xong
                         log.info("LogMessageRequest converted: {}", lmr);
+
                         // Push message lên WebSocket topic "/topic/logging_notification"
                         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), request);
+
                         // lấy event
                         EventRequest event = lmr.getDetails();
                         if (event != null) {
+
                             //tạo mới 1 event theo player và gameset
                             EventResponse e = eventService.addEvent(event);
+
+                            //update trạng thái ongoing cho gameSet
+                            GameSet startGs = gameSetService.startSet(event.getGameSetID());
+                            log.info("Starting gameSet with id: {}", startGs.getGameSetID());
+
+                            //update trạng thái ongoing cho match
+                            String startMatch = billiardMatchService.startMatch(startGs.getBilliardMatch().getBilliardMatchID());
+                            log.info(startMatch);
+
                             log.info("New event is added: {}", e);
                             //xử lí shot và gửi msg qua websocket
                             handlingEvent(event);

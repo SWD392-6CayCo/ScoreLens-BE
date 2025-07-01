@@ -35,7 +35,7 @@ public class BilliardTableV2Controller {
 
     BilliardMatchService billiardMatchService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/list/{id}")
     public ResponseObject getListByStoreID(@PathVariable String id) {
         StoreResponse store = storeService.findStoreById(id);
         List<BilliardTableResponse> response = billiardTableService.getTablesByStore(id);
@@ -56,6 +56,25 @@ public class BilliardTableV2Controller {
                 .data(response)
                 .build();
     }
+
+    @GetMapping("/{id}")
+    public ResponseObject getById(@PathVariable String id) {
+        BilliardTableResponse rs = billiardTableService.findBilliardTableById(id);
+        if (rs.getStatus().equals(TableStatus.inUse)) {
+            //find ongoing match if table is in use
+            BilliardMatchResponse tmp =
+                    billiardMatchService.getOnGoingMatch(rs.getBillardTableID());
+            if (tmp != null) {
+                rs.setMatchResponse(tmp);
+            }
+        }
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Table")
+                .data(rs)
+                .build();
+    }
+
 }
 
 

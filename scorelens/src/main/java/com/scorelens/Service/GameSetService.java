@@ -17,12 +17,14 @@ import com.scorelens.Repository.BilliardMatchRepository;
 import com.scorelens.Repository.GameSetRepository;
 import com.scorelens.Repository.TeamRepository;
 import com.scorelens.Service.Interface.IGameSetService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class GameSetService implements IGameSetService {
 
@@ -143,13 +145,14 @@ public class GameSetService implements IGameSetService {
 //    }
 
     @Override
-    public String startSet(int id){
+    public GameSet startSet(int id){
         GameSet gameSet = gameSetRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
         gameSet.setStartTime(LocalDateTime.now());
         gameSet.setStatus(MatchStatus.ongoing);
         gameSetRepository.save(gameSet);
-        return "GameSet no " + gameSet.getGameSetNo() + " has been started";
+        log.info("GameSet no " + gameSet.getGameSetNo() + " has been started");
+        return gameSet;
     }
 
 
