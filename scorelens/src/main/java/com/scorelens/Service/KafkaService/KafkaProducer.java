@@ -56,6 +56,13 @@ public class KafkaProducer {
         log.info("Sent kafka message: {} to topic: {}", object, ja_to_py_topic);
     }
 
+    //send event voi key = tableID
+    public void sendEvent(String tableID, Object object) {
+        kafkaTemplate.send(ja_to_py_topic, tableID, object);
+        kafkaTemplate.flush();
+        log.info("Sent kafka message: {} to topic: {} with key: {}", object, ja_to_py_topic, tableID);
+    }
+
     public void deleteEventByPlayer(Object object) {
         sendEvent(new ProducerRequest(KafkaCode.DELETE_PLAYER, object));
     }
@@ -100,8 +107,12 @@ public class KafkaProducer {
 
     // gửi thông tin qua python
     public InformationRequest sendInformation(BilliardMatchResponse response) {
+        //set code
         InformationRequest req = new InformationRequest();
         req.setCode(KafkaCode.START_STREAM);
+
+        //set tableID
+         req.setTableID(response.getBilliardTableID());
 
         //set camera url
         InformationRequest.Information info = new InformationRequest.Information();

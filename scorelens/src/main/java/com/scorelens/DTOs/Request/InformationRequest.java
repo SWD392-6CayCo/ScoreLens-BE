@@ -13,6 +13,7 @@ import java.util.List;
 public class InformationRequest {
 
     private KafkaCode code;
+    private String tableID;
     private Information data;
 
     @Data

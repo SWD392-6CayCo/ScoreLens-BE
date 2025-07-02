@@ -83,12 +83,13 @@ public class BilliardMatchV1Controller {
     @PostMapping
     public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
         BilliardMatchResponse response = billiardMatchService.createMatch(request);
+        String tableID = response.getBilliardTableID();
         //cam ai check
         producer.sendHeartbeat();
 
         //gửi thông tin trận đấu cho py
         InformationRequest req = producer.sendInformation(response);
-        producer.sendEvent(req);
+        producer.sendEvent(tableID, req);
 
         //set table status: inUse
         billiardTableService.setInUse(String.valueOf(response.getBilliardTableID()));

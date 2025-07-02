@@ -41,6 +41,16 @@ public class KafkaProducerController {
                 .build();
     }
 
+    @PostMapping("/send/information/{id}")
+    public ResponseObject sendInformation(@RequestBody InformationRequest request, @PathVariable String id) {
+        kafkaProducer.sendEvent(id, request);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Successfully sent message")
+                .build();
+    }
+
+
     @PostMapping("send/stop")
     public ResponseObject sendStop() {
         kafkaProducer.sendEvent(new ProducerRequest(KafkaCode.STOP_STREAM, "Stop stream"));
