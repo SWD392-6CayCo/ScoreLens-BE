@@ -9,13 +9,11 @@ import com.scorelens.Mapper.EventMapper;
 import com.scorelens.Repository.EventRepo;
 import com.scorelens.Repository.GameSetRepository;
 import com.scorelens.Repository.PlayerRepo;
-import com.scorelens.Service.Consumer.KafkaProducer;
+import com.scorelens.Service.KafkaService.KafkaProducer;
 import com.scorelens.Service.Interface.IEventService;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 

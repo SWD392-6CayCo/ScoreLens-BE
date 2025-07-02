@@ -84,7 +84,7 @@ public class BilliardTableV1Controller {
 
     }
 
-    @GetMapping("/v2/{id}")
+    @GetMapping("/list/{id}")
     public ResponseObject getListByStoreID(@PathVariable String id){
         StoreResponse store = storeService.findStoreById(id);
         return ResponseObject.builder()

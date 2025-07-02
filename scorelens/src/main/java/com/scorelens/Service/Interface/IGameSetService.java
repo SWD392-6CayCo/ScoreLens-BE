@@ -20,4 +20,5 @@ public interface IGameSetService {
     Integer delete(Integer id);
     void deleteByMatch(Integer id);
     GameSetResponse cancel(Integer id);
+    GameSet startSet(int id);
 }

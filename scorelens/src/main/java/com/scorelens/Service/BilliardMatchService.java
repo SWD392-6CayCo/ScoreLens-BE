@@ -9,15 +9,13 @@ import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.BilliardMatchMapper;
 import com.scorelens.Repository.*;
-import com.scorelens.Service.Consumer.KafkaProducer;
 import com.scorelens.Service.Interface.IBilliardMatchService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class BilliardMatchService implements IBilliardMatchService {
@@ -98,6 +96,7 @@ public class BilliardMatchService implements IBilliardMatchService {
     }
 
     @Override
+    @Transactional
     public BilliardMatchResponse createMatch(BilliardMatchCreateRequest request) {
         BilliardMatch match = billiardMatchMapper.toBilliardMatch(request);
         if (request.getStaffID() == null && request.getCustomerID() == null) {
@@ -420,5 +419,13 @@ public class BilliardMatchService implements IBilliardMatchService {
     public BilliardMatch findMatchByID(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+    }
+
+
+    public String startMatch(int billiardMatchID){
+        BilliardMatch m = findMatchByID(billiardMatchID);
+        m.setStatus(MatchStatus.ongoing);
+        repository.save(m);
+        return "Match with ID " + billiardMatchID + " has been started";
     }
 }

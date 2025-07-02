@@ -1,7 +1,7 @@
 package com.scorelens.Controller.v1;
 
 import com.scorelens.Config.KafKaHeartBeat;
-import com.scorelens.Service.Consumer.KafkaProducer;
+import com.scorelens.Service.KafkaService.KafkaProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

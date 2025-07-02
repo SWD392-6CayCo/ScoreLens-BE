@@ -2,7 +2,10 @@ package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.GameSetCreateRequest;
 import com.scorelens.DTOs.Request.GameSetUpdateRequest;
+import com.scorelens.DTOs.Response.GameSetResponse;
+import com.scorelens.Entity.GameSet;
 import com.scorelens.Entity.ResponseObject;
+import com.scorelens.Service.BilliardMatchService;
 import com.scorelens.Service.GameSetService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -11,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @Tag(name = "Game Set", description = "Manage Game Set")
@@ -23,6 +28,8 @@ public class GameSetV1Controller {
 
     @Autowired
     private GameSetService gameSetService;
+
+    BilliardMatchService billiardMatchService;
 
     @GetMapping("/{id}")
     public ResponseObject getById(@PathVariable Integer id) {
@@ -77,5 +84,19 @@ public class GameSetV1Controller {
                         .data(gameSetService.delete(id))
                         .build();
     }
+
+
+    public ResponseObject manualUpdateSet(Integer billiardMatchID) {
+        List<GameSet> list = gameSetService.getByMatch(billiardMatchID);
+        for (GameSet gameSet : list) {
+            GameSet tmp = gameSetService.startSet(gameSet.getGameSetID());
+        }
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Manual Update GameSet successfully")
+                .data(true)
+                .build();
+    }
+
 }
 
