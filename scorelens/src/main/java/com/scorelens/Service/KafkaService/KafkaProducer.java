@@ -64,22 +64,22 @@ public class KafkaProducer {
     }
 
     public void deleteEventByPlayer(Object object) {
-        sendEvent(new ProducerRequest(KafkaCode.DELETE_PLAYER, object));
+        sendEvent(new ProducerRequest(KafkaCode.DELETE_PLAYER, null, object));
     }
 
     public void deleteEventByGameSet(Object object) {
-        sendEvent(new ProducerRequest(KafkaCode.DELETE_GAME_SET, object));
+        sendEvent(new ProducerRequest(KafkaCode.DELETE_GAME_SET, null, object));
     }
 
     //cứ mỗi 10s, hàm sẽ run 1 lần
     //gửi msg đến fastapi liên tục đến khi có cập nhật mới ở listener
     //k sợ miss flag vì KafkaHeartBeat đã khai báo @Component => singleton scope
 //    @Scheduled(fixedDelay = 10000)
-    public void sendHeartbeat() {
+    public void sendHeartbeat(String tableID) {
         if (kafKaHeartBeat.isRunning()) {
             try {
-                String message = objectMapper.writeValueAsString(new ProducerRequest(KafkaCode.RUNNING, "Heart beat checking"));
-                sendEvent(message);
+                String message = objectMapper.writeValueAsString(new ProducerRequest(KafkaCode.RUNNING, tableID, "Heart beat checking"));
+                sendEvent(tableID, message);
                 webSocketService.sendToWebSocket(
                         "/topic/notification",
                         new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")
@@ -105,8 +105,8 @@ public class KafkaProducer {
         }
     }
 
-    // gửi thông tin qua python
-    public InformationRequest sendInformation(BilliardMatchResponse response) {
+    // map match_response to req
+    public InformationRequest mapInformation(BilliardMatchResponse response) {
         //set code
         InformationRequest req = new InformationRequest();
         req.setCode(KafkaCode.START_STREAM);

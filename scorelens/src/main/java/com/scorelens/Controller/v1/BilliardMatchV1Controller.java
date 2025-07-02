@@ -85,10 +85,10 @@ public class BilliardMatchV1Controller {
         BilliardMatchResponse response = billiardMatchService.createMatch(request);
         String tableID = response.getBilliardTableID();
         //cam ai check
-        producer.sendHeartbeat();
+        producer.sendHeartbeat(tableID);
 
         //gửi thông tin trận đấu cho py
-        InformationRequest req = producer.sendInformation(response);
+        InformationRequest req = producer.mapInformation(response);
         producer.sendEvent(tableID, req);
 
         //set table status: inUse

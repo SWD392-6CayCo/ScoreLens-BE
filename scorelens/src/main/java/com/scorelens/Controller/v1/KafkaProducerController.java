@@ -53,7 +53,7 @@ public class KafkaProducerController {
 
     @PostMapping("send/stop")
     public ResponseObject sendStop() {
-        kafkaProducer.sendEvent(new ProducerRequest(KafkaCode.STOP_STREAM, "Stop stream"));
+        kafkaProducer.sendEvent(new ProducerRequest(KafkaCode.STOP_STREAM,"", "Stop stream"));
         return ResponseObject.builder()
                 .status(1000)
                 .message("Successfully sent message")

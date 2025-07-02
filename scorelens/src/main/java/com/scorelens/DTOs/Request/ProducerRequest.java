@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProducerRequest {
     private KafkaCode code;
+    private String tableID;
     private Object data;
 
 }

@@ -55,6 +55,9 @@ public class EventProcessorService {
                 return;
             }
 
+            //xử lí shot và gửi msg qua websocket
+            handlingEvent(event);
+
             // Thêm event vào DB
             EventResponse e = eventService.addEvent(event);
             log.info("New event is added: {}", e);
@@ -78,9 +81,6 @@ public class EventProcessorService {
                     matchStartedMap.put(matchID, true);
                 }
             }
-
-            //xử lí shot và gửi msg qua websocket
-            handlingEvent(event);
 
         } catch (Exception ex) {
             log.error("Error while processing LOGGING message: {}", ex.getMessage());

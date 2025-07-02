@@ -13,6 +13,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
@@ -38,26 +40,29 @@ public class KafkaListeners {
 
     // msg từ fastapi
     @KafkaListener(
-            topicPartitions = @TopicPartition(
-                    topic = "py_to_ja",
-                    partitions = {"0"}
-            ),
+            topics = "py_to_ja",
             containerFactory = "StringKafkaListenerContainerFactory"
     )
-    public void listenCommunication(String message, Acknowledgment ack) {
+    public void listenCommunication(
+            String message,                                                                           // value
+            @Header(value = KafkaHeaders.RECEIVED_KEY, required = false) String key,                  // key
+            @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+            Acknowledgment ack
+    ) {
         try {
             ProducerRequest request = mapper.readValue(message, ProducerRequest.class);
-            System.out.println("Received Communication via SSL KafkaListener:\n" + message);
+            log.info("Received message on partition {} with key {}: {}", partition, key, message);
             log.info("KafkaCode received: {}", request.getCode());
             log.info("Data type: {}", request.getData().getClass());
 
             handlingKafkaCode(request);
 
-            ack.acknowledge(); // commit offset sau khi xử lý xong
+            ack.acknowledge();
         } catch (JsonProcessingException e) {
             log.error("Failed to parse ProducerRequest: {}", message, e);
         }
     }
+
 
     //xử lí enum KafkaCode
     private void handlingKafkaCode(ProducerRequest request) {

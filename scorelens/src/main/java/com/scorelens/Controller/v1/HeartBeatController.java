@@ -22,8 +22,8 @@ public class HeartBeatController {
     private final KafKaHeartBeat kafkaHeartBeat;
 
     @PostMapping("/send")
-    public ResponseEntity<String> sendHeartbeatManually() {
-        kafkaProducer.sendHeartbeat();
+    public ResponseEntity<String> sendHeartbeatManually(@RequestParam String tableID) {
+        kafkaProducer.sendHeartbeat(tableID);
         return ResponseEntity.ok("Heartbeat sent manually.");
     }
 
