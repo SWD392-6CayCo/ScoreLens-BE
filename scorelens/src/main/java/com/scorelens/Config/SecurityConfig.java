@@ -37,7 +37,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity(debug = false)
 @EnableMethodSecurity(prePostEnabled = true)
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "exp://192.168.90.68:8081"})
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
@@ -126,7 +126,8 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "https://localhost:5173",
-                "https://score-lens.vercel.app"
+                "https://score-lens.vercel.app",
+                "exp://192.168.90.68:8081"
         ));
         //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
         corsConfiguration.setAllowCredentials(true);

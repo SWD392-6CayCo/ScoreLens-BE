@@ -24,7 +24,7 @@ import java.util.List;
 @Tag(name = "Billiard Table", description = "Manage Billiard Table")
 @RestController
 @RequestMapping("v2/tables")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "exp://192.168.90.68:8081"})
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BilliardTableV2Controller {
