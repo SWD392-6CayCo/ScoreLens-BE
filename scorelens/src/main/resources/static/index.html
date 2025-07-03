@@ -63,17 +63,17 @@
             console.log('Connected: ' + frame);
 
             // Subscribe topic /topic/notification
-            stompClient.subscribe('/topic/notification', function (messageOutput) {
+            stompClient.subscribe('/topic/notification/23374e21-2391-41b0-b275-651df88b3b04', function (messageOutput) {
                 showMessage(messageOutput.body, 'notification');
             });
 
             // Subscribe topic /topic/logging_notification
-            stompClient.subscribe('/topic/logging_notification', function (messageOutput) {
+            stompClient.subscribe('/topic/logging_notification/23374e21-2391-41b0-b275-651df88b3b04', function (messageOutput) {
                 showMessage(messageOutput.body, 'logging');
             });
 
             // Subscribe topic /topic/shot_event
-            stompClient.subscribe('/topic/shot_event', function (messageOutput) {
+            stompClient.subscribe('/topic/shot_event/23374e21-2391-41b0-b275-651df88b3b04', function (messageOutput) {
                 const data = JSON.parse(messageOutput.body);
                 showShotEvent(data);
             });
