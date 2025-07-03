@@ -73,7 +73,7 @@ public class GlobalHandlingException {//Runtime exception
             errorCode = ErrorCode.valueOf(messageKey); // Nếu là key enum
 
             var constraintViolations = exception.getBindingResult()
-                    .getAllErrors().getFirst().unwrap(ConstraintViolation.class);
+                    .getAllErrors().get(0).unwrap(ConstraintViolation.class);
 
             attributes = constraintViolations.getConstraintDescriptor().getAttributes();
             log.info(attributes.toString());

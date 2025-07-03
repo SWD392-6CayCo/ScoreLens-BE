@@ -55,18 +55,7 @@ public class AuthenticationV2Controller {
                 .build();
     }
 
-    @PostMapping("/logout")
-    ResponseObject logout(@CookieValue("AccessToken") String accessToken,
-                          @CookieValue("RefreshToken") String refreshToken,
-                          HttpServletResponse response)
-            throws ParseException, JOSEException {
-        authenticationService.logout(accessToken, refreshToken);
-        tokenCookieManager.clearAuthCookies(response);
-        return ResponseObject.builder()
-                .status(1000)
-                .message("Logout succesfully")
-                .build();
-    }
+
 
     @PostMapping("/introspect")
     ResponseObject introspect(@CookieValue(value = "AccessToken", required = false) String accessToken) {
@@ -120,5 +109,24 @@ public class AuthenticationV2Controller {
                 .build();
     }
 
+    @PostMapping("/logout")
+    public ResponseObject logout(@CookieValue(value = "AccessToken", required = false) String accessToken,
+                                 @CookieValue(value = "RefreshToken", required = false) String refreshToken,
+                                 HttpServletResponse response) throws ParseException, JOSEException {
+
+        // Logout và blacklist tokens
+        if (accessToken != null || refreshToken != null) {
+            authenticationService.logout(accessToken, refreshToken);
+        }
+
+        // Clear cookies
+        tokenCookieManager.clearAuthCookies(response);
+
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Logout successfully")
+                .data(null)
+                .build();
+    }
 
 }

@@ -19,6 +19,12 @@ import org.springframework.context.annotation.Configuration;
         bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER
 )
+@io.swagger.v3.oas.annotations.security.SecurityScheme(
+        name = "cookieAuth",
+        type = SecuritySchemeType.APIKEY,
+        in = SecuritySchemeIn.COOKIE,
+        paramName = "AccessToken"
+)
 public class OpenApiConfig {
 
     @Bean
@@ -26,13 +32,20 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info().title("Scorelens - ベトナムのビリヤードは世界一").version("1.0"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                .components(new Components().addSecuritySchemes("bearerAuth",
-                        new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")
-                                .in(SecurityScheme.In.HEADER)
-                                .name("Authorization")));
+                .addSecurityItem(new SecurityRequirement().addList("cookieAuth"))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth",
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name("Authorization"))
+                        .addSecuritySchemes("cookieAuth",
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.APIKEY)
+                                        .in(SecurityScheme.In.COOKIE)
+                                        .name("AccessToken")));
     }
 
     @Bean
