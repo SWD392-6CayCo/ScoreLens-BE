@@ -59,32 +59,30 @@ public class EventProcessorService {
 
             //xử lí shot và gửi msg qua websocket
             handlingEvent(event, tableID);
+            
+            // Thêm event vào DB
+            EventResponse e = eventService.addEvent(event);
+            log.info("New event is added: {}", e);
 
+            Integer gameSetID = event.getGameSetID();
 
+            // Nếu gameSet chưa start thì start
+            if (!gameSetStartedMap.containsKey(gameSetID)) {
+                //update game_set status
+                GameSet startedGameSet = gameSetService.startSet(gameSetID);
+                log.info("Started gameSet with id: {}", startedGameSet.getGameSetID());
+                gameSetStartedMap.put(gameSetID, true);
 
-//            // Thêm event vào DB
-//            EventResponse e = eventService.addEvent(event);
-//            log.info("New event is added: {}", e);
-//
-//            Integer gameSetID = event.getGameSetID();
-//
-//            // Nếu gameSet chưa start thì start
-//            if (!gameSetStartedMap.containsKey(gameSetID)) {
-//                //update game_set status
-//                GameSet startedGameSet = gameSetService.startSet(gameSetID);
-//                log.info("Started gameSet with id: {}", startedGameSet.getGameSetID());
-//                gameSetStartedMap.put(gameSetID, true);
-//
-//                Integer matchID = startedGameSet.getBilliardMatch().getBilliardMatchID();
-//
-//                // Nếu match chưa start thì start
-//                if (!matchStartedMap.containsKey(matchID)) {
-//                    //update match status
-//                    String startMatchLog = billiardMatchService.startMatch(matchID);
-//                    log.info(startMatchLog);
-//                    matchStartedMap.put(matchID, true);
-//                }
-//            }
+                Integer matchID = startedGameSet.getBilliardMatch().getBilliardMatchID();
+
+                // Nếu match chưa start thì start
+                if (!matchStartedMap.containsKey(matchID)) {
+                    //update match status
+                    String startMatchLog = billiardMatchService.startMatch(matchID);
+                    log.info(startMatchLog);
+                    matchStartedMap.put(matchID, true);
+                }
+            }
 
         } catch (Exception ex) {
             log.error("Error while processing LOGGING message: {}", ex.getMessage());
