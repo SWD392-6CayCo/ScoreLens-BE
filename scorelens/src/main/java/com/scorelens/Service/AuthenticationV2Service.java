@@ -12,6 +12,7 @@ import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDtoV2;
 import com.scorelens.DTOs.Response.IntrospectResponseDto;
+import com.scorelens.DTOs.Response.IntrospectV2ResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.InvalidatedToken;
 import com.scorelens.Entity.Staff;
@@ -266,13 +267,16 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String email;
         String userId;
         String scope;
+        String username;
 
         if(o instanceof Customer c){
             email = c.getEmail();
+            username = c.getName();
             userId = c.getId();
             scope = buildScope(c);
         } else if(o instanceof Staff s){
             email = s.getEmail();
+            username = s.getName();
             userId = s.getId();
             scope = buildScope(s);
         } else {
@@ -282,6 +286,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .subject(email)
                 .claim("userID", userId)
+                .claim("username", username)
                 .claim("scope", scope)
                 .jwtID(UUID.randomUUID().toString())
                 .issuer("scorelens")
@@ -379,5 +384,111 @@ public class AuthenticationV2Service implements IAuthenticationService {
         return IntrospectResponseDto.builder()
                 .valid(isValid)
                 .build();
+    }
+
+    public IntrospectV2ResponseDto introspectV2(String accessToken) {
+        try {
+            // Check if token exists
+            if (accessToken == null || accessToken.isEmpty()) {
+                return IntrospectV2ResponseDto.builder()
+                        .isAuth(false)
+                        .userID(null)
+                        .username(null)
+                        .role(null)
+                        .userType(null)
+                        .build();
+            }
+
+            // Use existing introspect logic to validate token
+            IntrospectRequestDto request = IntrospectRequestDto.builder()
+                    .token(accessToken)
+                    .build();
+
+            var introspectResult = introspect(request);
+
+            if (!introspectResult.isValid()) {
+                return IntrospectV2ResponseDto.builder()
+                        .isAuth(false)
+                        .userID(null)
+                        .username(null)
+                        .role(null)
+                        .userType(null)
+                        .build();
+            }
+
+            // Token is valid, extract user info
+            SignedJWT signedJWT = verifyToken(accessToken, false);
+//            String email = signedJWT.getJWTClaimsSet().getSubject();
+            String username = signedJWT.getJWTClaimsSet().getStringClaim("username");
+            String userID = signedJWT.getJWTClaimsSet().getStringClaim("userID");
+            String scope = signedJWT.getJWTClaimsSet().getStringClaim("scope");
+
+            // Extract role from scope (e.g., "ROLE_ADMIN DELETE_CUSTOMER..." -> "ADMIN")
+            String role = extractRoleFromScope(scope);
+
+            // Determine userType based on userID or find user in database
+            UserType userType = determineUserType(userID);
+
+            return IntrospectV2ResponseDto.builder()
+                    .isAuth(true)
+                    .userID(userID)
+                    .username(username)
+                    .role(role)
+                    .userType(userType)
+                    .build();
+
+        } catch (Exception e) {
+            return IntrospectV2ResponseDto.builder()
+                    .isAuth(false)
+                    .userID(null)
+                    .username(null)
+                    .role(null)
+                    .userType(null)
+                    .build();
+        }
+    }
+
+    /**
+     * Extract role from scope string
+     * Input: "ROLE_ADMIN DELETE_CUSTOMER GET_STAFF_LIST UPDATE_STAFF_DETAIL..."
+     * Output: "ADMIN"
+     */
+    private String extractRoleFromScope(String scope) {
+        if (scope == null || scope.isEmpty()) {
+            return null;
+        }
+
+        // Split scope by spaces and find the ROLE_ prefix
+        String[] scopeParts = scope.split(" ");
+        for (String part : scopeParts) {
+            if (part.startsWith("ROLE_")) {
+                // Remove "ROLE_" prefix and return the role
+                return part.substring(5); // "ROLE_ADMIN" -> "ADMIN"
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine user type based on userID
+     * Check if userID exists in Customer or Staff table
+     */
+    private UserType determineUserType(String userID) {
+        if (userID == null || userID.isEmpty()) {
+            return null;
+        }
+
+        // Check if user exists in Customer table
+        if (customerRepo.findById(userID).isPresent()) {
+            return UserType.CUSTOMER;
+        }
+
+        // Check if user exists in Staff table
+        if (staffRepo.findById(userID).isPresent()) {
+            return UserType.STAFF;
+        }
+
+        return null;
     }
 }

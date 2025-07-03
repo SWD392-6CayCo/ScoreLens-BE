@@ -3,7 +3,9 @@ package com.scorelens.Service;
 import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
 import com.scorelens.DTOs.Request.CustomerCreateRequestDto;
 import com.scorelens.DTOs.Request.CustomerUpdateRequestDto;
+import com.scorelens.DTOs.Request.PageableRequestDto;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
+import com.scorelens.DTOs.Response.PageableResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Enums.StatusType;
 import com.scorelens.Exception.AppException;
@@ -17,6 +19,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -188,4 +195,66 @@ public class CustomerService implements ICustomerService {
     }
     //    --------------------------------------------------------------------------
 
+    //-------------------------------- PAGINATION ---------------------------------
+    public PageableResponseDto<CustomerResponseDto> getCustomersWithPagination(PageableRequestDto request) {
+        // Create sort
+        Sort sort = Sort.by(
+                "asc".equalsIgnoreCase(request.getSortDirection())
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC,
+                request.getSortBy()
+        );
+
+        // Create pageable
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
+
+        // Create specification for filtering
+        Specification<Customer> spec = createCustomerSpecification(request);
+
+        // Get page data
+        Page<Customer> customerPage = customerRepo.findAll(spec, pageable);
+
+        // Convert to DTO
+        List<CustomerResponseDto> customerDtos = customerMapper.toDtoList(customerPage.getContent());
+
+        return PageableResponseDto.<CustomerResponseDto>builder()
+                .content(customerDtos)
+                .page(customerPage.getNumber() + 1) // Convert 0-based to 1-based for response
+                .size(customerPage.getSize())
+                .totalElements(customerPage.getTotalElements())
+                .totalPages(customerPage.getTotalPages())
+                .first(customerPage.isFirst())
+                .last(customerPage.isLast())
+                .empty(customerPage.isEmpty())
+                .sortBy(request.getSortBy())
+                .sortDirection(request.getSortDirection())
+                .build();
+    }
+
+    private Specification<Customer> createCustomerSpecification(PageableRequestDto request) {
+        return (root, query, criteriaBuilder) -> {
+            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+
+            // Search by name, email, or phone
+            if (request.getSearch() != null && !request.getSearch().trim().isEmpty()) {
+                String searchPattern = "%" + request.getSearch().toLowerCase() + "%";
+                var searchPredicate = criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("phoneNumber")), searchPattern)
+                );
+                predicates.add(searchPredicate);
+            }
+
+            // Filter by status
+            if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+                StatusType statusType = "active".equalsIgnoreCase(request.getStatus())
+                    ? StatusType.active
+                    : StatusType.inactive;
+                predicates.add(criteriaBuilder.equal(root.get("status"), statusType));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+    }
 }

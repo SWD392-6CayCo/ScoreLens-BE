@@ -1,8 +1,10 @@
 package com.scorelens.Service;
 
 import com.scorelens.DTOs.Request.ChangePasswordRequestDto;
+import com.scorelens.DTOs.Request.PageableRequestDto;
 import com.scorelens.DTOs.Request.StaffCreateRequestDto;
 import com.scorelens.DTOs.Request.StaffUpdateRequestDto;
+import com.scorelens.DTOs.Response.PageableResponseDto;
 import com.scorelens.DTOs.Response.StaffResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.IDSequence;
@@ -22,6 +24,11 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -273,4 +280,78 @@ public class StaffService implements IStaffService {
         return check;
     }
     //    --------------------------------------------------------------------------
+
+    //-------------------------------- PAGINATION ---------------------------------
+    public PageableResponseDto<StaffResponseDto> getStaffsWithPagination(PageableRequestDto request, String storeId, String role) {
+        // Create sort
+        Sort sort = Sort.by(
+                "asc".equalsIgnoreCase(request.getSortDirection())
+                    ? Sort.Direction.ASC
+                    : Sort.Direction.DESC,
+                request.getSortBy()
+        );
+
+        // Create pageable
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
+
+        // Create specification for filtering
+        Specification<Staff> spec = createStaffSpecification(request, storeId, role);
+
+        // Get page data
+        Page<Staff> staffPage = staffRepository.findAll(spec, pageable);
+
+        // Convert to DTO
+        List<StaffResponseDto> staffDtos = staffMapper.toDto(staffPage.getContent());
+
+        return PageableResponseDto.<StaffResponseDto>builder()
+                .content(staffDtos)
+                .page(staffPage.getNumber() + 1) // Convert 0-based to 1-based for response
+                .size(staffPage.getSize())
+                .totalElements(staffPage.getTotalElements())
+                .totalPages(staffPage.getTotalPages())
+                .first(staffPage.isFirst())
+                .last(staffPage.isLast())
+                .empty(staffPage.isEmpty())
+                .sortBy(request.getSortBy())
+                .sortDirection(request.getSortDirection())
+                .build();
+    }
+
+    private Specification<Staff> createStaffSpecification(PageableRequestDto request, String storeId, String role) {
+        return (root, query, criteriaBuilder) -> {
+            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+
+            // Search by name, email, or phone
+            if (request.getSearch() != null && !request.getSearch().trim().isEmpty()) {
+                String searchPattern = "%" + request.getSearch().toLowerCase() + "%";
+                var searchPredicate = criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("phoneNumber")), searchPattern)
+                );
+                predicates.add(searchPredicate);
+            }
+
+            // Filter by status
+            if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+                StatusType statusType = "active".equalsIgnoreCase(request.getStatus())
+                    ? StatusType.active
+                    : StatusType.inactive;
+                predicates.add(criteriaBuilder.equal(root.get("status"), statusType));
+            }
+
+            // Filter by store ID
+            if (storeId != null && !storeId.trim().isEmpty()) {
+                predicates.add(criteriaBuilder.equal(root.get("store").get("storeID"), storeId));
+            }
+
+            // Filter by role
+            if (role != null && !role.trim().isEmpty()) {
+                var roleJoin = root.join("roles");
+                predicates.add(criteriaBuilder.equal(roleJoin.get("name"), role));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+    }
 }

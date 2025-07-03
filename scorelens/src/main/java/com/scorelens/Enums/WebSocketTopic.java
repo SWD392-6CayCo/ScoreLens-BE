@@ -8,9 +8,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum WebSocketTopic {
 
-    NOTI_LOGGING("/topic/logging_notification"),
-    NOTI_SHOT("/topic/shot_event"),
-    NOTI_NOTIFICATION("/topic/notification"),
+    NOTI_LOGGING("/topic/logging_notification/"),
+    NOTI_SHOT("/topic/shot_event/"),
+    NOTI_NOTIFICATION("/topic/notification/"),
     ;
 
 

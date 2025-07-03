@@ -3,6 +3,7 @@ package com.scorelens.Controller.v2;
 import com.nimbusds.jose.JOSEException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
+import com.scorelens.DTOs.Response.IntrospectV2ResponseDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Security.TokenCookieManager;
 import com.scorelens.Service.AuthenticationService;
@@ -18,6 +19,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.Map;
 
 @Tag(name = "Authentication", description = "Authentication APIs")
 @RestController
@@ -53,25 +55,26 @@ public class AuthenticationV2Controller {
                 .build();
     }
 
-    @PostMapping("/logout")
-    ResponseObject logout(@CookieValue("AccessToken") String accessToken,
-                          @CookieValue("RefreshToken") String refreshToken,
-                          HttpServletResponse response)
-            throws ParseException, JOSEException {
-        authenticationService.logout(accessToken, refreshToken);
-        tokenCookieManager.clearAuthCookies(response);
-        return ResponseObject.builder()
-                .status(1000)
-                .message("Logout succesfully")
-                .build();
-    }
+
 
     @PostMapping("/introspect")
-    ResponseObject authenticate(@RequestBody IntrospectRequestDto request)
-            throws ParseException, JOSEException {
-        var result = authenticationService.introspect(request);
+    ResponseObject introspect(@CookieValue(value = "AccessToken", required = false) String accessToken) {
+        var result = authenticationService.introspectV2(accessToken);
+
+        String message;
+        if (!result.isAuth()) {
+            if (accessToken == null || accessToken.isEmpty()) {
+                message = "No authentication token found";
+            } else {
+                message = "Invalid authentication token";
+            }
+        } else {
+            message = "Authentication status retrieved successfully";
+        }
+
         return ResponseObject.builder()
                 .status(1000)
+                .message(message)
                 .data(result)
                 .build();
     }
@@ -106,5 +109,24 @@ public class AuthenticationV2Controller {
                 .build();
     }
 
+    @PostMapping("/logout")
+    public ResponseObject logout(@CookieValue(value = "AccessToken", required = false) String accessToken,
+                                 @CookieValue(value = "RefreshToken", required = false) String refreshToken,
+                                 HttpServletResponse response) throws ParseException, JOSEException {
+
+        // Logout và blacklist tokens
+        if (accessToken != null || refreshToken != null) {
+            authenticationService.logout(accessToken, refreshToken);
+        }
+
+        // Clear cookies
+        tokenCookieManager.clearAuthCookies(response);
+
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Logout successfully")
+                .data(null)
+                .build();
+    }
 
 }

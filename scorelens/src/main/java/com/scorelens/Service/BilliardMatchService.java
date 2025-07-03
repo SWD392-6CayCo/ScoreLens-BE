@@ -12,15 +12,14 @@ import com.scorelens.Mapper.BilliardMatchMapper;
 import com.scorelens.Repository.*;
 import com.scorelens.Service.Interface.IBilliardMatchService;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class BilliardMatchService implements IBilliardMatchService {
@@ -65,6 +64,14 @@ public class BilliardMatchService implements IBilliardMatchService {
     }
 
     @Override
+    public BilliardMatchResponse getOnGoingMatch(String billiardTableID){
+        //k check null, neu null thi van tra ve null
+        return billiardMatchMapper.toBilliardMatchResponse(
+                repository.findByTableAndOngoing(billiardTableID)
+        );
+    }
+
+    @Override
     public List<BilliardMatchResponse> getByCustomer(String id){
         Customer customer = customerRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
@@ -97,6 +104,7 @@ public class BilliardMatchService implements IBilliardMatchService {
     }
 
     @Override
+    @Transactional
     public BilliardMatchResponse createMatch(BilliardMatchCreateRequest request) {
         BilliardMatch match = billiardMatchMapper.toBilliardMatch(request);
         if (request.getStaffID() == null && request.getCustomerID() == null) {
@@ -420,9 +428,9 @@ public class BilliardMatchService implements IBilliardMatchService {
         return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 
+    @Override
     public String completeMatch(Integer id) {
-        BilliardMatch match = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+        BilliardMatch match = findMatchByID(id);
         match.setStatus(MatchStatus.completed);
         repository.save(match);
         return "Match with ID " + id + " has been completed";
@@ -468,5 +476,17 @@ public class BilliardMatchService implements IBilliardMatchService {
             }
         }
         return billiardMatchMapper.toBilliardMatchResponses(filtered);
+    }
+    public BilliardMatch findMatchByID(Integer id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+    }
+
+
+    public String startMatch(int billiardMatchID){
+        BilliardMatch m = findMatchByID(billiardMatchID);
+        m.setStatus(MatchStatus.ongoing);
+        repository.save(m);
+        return "Match with ID " + billiardMatchID + " has been started";
     }
 }

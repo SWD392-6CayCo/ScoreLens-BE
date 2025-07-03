@@ -5,7 +5,7 @@ import com.scorelens.DTOs.Request.InformationRequest;
 import com.scorelens.DTOs.Request.ProducerRequest;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.KafkaCode;
-import com.scorelens.Service.Consumer.KafkaProducer;
+import com.scorelens.Service.KafkaService.KafkaProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class KafkaProducerController {
     }
 
     @PostMapping("/send/information")
-    public ResponseObject sendInfomation(@RequestBody InformationRequest request) {
+    public ResponseObject sendInformation(@RequestBody InformationRequest request) {
         kafkaProducer.sendEvent(request);
         return ResponseObject.builder()
                 .status(1000)
@@ -41,9 +41,19 @@ public class KafkaProducerController {
                 .build();
     }
 
+    @PostMapping("/send/information/{id}")
+    public ResponseObject sendInformation(@RequestBody InformationRequest request, @PathVariable String id) {
+        kafkaProducer.sendEvent(id, request);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Successfully sent message")
+                .build();
+    }
+
+
     @PostMapping("send/stop")
     public ResponseObject sendStop() {
-        kafkaProducer.sendEvent(new ProducerRequest(KafkaCode.STOP_STREAM, "Stop stream"));
+        kafkaProducer.sendEvent(new ProducerRequest(KafkaCode.STOP_STREAM,"", "Stop stream"));
         return ResponseObject.builder()
                 .status(1000)
                 .message("Successfully sent message")

@@ -1,6 +1,7 @@
 package com.scorelens.Service;
 
 import com.scorelens.DTOs.Request.BilliardTableRequest;
+import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.DTOs.Response.BilliardTableResponse;
 import com.scorelens.Entity.BilliardTable;
 import com.scorelens.Entity.Store;
@@ -100,12 +101,27 @@ public class BilliardTableService implements IBilliardTableService {
     }
 
     @Override
-    public BilliardTableResponse updateBilliardTable(String billiardTableID, String status) {
+    public BilliardTableResponse updateBilliardTable(String billiardTableID, TableStatus status) {
         BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)
                 .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
-        billiardTable.setStatus(TableStatus.valueOf(status));
+        billiardTable.setStatus(status);
         billiardTableRepo.save(billiardTable);
         return billiardTableMapper.toBilliardTableResponse(billiardTable);
+    }
+
+    @Override
+    public void setInUse(String billiardTableID) {
+        updateBilliardTable(billiardTableID, TableStatus.inUse);
+    }
+
+    @Override
+    public void setAvailable(String billiardTableID) {
+        updateBilliardTable(billiardTableID, TableStatus.available);
+    }
+
+    @Override
+    public void setUnderMaintenance(String billiardTableID) {
+        updateBilliardTable(billiardTableID, TableStatus.underMaintainance);
     }
 
 
@@ -128,8 +144,9 @@ public class BilliardTableService implements IBilliardTableService {
     @Override
     public List<BilliardTableResponse> getTablesByStore(String storeID) {
         List<BilliardTable> list = billiardTableRepo.findAllByStore_StoreID(storeID);
+        List<BilliardTableResponse> response = billiardTableMapper.toBilliardTableResponsesList(list);
         if (list.isEmpty()) throw new AppException(ErrorCode.EMPTY_LIST);
-        return billiardTableMapper.toBilliardTableResponsesList(list);
+        return response;
     }
 
 

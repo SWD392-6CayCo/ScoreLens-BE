@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
             "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout", "/v*/auth/refresh",
 //            "/v*/",
-            "/v*/ping"
+            "/v*/ping",
+            "index.html"
 
 
     };
@@ -72,18 +73,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
-//                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-//                .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
-//                .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
-//                .requestMatchers(HttpMethod.PUT, "v*/teams/*").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
-//                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches").permitAll()
-//
-//                .anyRequest().authenticated());
+                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
+                .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "v*/teams/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches").permitAll()
 
-                .anyRequest().permitAll());
+                .anyRequest().authenticated());
 
         http.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->

@@ -28,21 +28,21 @@
         // WebSocket receive → forward to /topic/notification
         @MessageMapping("/noti.send")
         public void handleNotification(String message) {
-            messagingTemplate.convertAndSend("/topic/notification", message);
+            messagingTemplate.convertAndSend("/topic/notification/23374e21-2391-41b0-b275-651df88b3b04", message);
             System.out.println("Received noti: " + message);
         }
 
         // WebSocket receive → forward to /topic/logging_notification
         @MessageMapping("/log.send")
         public void handleLoggingNotification(String message) {
-            messagingTemplate.convertAndSend("/topic/logging_notification", message);
+            messagingTemplate.convertAndSend("/topic/logging_notification/23374e21-2391-41b0-b275-651df88b3b04", message);
         }
 
         // REST API forward to notification topic
         @PostMapping("/send-notification")
         public ResponseObject sendNotification(@RequestParam String message) {
             log.info("Sending notification: " + message);
-            messagingTemplate.convertAndSend("/topic/notification", message);
+            messagingTemplate.convertAndSend("/topic/notification/23374e21-2391-41b0-b275-651df88b3b04", message);
             return ResponseObject.builder()
                     .status(1000)
                     .message(message)
@@ -54,7 +54,7 @@
         @PostMapping("/send-logging")
         public ResponseObject sendLogging(@RequestParam String message) {
             log.info("Sending logging message: " + message);
-            messagingTemplate.convertAndSend("/topic/logging_notification", message);
+            messagingTemplate.convertAndSend("/topic/logging_notification/23374e21-2391-41b0-b275-651df88b3b04", message);
             return ResponseObject.builder()
                     .status(1000)
                     .message(message)
@@ -66,7 +66,7 @@
         @PostMapping("/shot_event")
         public ResponseObject shotEvent(@RequestBody ShotEvent event) {
             log.info("Sending shot event: " + event);
-            messagingTemplate.convertAndSend("/topic/shot_event", event);
+            messagingTemplate.convertAndSend("/topic/shot_event/23374e21-2391-41b0-b275-651df88b3b04", event);
             return ResponseObject.builder()
                     .status(1000)
                     .message("shot event")
