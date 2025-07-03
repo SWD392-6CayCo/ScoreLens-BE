@@ -60,6 +60,8 @@ public class EventProcessorService {
             //xử lí shot và gửi msg qua websocket
             handlingEvent(event, tableID);
 
+
+
 //            // Thêm event vào DB
 //            EventResponse e = eventService.addEvent(event);
 //            log.info("New event is added: {}", e);
@@ -133,6 +135,9 @@ public class EventProcessorService {
 
 //        gửi thông báo qua web socket bằng topic: shot_event
         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue() + tableID, shot);
+        log.info("Send websocket to: /topic/shot_event/" + tableID);
+        log.info(shot.toString());
+
     }
 
 
