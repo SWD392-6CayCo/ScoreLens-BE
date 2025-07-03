@@ -1,9 +1,6 @@
 package com.scorelens.Controller.v1;
 
-import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
-import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
-import com.scorelens.DTOs.Request.GameSetCreateRequest;
-import com.scorelens.DTOs.Request.ScoreRequest;
+import com.scorelens.DTOs.Request.*;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.BilliardMatchService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @Slf4j
 @Tag(name = "Billiard Match", description = "Manage Billiard Match")
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BilliardMatchV1Controller {
-
     @Autowired
     BilliardMatchService billiardMatchService;
 
@@ -33,6 +32,22 @@ public class BilliardMatchV1Controller {
                         .message("Get Match information successfully")
                         .data(billiardMatchService.getById(id))
                         .build();
+    }
+
+    @GetMapping("/filtering")
+    public ResponseObject getFilter(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date,
+                                    @RequestParam(required = false) String status,
+                                    @RequestParam(required = false) Integer modeID
+    ) {
+        MatchFilterRequest request = new MatchFilterRequest();
+        request.setDate(date);
+        request.setStatus(status);
+        request.setModeID(modeID);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Get Matchs information successfully")
+                .data(billiardMatchService.getFilter(request))
+                .build();
     }
 
     @GetMapping("/bycreator/customer/{id}")

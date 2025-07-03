@@ -42,6 +42,14 @@ public class GameSet {
     private BilliardMatch billiardMatch;
 
     @OneToMany(mappedBy = "gameSet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Event> events = new ArrayList<>();
+
+    public void addEvent(Event event) {
+        events.add(event);
+        event.setGameSet(this);
+    }
+
+    @OneToMany(mappedBy = "gameSet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamSet> tss = new ArrayList<>();
 
     public void addTeamSet(TeamSet teamSet) {

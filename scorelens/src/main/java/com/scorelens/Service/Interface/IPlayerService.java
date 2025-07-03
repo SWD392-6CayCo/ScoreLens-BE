@@ -1,5 +1,6 @@
 package com.scorelens.Service.Interface;
 
+import com.scorelens.DTOs.Request.CustomerSaveRequest;
 import com.scorelens.DTOs.Request.PlayerCreateRequest;
 import com.scorelens.DTOs.Request.PlayerUpdateRequest;
 import com.scorelens.DTOs.Response.PlayerResponse;
@@ -23,6 +24,6 @@ public interface IPlayerService {
     PlayerResponse updatePlayer(Integer id, PlayerUpdateRequest request);
     Integer delete(Integer id);
     void deletePlayer(int id);
-    PlayerResponse updateCustomer(Integer id, String info);
+    PlayerResponse updateCustomer(Integer id, CustomerSaveRequest request);
 
 }
