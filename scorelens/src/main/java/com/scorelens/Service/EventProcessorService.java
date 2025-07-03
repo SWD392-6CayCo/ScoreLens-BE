@@ -59,7 +59,7 @@ public class EventProcessorService {
 
             //xử lí shot và gửi msg qua websocket
             handlingEvent(event, tableID);
-            
+
             // Thêm event vào DB
             EventResponse e = eventService.addEvent(event);
             log.info("New event is added: {}", e);
@@ -118,13 +118,10 @@ public class EventProcessorService {
 
         ShotEvent shot = new ShotEvent();
         // nếu AI k chắc chắn => undetected
-        ShotResult result = isUncertain ? ShotResult.UNDETECTED
-                // AI chắc chắn shot đánh foul
-                : (isFoul ? ShotResult.MISSED
-                // AI chắc chắn shot scored
-                : (scoreValue ? ShotResult.SCORED
-                // nếu không xác định
-                : ShotResult.UNKNOWN));
+        ShotResult result = !isUncertain && !isFoul && !scoreValue ? ShotResult.MISSED
+                : isUncertain ? ShotResult.UNDETECTED
+                : scoreValue ? ShotResult.SCORED
+                : ShotResult.FOUL;
 
         shot.setTime(LocalTime.now());
         shot.setShot(String.format("SHOT #%02d", shotCount));

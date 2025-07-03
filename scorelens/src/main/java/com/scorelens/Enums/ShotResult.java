@@ -4,5 +4,6 @@ public enum ShotResult {
     SCORED,
     MISSED,
     UNDETECTED,
-    UNKNOWN
+    UNKNOWN,
+    FOUL
 }
