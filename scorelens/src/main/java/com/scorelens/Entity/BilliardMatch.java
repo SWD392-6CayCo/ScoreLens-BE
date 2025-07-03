@@ -78,4 +78,12 @@ public class BilliardMatch {
         teams.add(team);
         team.setBilliardMatch(this);
     }
+
+    @OneToMany(mappedBy = "billiardMatch", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notis = new ArrayList<>();
+
+    public void addNotification(Notification notification) {
+        notis.add(notification);
+        notification.setBilliardMatch(this);
+    }
 }

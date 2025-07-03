@@ -1,9 +1,6 @@
 package com.scorelens.Controller.v1;
 
-import com.scorelens.DTOs.Request.PlayerCreateRequest;
-import com.scorelens.DTOs.Request.PlayerUpdateRequest;
-import com.scorelens.DTOs.Request.TeamCreateRequest;
-import com.scorelens.DTOs.Request.TeamUpdateRequest;
+import com.scorelens.DTOs.Request.*;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Service.PlayerService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,11 +57,11 @@ public class PlayerV1Controller {
     }
 
     @PutMapping("/save/{id}")
-    public ResponseObject saveCustomer(@PathVariable Integer id, @RequestBody String info) {
+    public ResponseObject saveCustomer(@PathVariable Integer id, @RequestBody CustomerSaveRequest request) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Update Player information successfully")
-                .data(playerService.updateCustomer(id, info))
+                .data(playerService.updateCustomer(id, request))
                 .build();
     }
 

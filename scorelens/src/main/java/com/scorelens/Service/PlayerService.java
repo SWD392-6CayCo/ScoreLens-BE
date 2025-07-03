@@ -1,5 +1,6 @@
 package com.scorelens.Service;
 
+import com.scorelens.DTOs.Request.CustomerSaveRequest;
 import com.scorelens.DTOs.Request.PlayerCreateRequest;
 import com.scorelens.DTOs.Request.PlayerUpdateRequest;
 import com.scorelens.DTOs.Response.PlayerResponse;
@@ -98,16 +99,19 @@ public class PlayerService implements IPlayerService {
     }
 
     @Override
-    public PlayerResponse updateCustomer(Integer id, String info) {   // email or phone number
+    public PlayerResponse updateCustomer(Integer id, CustomerSaveRequest request) {   // email or phone number
         Player player = playerRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PLAYER_NOT_FOUND));
-        if (info.matches("\\d+")){
-            Customer c = customerRepo.findByPhoneNumber(info)
+        if (player.getCustomer() != null) {
+            throw new AppException(ErrorCode.PLAYER_SAVED);
+        }
+        if (request.getInfo().matches("\\d+")){
+            Customer c = customerRepo.findByPhoneNumber(request.getInfo())
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
             player.setCustomer(c);
             player.setName(c.getName());
         }else{
-            Customer c = customerRepo.findByEmail(info)
+            Customer c = customerRepo.findByEmail(request.getInfo())
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
             player.setCustomer(c);
             player.setName(c.getName());
