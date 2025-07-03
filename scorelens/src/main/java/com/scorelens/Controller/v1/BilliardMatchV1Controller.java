@@ -2,11 +2,13 @@ package com.scorelens.Controller.v1;
 
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
+import com.scorelens.DTOs.Response.GameSetResponse;
 import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.MatchStatus;
 import com.scorelens.Service.BilliardMatchService;
 import com.scorelens.Service.BilliardTableService;
+import com.scorelens.Service.EventProcessorService;
 import com.scorelens.Service.KafkaService.KafkaProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -15,6 +17,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Tag(name = "Billiard Match", description = "Manage Billiard Match")
@@ -33,6 +38,8 @@ public class BilliardMatchV1Controller {
     KafkaProducer producer;
 
     GameSetV1Controller gameSetController;
+
+    EventProcessorService eventProcessorService;
 
 
     @GetMapping("/{id}")
@@ -112,6 +119,15 @@ public class BilliardMatchV1Controller {
     @PutMapping("/score")
     public ResponseObject updateScore(@RequestBody ScoreRequest request) {
         BilliardMatchResponse rs = billiardMatchService.updateScore(request);
+
+        //free matchID & gameSetID in queue
+        eventProcessorService.resetMatchState(rs.getBilliardMatchID());
+        List<Integer> gameSetIDList = rs.getSets()
+                .stream()
+                .map(GameSetResponse::getGameSetID)
+                .toList();
+        eventProcessorService.resetGameSetState(gameSetIDList);
+
         if (rs.getStatus().equals(MatchStatus.completed))
             //free table
             billiardTableService.setAvailable(String.valueOf(rs.getBilliardMatchID()));
