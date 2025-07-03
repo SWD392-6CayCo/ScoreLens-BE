@@ -13,9 +13,28 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // WebSocket endpoint with SockJS fallback (for web browsers)
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:5173",
+                    "https://localhost:5173",
+                    "https://score-lens.vercel.app",
+                    "exp://192.168.90.68:8081",
+                    "https://scorelens.onrender.com"
+                )
                 .withSockJS();
+
+        // Native WebSocket endpoint (for mobile apps)
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:5173",
+                    "https://localhost:5173",
+                    "https://score-lens.vercel.app",
+                    "exp://192.168.90.68:8081",
+                    "https://scorelens.onrender.com"
+                );
     }
 
     @Override
