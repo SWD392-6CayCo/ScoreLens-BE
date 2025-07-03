@@ -15,6 +15,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -90,11 +91,19 @@ public class EventProcessorService {
     /**
      * Reset trạng thái gameSet và match đã start — dùng khi kết thúc match
      */
-    public void resetGameSetAndMatchState() {
-        gameSetStartedMap.clear();
-        matchStartedMap.clear();
-        log.info("Reset gameSetStartedMap and matchStartedMap");
+    public void resetGameSetState(List<Integer> gameSetIDs) {
+        gameSetIDs.forEach(id -> {
+            gameSetStartedMap.remove(id);
+            log.info("Removed gameSetID: {} from gameSetStartedMap", id);
+        });
     }
+
+
+    public void resetMatchState(int matchID) {
+        matchStartedMap.remove(matchID);
+        log.info("Removed matchID: {} from matchStartedMap", matchID);
+    }
+
 
 
     // xác định shot event
