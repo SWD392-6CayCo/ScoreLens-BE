@@ -11,11 +11,13 @@ import com.scorelens.Repository.RoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -26,9 +28,14 @@ public class RoleService {
     RoleMapper roleMapper;
 
     public RoleResponse create(RoleRequest request) {
+        log.info("Creating role with name: {} and permissions: {}", request.getName(), request.getPermissions());
+
         var role = roleMapper.toRole(request);
         var permissions = permissionRepository.findAllById(request.getPermissions());
+        log.info("Found {} permissions in database", permissions.size());
+
         role.setPermissions(new HashSet<>(permissions));
+        log.info("Set permissions to role: {}", role.getPermissions().size());
 
         //Lấy prefix: 2 chữ cái đầu tiên của role name
         String prefix = role.getName().substring(0, 2).toUpperCase();
@@ -41,7 +48,9 @@ public class RoleService {
         }
 
         roleRepository.save(role);
-        return roleMapper.toRoleResponse(role);
+        var response = roleMapper.toRoleResponse(role);
+        log.info("Returning role response with {} permissions", response.getPermissions() != null ? response.getPermissions().size() : 0);
+        return response;
     }
     public List<RoleResponse> getAll() {
         return roleRepository.findAll()
