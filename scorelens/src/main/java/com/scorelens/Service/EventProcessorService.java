@@ -40,6 +40,7 @@ public class EventProcessorService {
      */
     @Transactional
     public void processEvent(ProducerRequest request) {
+        String tableID = request.getTableID();
         try {
             // Convert data (LinkedHashMap) -> LogMessageRequest
             LogMessageRequest lmr = mapper.convertValue(request.getData(), LogMessageRequest.class);
@@ -47,7 +48,7 @@ public class EventProcessorService {
             log.info("LogMessageRequest converted: {}", lmr);
 
             // Push message lên WebSocket topic "/topic/logging_notification"
-            webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue(), lmr);
+            webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue() + tableID, lmr);
 
             // Lấy event detail trong log
             EventRequest event = lmr.getDetails();
@@ -57,31 +58,31 @@ public class EventProcessorService {
             }
 
             //xử lí shot và gửi msg qua websocket
-            handlingEvent(event);
+            handlingEvent(event, tableID);
 
-            // Thêm event vào DB
-            EventResponse e = eventService.addEvent(event);
-            log.info("New event is added: {}", e);
-
-            Integer gameSetID = event.getGameSetID();
-
-            // Nếu gameSet chưa start thì start
-            if (!gameSetStartedMap.containsKey(gameSetID)) {
-                //update game_set status
-                GameSet startedGameSet = gameSetService.startSet(gameSetID);
-                log.info("Started gameSet with id: {}", startedGameSet.getGameSetID());
-                gameSetStartedMap.put(gameSetID, true);
-
-                Integer matchID = startedGameSet.getBilliardMatch().getBilliardMatchID();
-
-                // Nếu match chưa start thì start
-                if (!matchStartedMap.containsKey(matchID)) {
-                    //update match status
-                    String startMatchLog = billiardMatchService.startMatch(matchID);
-                    log.info(startMatchLog);
-                    matchStartedMap.put(matchID, true);
-                }
-            }
+//            // Thêm event vào DB
+//            EventResponse e = eventService.addEvent(event);
+//            log.info("New event is added: {}", e);
+//
+//            Integer gameSetID = event.getGameSetID();
+//
+//            // Nếu gameSet chưa start thì start
+//            if (!gameSetStartedMap.containsKey(gameSetID)) {
+//                //update game_set status
+//                GameSet startedGameSet = gameSetService.startSet(gameSetID);
+//                log.info("Started gameSet with id: {}", startedGameSet.getGameSetID());
+//                gameSetStartedMap.put(gameSetID, true);
+//
+//                Integer matchID = startedGameSet.getBilliardMatch().getBilliardMatchID();
+//
+//                // Nếu match chưa start thì start
+//                if (!matchStartedMap.containsKey(matchID)) {
+//                    //update match status
+//                    String startMatchLog = billiardMatchService.startMatch(matchID);
+//                    log.info(startMatchLog);
+//                    matchStartedMap.put(matchID, true);
+//                }
+//            }
 
         } catch (Exception ex) {
             log.error("Error while processing LOGGING message: {}", ex.getMessage());
@@ -107,7 +108,7 @@ public class EventProcessorService {
 
 
     // xác định shot event
-    public void handlingEvent(EventRequest request) {
+    public void handlingEvent(EventRequest request, String tableID) {
         boolean isFoul = request.isFoul();
         boolean scoreValue = request.isScoreValue();
         boolean isUncertain = request.isUncertain();
@@ -131,7 +132,7 @@ public class EventProcessorService {
         shot.setResult(result.name());
 
 //        gửi thông báo qua web socket bằng topic: shot_event
-        webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue(), shot);
+        webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue() + tableID, shot);
     }
 
 

@@ -6,6 +6,7 @@ import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Enums.WebSocketCode;
+import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +68,7 @@ public class KafkaListeners {
     //xử lí enum KafkaCode
     private void handlingKafkaCode(ProducerRequest request) {
         KafkaCode code = request.getCode();
+        String tableID = request.getTableID();
         try {
             switch (code) {
                 case RUNNING:
@@ -74,9 +76,10 @@ public class KafkaListeners {
                     kafkaHeartBeat.updateLastConfirmedTime();
                     //xac nhan da nhan res tu py
                     CompletableFuture<Boolean> tmp = heartbeatService.confirmHeartbeat();
+
                     log.info("CompletableFuture: {}", tmp);
                     webSocketService.sendToWebSocket(
-                            "/topic/notification",
+                            WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                             new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
                     );
                     break;
@@ -86,7 +89,7 @@ public class KafkaListeners {
                 case DELETE_CONFIRM:
                     int deleteCount = (Integer) request.getData();
                     webSocketService.sendToWebSocket(
-                            "/topic/notification",
+                            WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                             new WebsocketReq(WebSocketCode.WARNING, "Delete Event count: " + deleteCount));
                     break;
 
