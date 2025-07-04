@@ -55,8 +55,8 @@
     let stompClient = null;
 
     function connect() {
-        const socket = new SockJS('https://scorelens.onrender.com/ws');
-        // const socket = new SockJS('http://localhost:8080/ws');
+        // const socket = new SockJS('https://scorelens.onrender.com/ws');
+        const socket = new SockJS('http://localhost:8080/ws');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function (frame) {
