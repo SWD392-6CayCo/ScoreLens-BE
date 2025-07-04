@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>WebSocket Multi-Topic Demo</title>
+
+    <!-- Load STOMP client từ unpkg chuẩn -->
     <script src="https://unpkg.com/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         #messages { margin-top: 20px; }
@@ -14,11 +17,11 @@
 </head>
 <body>
 
-<h1>WebSocket</h1>
+<h1>WebSocket Test</h1>
 
 <input type="text" id="messageInput" placeholder="Type a message..."/>
-<button onclick="sendNotification()">Send Notification</button>
-<button onclick="sendLogging()">Send Logging</button>
+<button id="sendNotiBtn" onclick="sendNotification()">Send Notification</button>
+<button id="sendLogBtn" onclick="sendLogging()">Send Logging</button>
 
 <div id="messages"></div>
 
@@ -39,7 +42,6 @@
     let client = null;
 
     function connect() {
-<<<<<<< Updated upstream
         client = new StompJs.Client({
             brokerURL: 'ws://localhost:8080/ws',
             reconnectDelay: 5000,
@@ -47,15 +49,15 @@
                 console.log(str);
             }
         });
-=======
-        // const socket = new SockJS('https://scorelens.onrender.com/ws');
-        const socket = new SockJS('http://localhost:8080/ws');
-        stompClient = Stomp.over(socket);
->>>>>>> Stashed changes
 
         client.onConnect = function (frame) {
             console.log('Connected: ' + frame);
 
+            // Enable button khi kết nối thành công
+            document.getElementById('sendNotiBtn').disabled = false;
+            document.getElementById('sendLogBtn').disabled = false;
+
+            // Subscribe các topic
             client.subscribe('/topic/notification/23374e21-2391-41b0-b275-651df88b3b04', function (messageOutput) {
                 showMessage(messageOutput.body, 'notification');
             });
@@ -74,6 +76,11 @@
             console.error('WebSocket Error: ', err);
         };
 
+        client.onStompError = (frame) => {
+            console.error('Broker error: ' + frame.headers['message']);
+            console.error('Details: ' + frame.body);
+        };
+
         client.activate();
     }
 
@@ -88,7 +95,7 @@
             });
             messageInput.value = '';
         } else {
-            alert("Chưa kết nối WebSocket hoặc WebSocket chưa sẵn sàng!");
+            alert("WebSocket chưa kết nối!");
         }
     }
 
@@ -103,7 +110,7 @@
             });
             messageInput.value = '';
         } else {
-            alert("Chưa kết nối WebSocket hoặc WebSocket chưa sẵn sàng!");
+            alert("WebSocket chưa kết nối!");
         }
     }
 
@@ -129,8 +136,12 @@
         tableBody.appendChild(row);
     }
 
-    // Kết nối khi load trang
-    connect();
+    // Disable button khi chưa connect
+    window.onload = () => {
+        document.getElementById('sendNotiBtn').disabled = true;
+        document.getElementById('sendLogBtn').disabled = true;
+        connect();
+    };
 </script>
 
 </body>
