@@ -39,6 +39,7 @@
     let client = null;
 
     function connect() {
+<<<<<<< Updated upstream
         client = new StompJs.Client({
             brokerURL: 'ws://localhost:8080/ws',
             reconnectDelay: 5000,
@@ -46,6 +47,11 @@
                 console.log(str);
             }
         });
+=======
+        // const socket = new SockJS('https://scorelens.onrender.com/ws');
+        const socket = new SockJS('http://localhost:8080/ws');
+        stompClient = Stomp.over(socket);
+>>>>>>> Stashed changes
 
         client.onConnect = function (frame) {
             console.log('Connected: ' + frame);
