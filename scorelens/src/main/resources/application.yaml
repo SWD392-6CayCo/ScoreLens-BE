@@ -24,6 +24,7 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
   kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     ssl:
       key-store-location: ${KAFKA_KEYSTORE_LOCATION}
       key-store-password: ${KAFKA_KEYSTORE_PASSWORD}

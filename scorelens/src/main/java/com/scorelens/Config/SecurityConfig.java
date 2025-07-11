@@ -45,7 +45,7 @@ public class SecurityConfig {
             "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout", "/v*/auth/refresh",
 //            "/v*/",
             "/v*/ping",
-            "index.html",
+            "/index.html",
             "/ws/**"
 
 
@@ -77,7 +77,7 @@ public class SecurityConfig {
                 .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                 .requestMatchers(PERMISSION_ENDPOINTS).hasRole("ADMIN")
                 .requestMatchers(ROLE_ENDPOINTS).hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "v*/teams/*").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/v*/teams/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()

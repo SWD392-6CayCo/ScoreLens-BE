@@ -19,6 +19,9 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
@@ -41,7 +44,7 @@ public class KafkaConsumerConfig {
 
     private Map<String, Object> commonKafkaSSLProps() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "scorelens-minhdc-022d.e.aivencloud.com:15840");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         // deserializer cho key và value của kafka
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
