@@ -41,7 +41,7 @@ public class KafkaConsumerConfig {
 
     private Map<String, Object> commonKafkaSSLProps() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka-5c346d1-kafka-scorelens.f.aivencloud.com:26036");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "scorelens-minhdc-022d.e.aivencloud.com:15840");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         // deserializer cho key và value của kafka
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
