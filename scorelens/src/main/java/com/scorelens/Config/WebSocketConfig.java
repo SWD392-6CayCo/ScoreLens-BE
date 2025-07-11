@@ -11,10 +11,49 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 //Spring Boot WebSocket STOMP => server web socket riêng sử dụng STOMP protocol(Simple Text Oriented Messaging Protocol)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+//    @Override
+//    public void registerStompEndpoints(StompEndpointRegistry registry) {
+//        // WebSocket endpoint with SockJS fallback (for web browsers)
+//        registry.addEndpoint("/ws")
+//                .setAllowedOrigins(
+//                    "http://localhost:3000",
+//                    "http://localhost:5173",
+//                    "https://localhost:5173",
+//                    "https://score-lens.vercel.app",
+//                    "exp://192.168.90.68:8081",
+//                    "https://scorelens.onrender.com"
+//                );
+////                .withSockJS();
+//
+//        // Native WebSocket endpoint (for mobile apps)
+//        registry.addEndpoint("/ws")
+//                .setAllowedOrigins(
+//                    "http://localhost:3000",
+//                    "http://localhost:5173",
+//                    "https://localhost:5173",
+//                    "https://score-lens.vercel.app",
+//                    "exp://192.168.90.68:8081",
+//                    "https://scorelens.onrender.com"
+//                );
+//    }
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // 👉 Cho Web browser (dùng SockJS)
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*");
+                .setAllowedOrigins(
+                        "http://localhost:3000",
+                        "http://localhost:5173",
+                        "https://score-lens.vercel.app"
+                )
+                .withSockJS(); // Web sẽ fallback nếu cần
+
+        // 👉 Cho Mobile app (React Native) - native WebSocket
+        registry.addEndpoint("/ws-native")
+                .setAllowedOrigins(
+                        "exp://192.168.90.68:8081",
+                        "https://scorelens.onrender.com"
+                );
     }
 
     @Override

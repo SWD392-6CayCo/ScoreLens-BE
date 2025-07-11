@@ -42,7 +42,7 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-            "/v*/auth/login", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout", "/v*/auth/refresh",
+            "/v*/auth/login", "/v*/auth/login-google", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout", "/v*/auth/refresh",
 //            "/v*/",
             "/v*/ping",
             "/index.html",
@@ -128,7 +128,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "https://localhost:5173",
                 "https://score-lens.vercel.app",
-                "exp://192.168.90.68:8081"
+                "exp://192.168.90.68:8081",
+                "https://scorelens.onrender.com"
         ));
         //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
         corsConfiguration.setAllowCredentials(true);

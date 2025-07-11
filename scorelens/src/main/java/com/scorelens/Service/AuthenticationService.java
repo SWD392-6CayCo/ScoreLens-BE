@@ -9,6 +9,7 @@ import com.scorelens.DTOs.Request.AuthenticationRequestDto;
 import com.scorelens.DTOs.Request.IntrospectRequestDto;
 import com.scorelens.DTOs.Request.LogoutRequestDto;
 import com.scorelens.DTOs.Request.RefreshRequest;
+import com.scorelens.Dto.Request.LoginGoogleRequestDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDtoV2;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
@@ -16,6 +17,7 @@ import com.scorelens.DTOs.Response.IntrospectResponseDto;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.InvalidatedToken;
 import com.scorelens.Entity.Staff;
+import com.scorelens.Enums.StatusType;
 import com.scorelens.Enums.UserType;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
@@ -40,6 +42,7 @@ import org.springframework.util.CollectionUtils;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
@@ -244,6 +247,38 @@ public class AuthenticationService implements IAuthenticationService {
         }
         return IntrospectResponseDto.builder()
                 .valid(isValid)
+                .build();
+    }
+
+    public AuthenticationResponseDtoV2 authenticateGoogle(LoginGoogleRequestDto request) {
+        // Tìm customer theo email, nếu không có thì tạo mới
+        var customer = customerRepo.findByEmail(request.getEmail())
+                .orElseGet(() -> Customer.builder()
+                        .email(request.getEmail())
+                        .name(request.getName())
+                        .imageUrl(request.getPicture())
+                        .createAt(LocalDate.now())
+                        .status(StatusType.active)
+                        .build());
+
+        // Lưu customer nếu chưa tồn tại
+        if (!customerRepo.existsByEmail(request.getEmail())) {
+            customerRepo.save(customer);
+        }
+
+        // Tạo token
+        var token = generateToken(customer);
+        var refreshToken = generateToken(customer); // Sử dụng cùng method để tạo refresh token
+
+        // Map customer sang response DTO
+        CustomerResponseDto customerResponse = customerMapper.toDto(customer);
+
+        return AuthenticationResponseDtoV2.builder()
+                .authenticated(true)
+                .accessToken(token)
+                .refreshToken(refreshToken)
+                .user(customerResponse)
+                .userType(UserType.CUSTOMER)
                 .build();
     }
 }

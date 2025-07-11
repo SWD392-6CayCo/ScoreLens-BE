@@ -3,7 +3,9 @@ package com.scorelens.Controller.v2;
 import com.nimbusds.jose.JOSEException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.CustomerResponseDto;
+import com.scorelens.DTOs.Response.GoogleLoginResponseDto;
 import com.scorelens.DTOs.Response.IntrospectV2ResponseDto;
+import com.scorelens.Dto.Request.LoginGoogleRequestDto;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Security.TokenCookieManager;
 import com.scorelens.Service.AuthenticationService;
@@ -30,6 +32,7 @@ public class AuthenticationV2Controller {
 
     TokenCookieManager tokenCookieManager;
     AuthenticationV2Service authenticationService;
+    AuthenticationService authenticationServiceV1;
     CustomerService customerService;
 
     @PostMapping("/login")
@@ -106,6 +109,27 @@ public class AuthenticationV2Controller {
                 .status(1000)
                 .data(result.responseDto())
                 .message("Login successfully!!")
+                .build();
+    }
+
+    @PostMapping("/login-google")
+    ResponseObject authenticateGoogle(@RequestBody LoginGoogleRequestDto request, HttpServletResponse response) {
+        var result = authenticationServiceV1.authenticateGoogle(request);
+
+        // Lưu refreshtoken & accesstoken vào Cookie
+        tokenCookieManager.addAuthCookies(response, result.getAccessToken(), result.getRefreshToken());
+
+        // Tạo response DTO không chứa tokens
+        GoogleLoginResponseDto responseDto = GoogleLoginResponseDto.builder()
+                .authenticated(result.isAuthenticated())
+                .user(result.getUser())
+                .userType(result.getUserType())
+                .build();
+
+        return ResponseObject.builder()
+                .status(1000)
+                .data(responseDto)
+                .message("Login with Google successfully!!")
                 .build();
     }
 

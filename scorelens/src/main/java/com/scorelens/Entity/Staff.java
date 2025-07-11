@@ -50,7 +50,7 @@ public class Staff implements AppUser {
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "role", length = 20)
 //    StaffRole role; // STAFF, MANAGER, ADMIN
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "staff_roles",
             joinColumns = @JoinColumn(name = "staff_staffID", referencedColumnName = "staffID"),

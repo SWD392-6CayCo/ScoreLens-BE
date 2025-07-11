@@ -6,10 +6,7 @@ import com.scorelens.Enums.UserType;
 import com.scorelens.Security.AppUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 
@@ -19,6 +16,9 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name="customer")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Customer implements AppUser {
     @Id

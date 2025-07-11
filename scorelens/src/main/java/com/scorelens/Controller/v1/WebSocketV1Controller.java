@@ -20,6 +20,7 @@
     @Tag(name = "Web Socket", description = "Manage Noti")
     @RestController
     @RequestMapping("/v1/noti")
+    @CrossOrigin(origins = {"http://localhost:5173", "exp://192.168.90.68:8081", "https://scorelens.onrender.com"})
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public class WebSocketV1Controller {
 
