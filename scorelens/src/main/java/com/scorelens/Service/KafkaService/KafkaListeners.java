@@ -33,14 +33,6 @@ public class KafkaListeners {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    WebSocketService webSocketService;
-
-    KafKaHeartBeat kafkaHeartBeat;
-
-    HeartbeatService heartbeatService;
-
-    EventProcessorService eventProcessorService;
-
     KafkaCodeHandlerFactory handlerFactory;
 
     // msg từ fastapi
