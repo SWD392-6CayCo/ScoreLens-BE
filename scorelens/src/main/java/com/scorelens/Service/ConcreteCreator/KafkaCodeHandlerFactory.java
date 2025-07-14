@@ -1,4 +1,4 @@
-package com.scorelens.Service.FactoryMethod;
+package com.scorelens.Service.ConcreteCreator;
 
 import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Service.Interface.KafkaCodeHandler;
@@ -38,6 +38,7 @@ public class KafkaCodeHandlerFactory {
 
 
     //tra ve handler voi KafkaCode tuong ung
+    //day la factory method
     public KafkaCodeHandler getHandler(KafkaCode code) {
         return handlerMap.get(code);
     }

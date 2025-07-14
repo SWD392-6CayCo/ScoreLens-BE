@@ -2,27 +2,19 @@ package com.scorelens.Service.KafkaService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.Enums.KafkaCode;
-import com.scorelens.Enums.WebSocketCode;
-import com.scorelens.Enums.WebSocketTopic;
-import com.scorelens.Service.*;
-import com.scorelens.Service.FactoryMethod.KafkaCodeHandlerFactory;
+import com.scorelens.Service.ConcreteCreator.KafkaCodeHandlerFactory;
 import com.scorelens.Service.Interface.KafkaCodeHandler;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
-
-
-import java.util.concurrent.CompletableFuture;
 
 
 @Service
