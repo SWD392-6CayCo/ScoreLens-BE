@@ -46,7 +46,16 @@ See https://github.com/GoogleCloudPlatform/cloud-opensource-java/wiki/The-Google
 
     <dependencies>
 
-<!--        Zxing: qrcode-->
+<!--        fire-base-->
+        <!-- https://mvnrepository.com/artifact/com.google.firebase/firebase-admin -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.5.0</version>
+        </dependency>
+
+
+        <!--        Zxing: qrcode-->
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>core</artifactId>
