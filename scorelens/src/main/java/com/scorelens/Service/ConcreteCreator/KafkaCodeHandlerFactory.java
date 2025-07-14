@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class KafkaCodeHandlerFactory {
+public class KafkaCodeHandlerFactory implements KafkaCodeHandlerCreator{
     private final Map<KafkaCode, KafkaCodeHandler> handlerMap = new HashMap<>();
 
     //inject tat ca ca bean implemented KafkaCodeHandler (Running, Logging, Deleting) vao list handlers
@@ -39,7 +39,8 @@ public class KafkaCodeHandlerFactory {
 
     //tra ve handler voi KafkaCode tuong ung
     //day la factory method
-    public KafkaCodeHandler getHandler(KafkaCode code) {
+    @Override
+    public KafkaCodeHandler getKafkaCodeHandler(KafkaCode code) {
         return handlerMap.get(code);
     }
 }

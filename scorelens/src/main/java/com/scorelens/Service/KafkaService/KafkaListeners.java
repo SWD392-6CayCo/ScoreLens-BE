@@ -59,7 +59,7 @@ public class KafkaListeners {
         try {
 
             //tra ve handler voi kafkaCode tuong ung trong factory
-            KafkaCodeHandler handler = handlerFactory.getHandler(code);
+            KafkaCodeHandler handler = handlerFactory.getKafkaCodeHandler(code);
             if (handler != null) {
                 handler.handle(request);
             } else {
