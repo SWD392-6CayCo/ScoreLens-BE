@@ -32,7 +32,7 @@ public enum ErrorCode {
     UNAUTHENTICATED(1008, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZE(1099, "You do not have permission", HttpStatus.FORBIDDEN),
     UNSUPPORTED_USER_TYPE(1009, "Unsupported User Type", HttpStatus.BAD_REQUEST),
-    INCORRECT_EMAIL_OR_PASSWORD(1010, "Incorrect email or password", HttpStatus.UNAUTHORIZED),
+    INCORRECT_EMAIL_OR_PASSWORD(1010, "Incorrect email or password", HttpStatus.BAD_REQUEST),
     USER_INACTIVE(1011, "This account is inactive", HttpStatus.FORBIDDEN),
 
     //-------------------------- STORE -----------------------------------
