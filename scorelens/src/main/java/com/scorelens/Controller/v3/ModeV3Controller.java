@@ -1,5 +1,6 @@
 package com.scorelens.Controller.v3;
 
+import com.scorelens.DTOs.Request.ModeRequest;
 import com.scorelens.DTOs.Request.ModeV3Request;
 import com.scorelens.DTOs.Response.ModeResponse;
 import com.scorelens.Entity.ResponseObject;
@@ -57,7 +58,7 @@ public class ModeV3Controller {
             switch (queryType.toLowerCase()) {
                 case "all":
                     data = modeService.getAll();
-                    message = "Get Modes information successfully";
+                    message = "Get Mode list";
                     break;
                     
                 case "byid":
@@ -91,5 +92,32 @@ public class ModeV3Controller {
                     .message("Internal server error: " + e.getMessage())
                     .build();
         }
+    }
+
+    @PostMapping
+    public ResponseObject createMode(@RequestBody ModeRequest request) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Create new Mode successfully")
+                .data(modeService.createMode(request))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseObject updateMode(@PathVariable Integer id, @RequestBody ModeRequest request) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Update Mode information successfully")
+                .data(modeService.updateMode(id, request))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseObject delete(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Mode with ID " + id + " has been deleted")
+                .data(modeService.delete(id))
+                .build();
     }
 }

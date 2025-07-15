@@ -1,11 +1,12 @@
 package com.scorelens.Controller.v3;
 
-import com.scorelens.DTOs.Request.TeamCreateRequest;
-import com.scorelens.DTOs.Request.TeamUpdateRequest;
-import com.scorelens.DTOs.Request.TeamV3Request;
-import com.scorelens.DTOs.Response.TeamResponse;
+import com.scorelens.DTOs.Request.GameSetCreateRequest;
+import com.scorelens.DTOs.Request.GameSetUpdateRequest;
+import com.scorelens.DTOs.Request.GameSetV3Request;
+import com.scorelens.DTOs.Response.GameSetResponse;
+import com.scorelens.Entity.GameSet;
 import com.scorelens.Entity.ResponseObject;
-import com.scorelens.Service.TeamService;
+import com.scorelens.Service.GameSetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,26 +20,26 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Slf4j
-@Tag(name = "Team V3", description = "Unified Team API")
+@Tag(name = "Game Set V3", description = "Unified Game Set API")
 @RestController
-@RequestMapping("v3/teams")
+@RequestMapping("v3/gamesets")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class TeamV3Controller {
+public class GameSetV3Controller {
     
     @Autowired
-    TeamService teamService;
+    GameSetService gameSetService;
 
-    @Operation(summary = "Get teams with unified parameters", 
+    @Operation(summary = "Get game sets with unified parameters", 
                description = "Unified API that combines all GET operations from v1 controller")
     @GetMapping
-    public ResponseObject getTeams(
+    public ResponseObject getGameSets(
             @Parameter(description = "Query type: all, byId, byMatch")
             @RequestParam(required = false, defaultValue = "all") String queryType,
             
-            @Parameter(description = "Team ID (required for queryType=byId)")
-            @RequestParam(required = false) Integer teamId,
+            @Parameter(description = "Game Set ID (required for queryType=byId)")
+            @RequestParam(required = false) Integer gameSetId,
             
             @Parameter(description = "Match ID (required for queryType=byMatch)")
             @RequestParam(required = false) Integer matchId,
@@ -50,10 +51,10 @@ public class TeamV3Controller {
             @RequestParam(required = false, defaultValue = "10") Integer size,
             
             @Parameter(description = "Sort field")
-            @RequestParam(required = false, defaultValue = "createAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "gameSetNo") String sortBy,
             
             @Parameter(description = "Sort direction (asc/desc)")
-            @RequestParam(required = false, defaultValue = "desc") String sortDirection
+            @RequestParam(required = false, defaultValue = "asc") String sortDirection
     ) {
         try {
             Object data;
@@ -61,19 +62,19 @@ public class TeamV3Controller {
             
             switch (queryType.toLowerCase()) {
                 case "all":
-                    data = teamService.getAllTeams();
-                    message = "Get Team list";
+                    data = gameSetService.getAllGameSets();
+                    message = "Get Game Set list";
                     break;
 
                 case "byid":
-                    if (teamId == null) {
+                    if (gameSetId == null) {
                         return ResponseObject.builder()
                                 .status(400)
-                                .message("Team ID is required for queryType=byId")
+                                .message("Game Set ID is required for queryType=byId")
                                 .build();
                     }
-                    data = teamService.getById(teamId);
-                    message = "Get Team information successfully";
+                    data = gameSetService.getById(gameSetId);
+                    message = "Get GameSet information successfully";
                     break;
                     
                 case "bymatch":
@@ -83,8 +84,8 @@ public class TeamV3Controller {
                                 .message("Match ID is required for queryType=byMatch")
                                 .build();
                     }
-                    data = teamService.getByMatchID(matchId);
-                    message = "Get Teams information successfully";
+                    data = gameSetService.getByMatchID(matchId);
+                    message = "Get Game Sets information successfully";
                     break;
                     
                 default:
@@ -93,6 +94,7 @@ public class TeamV3Controller {
                             .message("Invalid queryType. Valid values: all, byId, byMatch")
                             .build();
             }
+            
             return ResponseObject.builder()
                     .status(1000)
                     .message(message)
@@ -100,7 +102,7 @@ public class TeamV3Controller {
                     .build();
                     
         } catch (Exception e) {
-            log.error("Error in getTeams: ", e);
+            log.error("Error in getGameSets: ", e);
             return ResponseObject.builder()
                     .status(500)
                     .message("Internal server error: " + e.getMessage())
@@ -109,29 +111,45 @@ public class TeamV3Controller {
     }
 
     @PostMapping
-    public ResponseObject createTeam(@RequestBody TeamCreateRequest request) {
+    public ResponseObject createSet(@RequestBody GameSetCreateRequest request) {
         return ResponseObject.builder()
                 .status(1000)
-                .message("Create new Team successfully")
-                .data(teamService.addTeam(request))
+                .message("Create GameSet sucessfully")
+                .data(gameSetService.createSet(request))
                 .build();
     }
 
     @PutMapping("/{id}")
-    public ResponseObject updateTeam(@PathVariable Integer id, @RequestBody TeamUpdateRequest request) {
+    public ResponseObject updateSet(@PathVariable Integer id, @RequestBody GameSetUpdateRequest request) {
         return ResponseObject.builder()
                 .status(1000)
-                .message("Update Team information successfully")
-                .data(teamService.updateTeam(id, request))
+                .message("Update GameSet sucessfully")
+                .data(gameSetService.updateSet(id, request))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseObject deleteTeam(@PathVariable Integer id) {
+    public ResponseObject deleteSet(@PathVariable Integer id) {
         return ResponseObject.builder()
                 .status(1000)
-                .message("Team with ID " + id + " has been deleted")
-                .data(teamService.delete(id))
+                .message("GameSet with ID " + id + " has been deleted")
+                .data(gameSetService.delete(id))
                 .build();
     }
+
+
+    public ResponseObject manualUpdateSet(Integer billiardMatchID) {
+        List<GameSet> list = gameSetService.getByMatch(billiardMatchID);
+        for (GameSet gameSet : list) {
+            if (gameSet.getGameSetNo() == 1){
+                GameSet tmp = gameSetService.startSet(gameSet.getGameSetID());
+            }
+        }
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Manual Update GameSet successfully")
+                .data(true)
+                .build();
+    }
+
 }

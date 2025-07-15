@@ -8,6 +8,7 @@ import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.GameSet;
 import com.scorelens.Entity.Team;
+import com.scorelens.Entity.TeamSet;
 import com.scorelens.Enums.MatchStatus;
 import com.scorelens.Enums.ResultStatus;
 import com.scorelens.Exception.AppException;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -38,11 +40,16 @@ public class GameSetService implements IGameSetService {
     @Autowired
     private TeamSetService tsService;
 
-
     @Autowired
     TeamSetService teamSetService;
     @Autowired
     private GameSetMapper gameSetMapper;
+
+    @Override
+    public List<GameSetResponse> getAllGameSets() {
+        List<GameSet> gss = gameSetRepository.findAll();
+        return gameSetMapper.toSetResponseList(gss);
+    }
 
     @Override
     public GameSetResponse getById(Integer id) {
@@ -71,13 +78,25 @@ public class GameSetService implements IGameSetService {
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
 
         GameSet gameSet = new GameSet();
-        gameSet.setGameSetNo(0);
+        GameSet maxGameSet = match.getSets().stream()
+                .max(Comparator.comparingInt(GameSet::getGameSetNo))
+                .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
+        gameSet.setGameSetNo(maxGameSet.getGameSetNo() + 1);
         gameSet.setRaceTo(request.getRaceTo());
         gameSet.setWinner(null);
         gameSet.setStartTime(LocalDateTime.now());
         gameSet.setEndTime(null);
         gameSet.setStatus(MatchStatus.pending);
         gameSet.setBilliardMatch(match);
+        gameSetRepository.save(gameSet);
+
+        match.setTotalSet(match.getTotalSet() + 1);
+        matchRepository.save(match);
+
+        for (Team t : match.getTeams()) {
+            TeamSet ts = teamSetService.createTeamSet(t.getTeamID(), gameSet.getGameSetID());
+            gameSet.addTeamSet(ts);
+        }
 
         return gameSetMapper.toGameSetResponse(gameSetRepository.save(gameSet));
     }

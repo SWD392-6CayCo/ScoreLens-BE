@@ -15,13 +15,11 @@ public class BilliardMatchV3UpdateRequest {
     private MatchStatus status;
     
     // For score update (updateType = "score")
+    // Match ID for operations that need it (cancel, complete, manual, update)
     private Integer matchID;
     private Integer teamID;
     private String delta; // -1, +1
     
     // For forfeit operation (updateType = "forfeit")
     private Integer forfeitTeamID;
-    
-    // Match ID for operations that need it (cancel, complete, manual, forfeit)
-    private Integer id;
 }

@@ -176,6 +176,26 @@ public class BilliardMatchV3Controller {
         }
     }
 
+    @PostMapping
+    public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
+        BilliardMatchResponse response = billiardMatchService.createMatch(request);
+        String tableID = response.getBilliardTableID();
+        //cam ai check
+        producer.sendHeartbeat(tableID);
+
+        //gửi thông tin trận đấu cho py
+        InformationRequest req = producer.mapInformation(response);
+        producer.sendEvent(tableID, req);
+
+        //set table status: inUse
+        billiardTableService.setInUse(String.valueOf(response.getBilliardTableID()));
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Create new Match successfully")
+                .data(response)
+                .build();
+    }
+
     @Operation(summary = "Update billiard match with unified parameters",
                description = "Unified API that combines all PUT operations from v1 controller")
     @PutMapping
@@ -185,7 +205,7 @@ public class BilliardMatchV3Controller {
             if (updateType == null) {
                 return ResponseObject.builder()
                         .status(400)
-                        .message("updateType is required. Valid values: update, score, forfeit, cancel, complete, manual")
+                        .message("updateType is required. Valid values: update, score, cancel, complete, manual")
                         .build();
             }
 
@@ -194,8 +214,6 @@ public class BilliardMatchV3Controller {
                     return handleUpdateMatch(request);
                 case "score":
                     return handleUpdateScore(request);
-                case "forfeit":
-                    return handleForfeit(request);
                 case "cancel":
                     return handleCancel(request);
                 case "complete":
@@ -205,7 +223,7 @@ public class BilliardMatchV3Controller {
                 default:
                     return ResponseObject.builder()
                             .status(400)
-                            .message("Invalid updateType. Valid values: update, score, forfeit, cancel, complete, manual")
+                            .message("Invalid updateType. Valid values: update, score, cancel, complete, manual")
                             .build();
             }
         } catch (Exception e) {
@@ -218,7 +236,7 @@ public class BilliardMatchV3Controller {
     }
 
     private ResponseObject handleUpdateMatch(BilliardMatchV3UpdateRequest request) {
-        if (request.getId() == null) {
+        if (request.getMatchID() == null) {
             return ResponseObject.builder()
                     .status(400)
                     .message("Match ID is required for update operation")
@@ -232,7 +250,7 @@ public class BilliardMatchV3Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Update Match information successfully")
-                .data(billiardMatchService.updateMatch(request.getId(), updateRequest))
+                .data(billiardMatchService.updateMatch(request.getMatchID(), updateRequest))
                 .build();
     }
 
@@ -270,68 +288,53 @@ public class BilliardMatchV3Controller {
                 .build();
     }
 
-    private ResponseObject handleForfeit(BilliardMatchV3UpdateRequest request) {
-        if (request.getId() == null || request.getForfeitTeamID() == null) {
+    private ResponseObject handleCancel(BilliardMatchV3UpdateRequest request) {
+        if (request.getMatchID() == null || request.getForfeitTeamID() == null) {
             return ResponseObject.builder()
                     .status(400)
                     .message("Match ID and forfeitTeamID are required for forfeit operation")
                     .build();
         }
 
+        BilliardMatchResponse response = billiardMatchService.cancelMatch(request.getMatchID(), request.getForfeitTeamID());
+        //free table
+        billiardTableService.setAvailable(String.valueOf(response.getBilliardTableID()));
+
         return ResponseObject.builder()
                 .status(1000)
                 .message("Team with ID " + request.getForfeitTeamID() + " has been forfeited")
-                .data(billiardMatchService.forfeit(request.getId(), request.getForfeitTeamID()))
-                .build();
-    }
-
-    private ResponseObject handleCancel(BilliardMatchV3UpdateRequest request) {
-        if (request.getId() == null) {
-            return ResponseObject.builder()
-                    .status(400)
-                    .message("Match ID is required for cancel operation")
-                    .build();
-        }
-
-        BilliardMatchResponse response = billiardMatchService.cancel(request.getId());
-        //free table
-        billiardTableService.setAvailable(String.valueOf(response.getBilliardMatchID()));
-
-        return ResponseObject.builder()
-                .status(1000)
-                .message("Cancel Match successfully")
                 .data(response)
                 .build();
     }
 
     private ResponseObject handleComplete(BilliardMatchV3UpdateRequest request) {
-        if (request.getId() == null) {
+        if (request.getMatchID() == null) {
             return ResponseObject.builder()
                     .status(400)
                     .message("Match ID is required for complete operation")
                     .build();
         }
 
-        BilliardMatch match = billiardMatchService.findMatchByID(request.getId());
+        BilliardMatch match = billiardMatchService.findMatchByID(request.getMatchID());
         //free table
-        billiardTableService.setAvailable(String.valueOf(match.getBilliardMatchID()));
+        billiardTableService.setAvailable(String.valueOf(match.getBillardTable().getBillardTableID()));
 
         return ResponseObject.builder()
                 .status(1000)
                 .message("Match is currently completed")
-                .data(billiardMatchService.completeMatch(request.getId()))
+                .data(billiardMatchService.completeMatch(request.getMatchID()))
                 .build();
     }
 
     private ResponseObject handleManualUpdate(BilliardMatchV3UpdateRequest request) {
-        if (request.getId() == null) {
+        if (request.getMatchID() == null) {
             return ResponseObject.builder()
                     .status(400)
                     .message("Match ID is required for manual update operation")
                     .build();
         }
 
-        BilliardMatch match = billiardMatchService.findMatchByID(request.getId());
+        BilliardMatch match = billiardMatchService.findMatchByID(request.getMatchID());
         String manualMatch = billiardMatchService.startMatch(match.getBilliardMatchID());
         ResponseObject tmp = gameSetController.manualUpdateSet(match.getBilliardMatchID());
 
@@ -339,5 +342,19 @@ public class BilliardMatchV3Controller {
                 .status(1000)
                 .message("Match's information updated manually successfully")
                 .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseObject deleteMatch(@PathVariable Integer id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Match with ID " + id + " has been deleted")
+                .data(billiardMatchService.delete(id))
+                .build();
+    }
+
+    @DeleteMapping()
+    public void deleteAll() {
+        billiardMatchService.deleteAll();
     }
 }
