@@ -16,11 +16,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 
 import java.util.List;
@@ -135,8 +134,18 @@ public class BilliardTableService implements IBilliardTableService {
         String qrCodeUrl = table.getQrCode();
         // Xóa record trong DB (sẽ rollback nếu exception sau đó)
         billiardTableRepo.delete(table);
-        // Xóa QR code trên S3 nếu có URL
-        s3Service.deleteQrCodeFromS3(qrCodeUrl, table.getBillardTableID());
+
+        //đăng kí callback xóa sau khi commit thành công, vì s3 nằm ngoài db, k thuộc quản lí jpa
+        if (qrCodeUrl != null) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                // Xóa QR code trên S3 nếu có URL
+                @Override
+                public void afterCommit() {
+                    s3Service.deleteQrCodeFromS3(qrCodeUrl, table.getBillardTableID());
+                }
+            });
+        }
+
         return true;
     }
 
