@@ -2,25 +2,19 @@ package com.scorelens.Service.KafkaService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.Enums.KafkaCode;
-import com.scorelens.Enums.WebSocketCode;
-import com.scorelens.Enums.WebSocketTopic;
-import com.scorelens.Service.*;
+import com.scorelens.Service.ConcreteCreator.KafkaCodeHandlerFactory;
+import com.scorelens.Service.Interface.KafkaCodeHandler;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
-
-
-import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -31,13 +25,7 @@ public class KafkaListeners {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    WebSocketService webSocketService;
-
-    KafKaHeartBeat kafkaHeartBeat;
-
-    HeartbeatService heartbeatService;
-
-    EventProcessorService eventProcessorService;
+    KafkaCodeHandlerFactory handlerFactory;
 
     // msg từ fastapi
     @KafkaListener(
@@ -68,38 +56,16 @@ public class KafkaListeners {
     //xử lí enum KafkaCode
     private void handlingKafkaCode(ProducerRequest request) {
         KafkaCode code = request.getCode();
-        String tableID = request.getTableID();
         try {
-            switch (code) {
-                case RUNNING:
-                    kafkaHeartBeat.stop();
-                    kafkaHeartBeat.updateLastConfirmedTime();
-                    //xac nhan da nhan res tu py
-                    CompletableFuture<Boolean> tmp = heartbeatService.confirmHeartbeat();
 
-                    log.info("CompletableFuture: {}", tmp);
-                    webSocketService.sendToWebSocket(
-                            WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                            new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
-                    );
-                    break;
-                case LOGGING:
-                    eventProcessorService.processEvent(request);
-                    break;
-                case DELETE_CONFIRM:
-                    int deleteCount = (Integer) request.getData();
-                    webSocketService.sendToWebSocket(
-                            WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                            new WebsocketReq(WebSocketCode.WARNING, "Delete Event count: " + deleteCount));
-                    break;
-
-
-
-
-                default:
-                    System.out.println("Unknown code.");
-
+            //tra ve handler voi kafkaCode tuong ung trong factory
+            KafkaCodeHandler handler = handlerFactory.getKafkaCodeHandler(code);
+            if (handler != null) {
+                handler.handle(request);
+            } else {
+                log.warn("No handler found for KafkaCode: {}", code);
             }
+
         } catch (IllegalArgumentException e) {
             System.out.println("Invalid KafkaCode: " + code);
         }

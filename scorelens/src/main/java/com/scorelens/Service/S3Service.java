@@ -37,6 +37,42 @@ public class S3Service {
     @Value("${aws.s3.avt-folder-prefix}")
     private String avtFolderPrefix;
 
+    // Allowed file types for security
+    private static final List<String> ALLOWED_IMAGE_TYPES = List.of(
+            "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
+    );
+
+    private static final List<String> ALLOWED_EXTENSIONS = List.of(
+            "jpg", "jpeg", "png", "gif", "webp"
+    );
+
+    // Validate file type and size
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new AppException(ErrorCode.FILE_EMPTY);
+        }
+
+        // Check file size (5MB limit)
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new AppException(ErrorCode.FILE_TOO_LARGE);
+        }
+
+        // Check content type
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase())) {
+            throw new AppException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
+        // Check file extension
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename != null) {
+            String extension = StringUtils.getFilenameExtension(originalFilename);
+            if (extension == null || !ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
+                throw new AppException(ErrorCode.INVALID_FILE_TYPE);
+            }
+        }
+    }
+
     // Add prefix to the key
     private String buildKey(String keyName) {
         return folderPrefix + "/" + keyName;
@@ -62,18 +98,47 @@ public class S3Service {
         return uuidFileName;
     }
 
-    // key from url
+    // key from url - with security validation
     private String extractKeyFromUrl(String url) {
+        String key = getStringKey(url);
+
+        // Security validation: prevent path traversal
+        if (key.contains("../") || key.contains("..\\") || key.contains("//")) {
+            throw new AppException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
+        // Ensure key starts with allowed prefixes
+        if (!key.startsWith("qr/") && !key.startsWith(folderPrefix + "/") && !key.startsWith(avtFolderPrefix + "/")) {
+            throw new AppException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
+        return key;
+    }
+
+    private String getStringKey(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
+        // Validate URL format
+        if (!url.startsWith("https://" + bucketName + ".s3." + region.id() + ".amazonaws.com/")) {
+            throw new AppException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
         int index = url.indexOf("qr/");
         if (index == -1) {
-            throw new IllegalArgumentException("Invalid S3 URL format: " + url);
+            throw new AppException(ErrorCode.INVALID_FILE_TYPE);
         }
+
         return url.substring(index);
     }
 
 
     // Create - Upload a file to S3
     public String uploadFile(MultipartFile file) {
+        // Validate file first
+        validateFile(file);
+
         try {
             // Build full key with folder prefix
             String keyName = buildKey(generateUniqueFileName(file));
@@ -96,6 +161,9 @@ public class S3Service {
 
     // Upload file with custom folder prefix
     public String uploadFile(MultipartFile file, String customFolderPrefix) {
+        // Validate file first
+        validateFile(file);
+
         try {
             // Generate unique filename
             String fileName = generateUniqueFileName(file);
@@ -212,20 +280,70 @@ public class S3Service {
 
 
     public void deleteQrCodeFromS3(String qrCodeUrl, String tableID) {
-        if (qrCodeUrl == null || qrCodeUrl.isEmpty()) {
+        if (qrCodeUrl == null || qrCodeUrl.trim().isEmpty()) {
+            log.warn("QR code URL is null or empty for table: {}", tableID);
             return;
         }
+
         try {
+            // Validate and extract key with security checks
             String s3Key = extractKeyFromUrl(qrCodeUrl);
-            String tmp = deleteFile(s3Key);
-            log.info("Successfully deleted file: {}", tmp);
+
+            // Additional validation: ensure it's a QR code file
+            if (!s3Key.startsWith("qr/")) {
+                log.error("Invalid QR code path for table {}: {}", tableID, s3Key);
+                throw new AppException(ErrorCode.INVALID_FILE_TYPE);
+            }
+
+            String result = deleteFile(s3Key);
+            log.info("Successfully deleted QR code for table {}: {}", tableID, result);
+
+        } catch (AppException e) {
+            log.error("Validation failed when deleting QR code for table {}: {}", tableID, e.getMessage());
+            throw e; // Re-throw AppException to rollback transaction
         } catch (Exception e) {
             log.error("Failed to delete QR code from S3 for table {}: {}", tableID, e.getMessage());
-            //AppException để rollback transaction DB
+            // Don't throw exception for S3 deletion failures to avoid DB rollback
+            // QR code deletion is not critical for business logic
             throw new AppException(ErrorCode.DELETE_FILE_FAILED);
+        }
+    }
+
+    // Public method to validate if URL belongs to our S3 bucket
+    public boolean isValidS3Url(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            // Check if URL belongs to our bucket
+            if (!url.startsWith("https://" + bucketName + ".s3." + region.id() + ".amazonaws.com/")) {
+                return false;
+            }
+
+            // Extract and validate key
+            extractKeyFromUrl(url);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // Method to safely delete any file with validation
+    public void safeDeleteFile(String fileUrl, String context) {
+        if (!isValidS3Url(fileUrl)) {
+            log.warn("Invalid S3 URL provided for deletion in context {}: {}", context, fileUrl);
+            return;
+        }
+
+        try {
+            String s3Key = extractKeyFromUrl(fileUrl);
+            deleteFile(s3Key);
+            log.info("Successfully deleted file in context {}: {}", context, s3Key);
+        } catch (Exception e) {
+            log.error("Failed to delete file in context {}: {}", context, e.getMessage());
         }
     }
 
 
 }
-
