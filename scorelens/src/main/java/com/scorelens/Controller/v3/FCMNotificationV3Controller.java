@@ -29,8 +29,8 @@ public class FCMNotificationV3Controller {
     @PostMapping("/send")
     public ResponseObject sendNotification(@RequestParam String tableID, @RequestParam String title, @RequestParam String body) {
         try {
-            log.info("Sending FCM notification to token with tableID: {}, title: {}, body: {}", tableID, title, body);
             String response = fcmService.sendNotification(tableID, title, body);
+            log.info("Sending FCM notification to token with tableID: {}, title: {}, body: {}", tableID, title, body);
             return ResponseObject.builder()
                     .status(1000)
                     .message("Notification sent successfully")
@@ -39,7 +39,7 @@ public class FCMNotificationV3Controller {
         } catch (FirebaseMessagingException e) {
             log.error("Error sending FCM notification: {}", e.getMessage(), e);
             return ResponseObject.builder()
-                    .status(9999)
+                    .status(1005)
                     .message("Failed to send notification")
                     .data(e.getMessage())
                     .build();

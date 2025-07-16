@@ -3,6 +3,7 @@ package com.scorelens.Service.KafkaService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.InformationRequest;
 import com.scorelens.DTOs.Request.ProducerRequest;
@@ -15,6 +16,7 @@ import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Enums.WebSocketCode;
 import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.BilliardTableService;
+import com.scorelens.Service.FCMService;
 import com.scorelens.Service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,8 @@ public class KafkaProducer {
     private final KafKaHeartBeat kafKaHeartBeat;
 
     private final HeartbeatService heartbeatService;
+
+    private final FCMService fcmService;
 
     //    @Value("${spring.kafka.producer.topic}")
     private final String ja_to_py_topic = "ja_to_py";
@@ -85,6 +89,11 @@ public class KafkaProducer {
                         WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                         new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")
                 );
+                fcmService.sendNotification(
+                        tableID,
+                        "Connecting to AI Camera...",
+                        "noti"
+                );
 
                 //sau 10s neu py k gui msg
                 CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking(tableID);
@@ -97,6 +106,8 @@ public class KafkaProducer {
                 });
             } catch (JsonProcessingException e) {
                 log.error("Failed to serialize heartbeat message", e);
+            } catch (FirebaseMessagingException e) {
+                throw new RuntimeException(e);
             }
         } else {
             if (kafKaHeartBeat.timeSinceLastConfirm().getSeconds() > 30) {
