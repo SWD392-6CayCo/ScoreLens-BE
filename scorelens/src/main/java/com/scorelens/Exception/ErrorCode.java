@@ -43,6 +43,7 @@ public enum ErrorCode {
     TABLE_NOT_AVAILABLE(1014, "Table not available", HttpStatus.BAD_REQUEST),
     //-------------------------- BILLIARD MATCH -----------------------------------
     MATCH_NOT_FOUND(1015,"Match not found", HttpStatus.NOT_FOUND),
+    MATCH_COMPLETED(1015,"Match completed", HttpStatus.BAD_REQUEST),
     //-------------------------- ROUND  -----------------------------------
     ROUND_NOT_FOUND(1016, "Round not found", HttpStatus.NOT_FOUND),
     SET_NOT_FOUND(1016, "GameSet not found", HttpStatus.NOT_FOUND),

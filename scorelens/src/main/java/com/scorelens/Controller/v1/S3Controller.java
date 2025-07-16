@@ -66,5 +66,4 @@ public class S3Controller {
                 .data(s3Service.deleteFile(fileName))
                 .build();
     }
-
 }

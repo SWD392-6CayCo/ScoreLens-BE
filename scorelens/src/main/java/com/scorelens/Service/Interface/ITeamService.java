@@ -8,7 +8,9 @@ import com.scorelens.Entity.Team;
 import java.util.List;
 
 public interface ITeamService {
+        List<TeamResponse> getAllTeams();
         TeamResponse getById(Integer id);
+        TeamResponse addTeam(TeamCreateRequest request);
         Team createTeam(TeamCreateRequest request);
         TeamResponse updateTeam(Integer id, TeamUpdateRequest request);
         List<TeamResponse> getByMatchID(Integer id);
