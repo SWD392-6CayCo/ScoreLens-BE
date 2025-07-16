@@ -6,11 +6,9 @@ import com.scorelens.DTOs.Request.StaffCreateRequestDto;
 import com.scorelens.DTOs.Request.StaffUpdateRequestDto;
 import com.scorelens.DTOs.Response.PageableResponseDto;
 import com.scorelens.DTOs.Response.StaffResponseDto;
-import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.IDSequence;
 import com.scorelens.Entity.Staff;
 import com.scorelens.Entity.Store;
-import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.StatusType;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
@@ -112,14 +110,16 @@ public class StaffService implements IStaffService {
     @Override
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE_STAFF')")
     public StaffResponseDto createStaff(StaffCreateRequestDto staffCreateRequestDto) {
-        Set<String> roles = staffCreateRequestDto.getRoles();
-        String r = roles.stream().findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("No role provided"));
-        boolean roleExists = roleRepository.existsById(r);
-        if (!roleExists) {
-            throw new IllegalArgumentException("Role " + r + " does not exist in the system.");
+        String role = staffCreateRequestDto.getRole();
+        if (role == null || role.trim().isEmpty()) {
+            throw new IllegalArgumentException("No role provided");
         }
-        String prefix = r.substring(0, 2).toUpperCase();
+
+        boolean roleExists = roleRepository.existsById(role);
+        if (!roleExists) {
+            throw new IllegalArgumentException("Role " + role + " does not exist in the system.");
+        }
+        String prefix = role.substring(0, 2).toUpperCase();
 
 //        // Lock row and increment
         IDSequence sequence = idSequenceRepository.findAndLockByRolePrefix(prefix);
@@ -156,7 +156,10 @@ public class StaffService implements IStaffService {
 
         //Dùng BCrypt để mã hóa mật khẩu khi lưu vào DB
         staff.setPassword(passwordEncoder.encode(staffCreateRequestDto.getPassword()));
-        var roleList = roleRepository.findAllById(roles);
+
+        // Convert single role to Set for compatibility with existing logic
+        Set<String> roleSet = Set.of(role);
+        var roleList = roleRepository.findAllById(roleSet);
         staff.setRoles(new HashSet<>(roleList));
         staffRepository.save(staff);
 
@@ -192,8 +195,12 @@ public class StaffService implements IStaffService {
 
 //        existingStaff.setRole(requestDto.getRole()); // không cho set role
 
-        var roles = roleRepository.findAllById(requestDto.getRoles());
-        existingStaff.setRoles(new HashSet<>(roles));
+        // Convert single role to Set for compatibility with existing logic
+        if (requestDto.getRole() != null && !requestDto.getRole().trim().isEmpty()) {
+            Set<String> roleSet = Set.of(requestDto.getRole());
+            var roles = roleRepository.findAllById(roleSet);
+            existingStaff.setRoles(new HashSet<>(roles));
+        }
 
         existingStaff.setAddress(requestDto.getAddress());
         existingStaff.setStatus(requestDto.getStatus());
