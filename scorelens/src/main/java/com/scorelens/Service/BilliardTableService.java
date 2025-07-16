@@ -88,6 +88,11 @@ public class BilliardTableService implements IBilliardTableService {
         return billiardTableMapper.toBilliardTableResponse(billiardTable);
     }
 
+    public BilliardTable findBilliardTable(String billiardTableID){
+        return billiardTableRepo.findById(billiardTableID)
+                .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+    }
+
     @Override
     public BilliardTableResponse updateBilliardTable(String billiardTableID, BilliardTableRequest request) {
         BilliardTable billiardTable = billiardTableRepo.findById(billiardTableID)

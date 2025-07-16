@@ -66,3 +66,7 @@ aws:
     bucket-name: ${AWS_BUCKET_NAME}
     folder-prefix: ${AWS_FOLDER_PREFIX}
     avt-folder-prefix: ${AWS_AVT_FOLDER_PREFIX}
+firebase:
+  service-account:
+    path: firebase-service-account.json
+

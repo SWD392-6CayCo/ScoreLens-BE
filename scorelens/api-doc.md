@@ -5,7 +5,7 @@
   "tableID": "23374e21-2391-41b0-b275-651df88b3b04",
   "modeID": 2,
   "data": {
-    "cameraUrl": "rtsp://192.168.1.100/stream",
+    "cameraUrl": "C:/Users/dinhc/Downloads/vid_3867.mp4",
     "totalSet": 1,
     "sets": [
       {
