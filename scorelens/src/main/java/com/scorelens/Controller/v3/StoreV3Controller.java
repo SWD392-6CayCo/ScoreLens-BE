@@ -30,7 +30,7 @@ public class StoreV3Controller {
                description = "Unified API that combines all GET operations from v1 controller")
     @GetMapping
     public ResponseObject getStores(
-            @Parameter(description = "Query type: all, byId")
+            @Parameter(description = "Query type: all, byId, storeData")
             @RequestParam(required = false, defaultValue = "all") String queryType,
             
             @Parameter(description = "Store ID (required for queryType=byId)")
@@ -66,6 +66,17 @@ public class StoreV3Controller {
                                 .build();
                     }
                     data = storeService.findStoreById(storeId);
+                    message = "Store found";
+                    break;
+
+                case "storedata":
+                    if (storeId == null || storeId.trim().isEmpty()) {
+                        return ResponseObject.builder()
+                                .status(400)
+                                .message("Store ID is required for queryType=byId")
+                                .build();
+                    }
+                    data = storeService.getStoreData(storeId);
                     message = "Store found";
                     break;
                     

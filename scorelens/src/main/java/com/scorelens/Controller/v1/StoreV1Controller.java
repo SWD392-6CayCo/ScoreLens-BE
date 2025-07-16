@@ -51,6 +51,15 @@ public class StoreV1Controller {
                 .build();
     }
 
+    @GetMapping("data/{id}")
+    public ResponseObject getStoreData(@PathVariable String id) {
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Store found")
+                .data(storeService.getStoreData(id))
+                .build();
+    }
+
     @PutMapping("/{id}")
     public ResponseObject updateStore(@PathVariable String id, @RequestBody StoreRequest storeRequest) {
         return ResponseObject.builder()
