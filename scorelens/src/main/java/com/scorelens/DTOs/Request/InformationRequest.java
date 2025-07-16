@@ -14,6 +14,7 @@ public class InformationRequest {
 
     private KafkaCode code;
     private String tableID;
+    private Integer modeID;
     private Information data;
 
     @Data

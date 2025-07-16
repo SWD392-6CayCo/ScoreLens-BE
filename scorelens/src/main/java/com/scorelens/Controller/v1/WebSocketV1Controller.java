@@ -9,6 +9,7 @@
     import lombok.extern.slf4j.Slf4j;
     import org.checkerframework.checker.units.qual.A;
     import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.messaging.handler.annotation.DestinationVariable;
     import org.springframework.messaging.handler.annotation.MessageMapping;
     import org.springframework.messaging.handler.annotation.SendTo;
     import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -20,30 +21,32 @@
     @Tag(name = "Web Socket", description = "Manage Noti")
     @RestController
     @RequestMapping("/v1/noti")
-    @CrossOrigin(origins = {"http://localhost:5173", "exp://192.168.90.68:8081", "https://scorelens.onrender.com"})
+    @CrossOrigin(origins = {"http://localhost:5173", "exp://192.168.90.68:8081", "https://scorelens.onrender.com", "http://localhost:8080"})
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     public class WebSocketV1Controller {
 
         SimpMessagingTemplate messagingTemplate;
 
         // WebSocket receive → forward to /topic/notification
-        @MessageMapping("/noti.send")
-        public void handleNotification(String message) {
-            messagingTemplate.convertAndSend("/topic/notification/23374e21-2391-41b0-b275-651df88b3b04", message);
-            System.out.println("Received noti: " + message);
+        @MessageMapping("/noti.send/{tableID}")
+        public void handleNotification(String message, @DestinationVariable String tableID) {
+            log.info("Received noti from table {}: {}", tableID, message);
+            messagingTemplate.convertAndSend("/topic/notification/" + tableID, message);
         }
 
         // WebSocket receive → forward to /topic/logging_notification
         @MessageMapping("/log.send")
-        public void handleLoggingNotification(String message) {
-            messagingTemplate.convertAndSend("/topic/logging_notification/23374e21-2391-41b0-b275-651df88b3b04", message);
+        public void handleLoggingNotification(String message, @DestinationVariable String tableID) {
+            log.info("Received log from table {}: {}", tableID, message);
+            messagingTemplate.convertAndSend("/topic/logging_notification/" + tableID, message);
+
         }
 
         // REST API forward to notification topic
         @PostMapping("/send-notification")
-        public ResponseObject sendNotification(@RequestParam String message) {
-            log.info("Sending notification: " + message);
-            messagingTemplate.convertAndSend("/topic/notification/23374e21-2391-41b0-b275-651df88b3b04", message);
+        public ResponseObject sendNotification(@RequestParam String message, @RequestParam String tableID) {
+            log.info("Sending notification from table {}: {} ", tableID, message);
+            messagingTemplate.convertAndSend("/topic/notification/" + tableID, message);
             return ResponseObject.builder()
                     .status(1000)
                     .message(message)
@@ -53,9 +56,9 @@
 
         // REST API forward to logging_notification topic
         @PostMapping("/send-logging")
-        public ResponseObject sendLogging(@RequestParam String message) {
-            log.info("Sending logging message: " + message);
-            messagingTemplate.convertAndSend("/topic/logging_notification/23374e21-2391-41b0-b275-651df88b3b04", message);
+        public ResponseObject sendLogging(@RequestParam String message, @RequestParam String tableID) {
+            log.info("Sending logging from table {}: {} ", tableID, message);
+            messagingTemplate.convertAndSend("/topic/logging_notification/" + tableID, message);
             return ResponseObject.builder()
                     .status(1000)
                     .message(message)
@@ -65,9 +68,9 @@
 
         // REST API forward to shot_event topic
         @PostMapping("/shot_event")
-        public ResponseObject shotEvent(@RequestBody ShotEvent event) {
-            log.info("Sending shot event: " + event);
-            messagingTemplate.convertAndSend("/topic/shot_event/23374e21-2391-41b0-b275-651df88b3b04", event);
+        public ResponseObject shotEvent(@RequestBody ShotEvent event, @RequestParam String tableID) {
+            log.info("Sending shot_event from table {}: {} ", tableID, event);
+            messagingTemplate.convertAndSend("/topic/shot_event/" + tableID, event);
             return ResponseObject.builder()
                     .status(1000)
                     .message("shot event")

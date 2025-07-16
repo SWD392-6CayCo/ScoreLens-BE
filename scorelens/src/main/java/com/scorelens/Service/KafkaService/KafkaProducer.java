@@ -13,6 +13,7 @@ import com.scorelens.DTOs.Response.PlayerResponse;
 import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Enums.WebSocketCode;
+import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.BilliardTableService;
 import com.scorelens.Service.WebSocketService;
 import lombok.RequiredArgsConstructor;
@@ -81,12 +82,12 @@ public class KafkaProducer {
                 String message = objectMapper.writeValueAsString(new ProducerRequest(KafkaCode.RUNNING, tableID, "Heart beat checking"));
                 sendEvent(tableID, message);
                 webSocketService.sendToWebSocket(
-                        "/topic/notification",
+                        WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                         new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")
                 );
 
                 //sau 10s neu py k gui msg
-                CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking();
+                CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking(tableID);
                 future.thenAccept(result -> {
                     if (result) {
                         log.info("Heartbeat OK");
@@ -112,7 +113,10 @@ public class KafkaProducer {
         req.setCode(KafkaCode.START_STREAM);
 
         //set tableID
-         req.setTableID(response.getBilliardTableID());
+        req.setTableID(response.getBilliardTableID());
+
+        //SET MODE ID
+        req.setModeID(response.getModeID());
 
         //set camera url
         InformationRequest.Information info = new InformationRequest.Information();
@@ -146,6 +150,7 @@ public class KafkaProducer {
             for (PlayerResponse p : t.getPlayers()) {
                 InformationRequest.Player tmpP = new InformationRequest.Player();
                 tmpP.setPlayerID(p.getPlayerID());
+                tmpP.setName(p.getName());
                 player.add(tmpP);
             }
             tmp.setPlayers(player);
