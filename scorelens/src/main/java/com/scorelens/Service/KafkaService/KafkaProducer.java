@@ -123,11 +123,15 @@ public class KafkaProducer {
         String cameraUrl = billiardTableService.findBilliardTableById(response.getBilliardTableID()).getCameraUrl();
         info.setCameraUrl(cameraUrl);
 
+        //set totalSet
+        info.setTotalSet(response.getTotalSet());
+
         //map game set
         List<InformationRequest.GameSet> gsList = new ArrayList<>();
         for (GameSetResponse g : response.getSets()) {
             InformationRequest.GameSet gs = new InformationRequest.GameSet();
             gs.setGameSetID(g.getGameSetID());
+            gs.setRaceTo(g.getRaceTo());
             gsList.add(gs);
         }
         info.setSets(gsList);
