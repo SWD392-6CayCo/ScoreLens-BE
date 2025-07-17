@@ -46,7 +46,8 @@ public class SecurityConfig {
 //            "/v*/",
             "/v*/ping",
             "/index.html",
-            "/ws/**"
+            "/ws/**",
+
 
 
     };
