@@ -66,3 +66,16 @@ aws:
     bucket-name: ${AWS_BUCKET_NAME}
     folder-prefix: ${AWS_FOLDER_PREFIX}
     avt-folder-prefix: ${AWS_AVT_FOLDER_PREFIX}
+
+firebase:
+  type: ${FIREBASE_TYPE:}
+  project-id: ${FIREBASE_PROJECT_ID:}
+  private-key-id: ${FIREBASE_PRIVATE_KEY_ID:}
+  private-key: ${FIREBASE_PRIVATE_KEY:}
+  client-email: ${FIREBASE_CLIENT_EMAIL:}
+  client-id: ${FIREBASE_CLIENT_ID:}
+  auth-uri: ${FIREBASE_AUTH_URI:}
+  token-uri: ${FIREBASE_TOKEN_URI:}
+  auth-provider-x509-cert-url: ${FIREBASE_AUTH_PROVIDER_X509_CERT_URL:}
+  client-x509-cert-url: ${FIREBASE_CLIENT_X509_CERT_URL:}
+  universe-domain: ${FIREBASE_UNIVERSE_DOMAIN:}
