@@ -47,7 +47,7 @@ public class SecurityConfig {
             "/v*/ping",
             "/index.html",
             "/ws/**",
-            "/ws-native", "/ws-native/**", "**/ws-native",
+            "/ws-native", "/ws-native/**"
 
 
 
