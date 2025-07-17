@@ -2,6 +2,7 @@ package com.scorelens.Service.KafkaService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Service.ConcreteCreator.KafkaCodeHandlerFactory;
@@ -67,7 +68,9 @@ public class KafkaListeners {
             }
 
         } catch (IllegalArgumentException e) {
-            System.out.println("Invalid KafkaCode: " + code);
+            log.error("Invalid KafkaCode: {}", code, e);
+        } catch (FirebaseMessagingException e) {
+            log.error("Firebase messaging error for KafkaCode {}: {}", code, e.getMessage(), e);
         }
     }
 
