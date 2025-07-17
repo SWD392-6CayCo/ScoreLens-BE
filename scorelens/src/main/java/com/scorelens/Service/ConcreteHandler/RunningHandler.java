@@ -5,7 +5,7 @@ import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.ProducerRequest;
 import com.scorelens.DTOs.Request.WebsocketReq;
 import com.scorelens.Enums.KafkaCode;
-import com.scorelens.Enums.WebSocketCode;
+import com.scorelens.Enums.WSFCMCode;
 import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.FCMService;
 import com.scorelens.Service.Interface.KafkaCodeHandler;
@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.lang.annotation.Annotation;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -46,12 +45,12 @@ public class RunningHandler implements KafkaCodeHandler {
         log.info("CompletableFuture: {}", tmp);
         webSocketService.sendToWebSocket(
                 WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
+                new WebsocketReq(WSFCMCode.NOTIFICATION, "AI Camera Connected")
         );
         fcmService.sendNotification(
                 tableID,
-                "AI Camera Connected",
-                "noti"
+                String.valueOf(WSFCMCode.NOTIFICATION),
+                "Ai Camera Connected"
         );
     }
 }

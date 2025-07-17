@@ -12,6 +12,8 @@ public class LogMessageRequest {
     private String type;
     private String trace_id;
     private int cueBallId;
+    private int targetBallId;
+    private int modeID;
     private List<Ball> balls;
     private List<Collision> collisions;
     private String message;

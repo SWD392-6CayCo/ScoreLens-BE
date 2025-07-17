@@ -1,11 +1,13 @@
 package com.scorelens.Service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.Entity.*;
 import com.scorelens.Enums.MatchStatus;
 import com.scorelens.Enums.ResultStatus;
 import com.scorelens.Enums.TableStatus;
+import com.scorelens.Enums.WSFCMCode;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.BilliardMatchMapper;
@@ -55,6 +57,9 @@ public class BilliardMatchService implements IBilliardMatchService {
 
     @Autowired
     BilliardMatchMapper billiardMatchMapper;
+
+    @Autowired
+    FCMService fcmService;
 
     @Override
     public BilliardMatchResponse getById(Integer id) {
@@ -257,6 +262,20 @@ public class BilliardMatchService implements IBilliardMatchService {
             currentSet.setStatus(MatchStatus.completed);
             currentSet.setWinner(team.getName());
             setRepo.save(currentSet);
+
+            String tmp = "Team" + team.getName() + "has win game set no" + currentSet.getGameSetNo();
+
+            //push noti
+            try {
+                fcmService.sendNotification(
+                        match.getBillardTable().getBillardTableID(),
+                        String.valueOf(WSFCMCode.SHOT),
+                        tmp
+                );
+            } catch ( Exception e ) {
+               e.printStackTrace(); 
+            }
+
 
             // Update team scores into TeamSet
             for (Team t : match.getTeams()) {
