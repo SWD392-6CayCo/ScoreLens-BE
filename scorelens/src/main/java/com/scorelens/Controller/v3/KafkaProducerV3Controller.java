@@ -27,7 +27,7 @@ public class KafkaProducerV3Controller {
 
     @Operation(summary = "Send Kafka message with unified parameters", 
                description = "Unified API that combines all POST operations from v1 controller")
-    @PostMapping("/send")
+    @PostMapping()
     public ResponseObject sendMessage(@RequestBody KafkaProducerV3Request request) {
         try {
             String sendType = request.getSendType();

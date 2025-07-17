@@ -29,20 +29,20 @@ public class WebSocketV3Controller {
 
     SimpMessagingTemplate messagingTemplate;
 
-//    // WebSocket receive → forward to /topic/notification
-//    @MessageMapping("/noti.send/{tableID}")
-//    public void handleNotification(String message, @DestinationVariable String tableID) {
-//        log.info("Received noti from table {}: {}", tableID, message);
-//        messagingTemplate.convertAndSend("/topic/notification/" + tableID, message);
-//    }
-//
-//    // WebSocket receive → forward to /topic/logging_notification
-//    @MessageMapping("/log.send")
-//    public void handleLoggingNotification(String message, @DestinationVariable String tableID) {
-//        log.info("Received log from table {}: {}", tableID, message);
-//        messagingTemplate.convertAndSend("/topic/logging_notification/" + tableID, message);
-//
-//    }
+    // WebSocket receive → forward to /topic/notification
+    @MessageMapping("/noti.send/{tableID}")
+    public void handleNotification(String message, @DestinationVariable String tableID) {
+        log.info("Received noti from table {}: {}", tableID, message);
+        messagingTemplate.convertAndSend("/topic/notification/" + tableID, message);
+    }
+
+    // WebSocket receive → forward to /topic/logging_notification
+    @MessageMapping("/log.send")
+    public void handleLoggingNotification(String message, @DestinationVariable String tableID) {
+        log.info("Received log from table {}: {}", tableID, message);
+        messagingTemplate.convertAndSend("/topic/logging_notification/" + tableID, message);
+
+    }
 
     // Unified REST API for all WebSocket message types
     @Operation(summary = "Send unified WebSocket message", description = "Unified API that combines notification, logging, and shot_event message types")
