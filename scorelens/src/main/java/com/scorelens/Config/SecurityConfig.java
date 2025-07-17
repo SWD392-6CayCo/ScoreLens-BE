@@ -81,8 +81,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/v*/teams/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
-                .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/tables").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches", "/v3/fcm/operation").permitAll()
 
                 .anyRequest().authenticated());
 
