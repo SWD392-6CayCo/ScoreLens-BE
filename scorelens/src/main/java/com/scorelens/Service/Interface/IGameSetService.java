@@ -12,6 +12,7 @@ import com.scorelens.Exception.ErrorCode;
 import java.util.List;
 
 public interface IGameSetService {
+    List<GameSetResponse> getAllGameSets();
     GameSetResponse getById(Integer id);
     List<GameSetResponse> getByMatchID(Integer id);
     GameSetResponse createSet(GameSetCreateRequest request);

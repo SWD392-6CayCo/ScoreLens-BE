@@ -155,26 +155,26 @@ public class BilliardMatchV1Controller {
                 .build();
     }
 
-    @PutMapping("/forfeit/{id}")
+    @PutMapping("/cancel/{id}")
     public ResponseObject forfeit(@PathVariable Integer id, @RequestBody Integer teamID) {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Team with ID " + teamID + " has been forfeited")
-                .data(billiardMatchService.forfeit(id,teamID))
+                .data(billiardMatchService.cancelMatch(id,teamID))
                 .build();
     }
 
-    @PutMapping("/cancel/{id}")
-    public ResponseObject cancel(@PathVariable Integer id) {
-        BilliardMatchResponse response = billiardMatchService.cancel(id);
-        //free table
-        billiardTableService.setAvailable(String.valueOf(response.getBilliardMatchID()));
-        return ResponseObject.builder()
-                .status(1000)
-                .message("Cancel Match successfully")
-                .data(billiardMatchService.cancel(id))
-                .build();
-    }
+//    @PutMapping("/cancel/{id}")
+//    public ResponseObject cancel(@PathVariable Integer id) {
+//        BilliardMatchResponse response = billiardMatchService.cancel(id);
+//        //free table
+//        billiardTableService.setAvailable(String.valueOf(response.getBilliardMatchID()));
+//        return ResponseObject.builder()
+//                .status(1000)
+//                .message("Cancel Match successfully")
+//                .data(billiardMatchService.cancel(id))
+//                .build();
+//    }
 
     @PutMapping("/complete/{id}")
     public ResponseObject complete(@PathVariable Integer id) {

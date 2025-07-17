@@ -1,55 +1,123 @@
 package com.scorelens.Config;
 
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Configuration;
-
-import java.io.FileInputStream;
-
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
+@ConditionalOnProperty(
+    name = "firebase.project-id",
+    matchIfMissing = false
+)
 @Slf4j
 public class FirebaseConfig {
 
-    @PostConstruct
-    public void initialize() {
+    @Value("${firebase.type}")
+    private String type;
 
+    @Value("${firebase.project-id}")
+    private String projectId;
+
+    @Value("${firebase.private-key-id}")
+    private String privateKeyId;
+
+    @Value("${firebase.private-key}")
+    private String privateKey;
+
+    @Value("${firebase.client-email}")
+    private String clientEmail;
+
+    @Value("${firebase.client-id}")
+    private String clientId;
+
+    @Value("${firebase.auth-uri}")
+    private String authUri;
+
+    @Value("${firebase.token-uri}")
+    private String tokenUri;
+
+    @Value("${firebase.auth-provider-x509-cert-url}")
+    private String authProviderX509CertUrl;
+
+    @Value("${firebase.client-x509-cert-url}")
+    private String clientX509CertUrl;
+
+    @Value("${firebase.universe-domain}")
+    private String universeDomain;
+
+    private FirebaseApp initializeFirebase() {
         try {
-
-            Resource resource = new ClassPathResource("firebase-service-account.json");
-            FileInputStream serviceAccount = new FileInputStream(resource.getFile());
-
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .build();
-
-            // Chỉ khởi tạo nếu chưa có FirebaseApp nào được khởi tạo
-            if (FirebaseApp.getApps().isEmpty()) {
-                FirebaseApp.initializeApp(options);
-                log.info("Firebase Admin SDK initialized successfully!");
-            } else {
-                log.info("Firebase Admin SDK already initialized.");
+            // Validate required environment variables
+            if (projectId == null || projectId.trim().isEmpty()) {
+                throw new IllegalArgumentException("Firebase project ID is required");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            if (privateKey == null || privateKey.trim().isEmpty()) {
+                throw new IllegalArgumentException("Firebase private key is required");
+            }
+            if (clientEmail == null || clientEmail.trim().isEmpty()) {
+                throw new IllegalArgumentException("Firebase client email is required");
+            }
+
+            if (FirebaseApp.getApps().isEmpty()) {
+                // Tạo JSON string từ environment variables
+                String firebaseConfigJson = createFirebaseConfigJson();
+
+                // Tạo credentials từ JSON string
+                GoogleCredentials credentials = GoogleCredentials.fromStream(
+                    new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8))
+                );
+
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(credentials)
+                        .setProjectId(projectId)
+                        .build();
+
+                FirebaseApp app = FirebaseApp.initializeApp(options);
+                log.info("Firebase initialized successfully with project ID: {}", projectId);
+                return app;
+            } else {
+                return FirebaseApp.getInstance();
+            }
+        } catch (IOException e) {
+            log.error("Failed to initialize Firebase: {}", e.getMessage());
+            throw new RuntimeException("Firebase initialization failed", e);
         }
     }
 
-    // Tùy chọn: Nếu muốn có một Bean Firestore cho dễ sử dụng
-    // @Bean
-    // public Firestore getFirestore() {
-    //     return FirestoreClient.getFirestore();
-    // }
+    private String createFirebaseConfigJson() {
+        return String.format("""
+            {
+              "type": "%s",
+              "project_id": "%s",
+              "private_key_id": "%s",
+              "private_key": "%s",
+              "client_email": "%s",
+              "client_id": "%s",
+              "auth_uri": "%s",
+              "token_uri": "%s",
+              "auth_provider_x509_cert_url": "%s",
+              "client_x509_cert_url": "%s",
+              "universe_domain": "%s"
+            }
+            """,
+            type, projectId, privateKeyId, privateKey.replace("\\n", "\n"),
+            clientEmail, clientId, authUri, tokenUri,
+            authProviderX509CertUrl, clientX509CertUrl, universeDomain
+        );
+    }
 
-    // Tùy chọn: Nếu bạn muốn có một Bean FirebaseAuth cho dễ sử dụng
-    // @Bean
-    // public FirebaseAuth getFirebaseAuth() {
-    //     return FirebaseAuth.getInstance();
-    // }
-
+    @Bean
+    public FirebaseApp firebaseApp() {
+        return initializeFirebase();
+    }
 }

@@ -89,7 +89,9 @@ public class GameSetV1Controller {
     public ResponseObject manualUpdateSet(Integer billiardMatchID) {
         List<GameSet> list = gameSetService.getByMatch(billiardMatchID);
         for (GameSet gameSet : list) {
-            GameSet tmp = gameSetService.startSet(gameSet.getGameSetID());
+            if (gameSet.getGameSetNo() == 1){
+                GameSet tmp = gameSetService.startSet(gameSet.getGameSetID());
+            }
         }
         return ResponseObject.builder()
                 .status(1000)

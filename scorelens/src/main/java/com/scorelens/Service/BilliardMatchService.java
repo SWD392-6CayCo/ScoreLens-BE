@@ -131,6 +131,9 @@ public class BilliardMatchService implements IBilliardMatchService {
         if (request.getCustomerID() == null) {
             BilliardTable table = tableRepo.findById(request.getBilliardTableID())
                     .orElseThrow(() -> new AppException(ErrorCode.TABLE_NOT_FOUND));
+            if(!table.getStatus().equals(TableStatus.available)) {
+                throw new AppException(ErrorCode.TABLE_NOT_AVAILABLE);
+            }
             Mode mode = modeRepo.findById(request.getModeID())
                     .orElseThrow(() -> new AppException(ErrorCode.MODE_NOT_FOUND));
             Staff staff = staffRepo.findById(request.getStaffID())
@@ -220,6 +223,11 @@ public class BilliardMatchService implements IBilliardMatchService {
     public BilliardMatchResponse updateScore(ScoreRequest request) {
         BilliardMatch match = repository.findById(request.getMatchID())
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+        if (match.getStatus().equals(MatchStatus.pending)) {
+            match.setStatus(MatchStatus.ongoing);
+        } else if (match.getStatus().equals(MatchStatus.completed) || match.getStatus().equals(MatchStatus.cancelled)) {
+            throw new AppException(ErrorCode.MATCH_COMPLETED);
+        }
 
         Team team = teamRepo.findById(request.getTeamID())
                 .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
@@ -227,7 +235,16 @@ public class BilliardMatchService implements IBilliardMatchService {
         GameSet currentSet = match.getSets().stream()
                 .filter(set -> set.getStatus() == MatchStatus.ongoing)
                 .findFirst()
-                .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
+                .orElseGet(() -> {
+                    GameSet pendingSet = match.getSets().stream()
+                            .filter(set -> set.getStatus() == MatchStatus.pending)
+                            .findFirst()
+                            .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
+
+                    pendingSet.setStatus(MatchStatus.ongoing);
+                    pendingSet.setStartTime(LocalDateTime.now());
+                    return pendingSet;
+                });
 
         // Update team score
         int delta = Integer.parseInt(request.getDelta());
@@ -337,94 +354,98 @@ public class BilliardMatchService implements IBilliardMatchService {
     }
 
     @Override
-    public BilliardMatchResponse forfeit(Integer matchID, Integer teamID) {
+    public BilliardMatchResponse cancelMatch(Integer matchID, Integer teamID) {
         BilliardMatch match = repository.findById(matchID)
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
-        Team forfeitedTeam = teamRepo.findById(teamID)
-                .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
-        GameSet currentSet = match.getSets().stream()
-                .filter(set -> set.getStatus() == MatchStatus.ongoing)
-                .findFirst()
-                .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
-
-        if (match.getTeams().size() == 2) {
-            Team winningTeam = match.getTeams().stream()
-                    .filter(t -> !t.equals(forfeitedTeam))
+        if (match.getStatus() == MatchStatus.pending) {
+            match.setStatus(MatchStatus.cancelled);
+            match.setEndTime(LocalDateTime.now());
+            repository.save(match);
+            for (GameSet gs : match.getSets()) {
+                gs.setStatus(MatchStatus.cancelled);
+                gs.setEndTime(LocalDateTime.now());
+                setRepo.save(gs);
+            }
+        } else if (match.getStatus() == MatchStatus.ongoing) {
+            Team forfeitedTeam = teamRepo.findById(teamID)
+                    .orElseThrow(() -> new AppException(ErrorCode.TEAM_NOT_FOUND));
+            GameSet currentSet = match.getSets().stream()
+                    .filter(set -> set.getStatus() == MatchStatus.ongoing)
                     .findFirst()
-                    .orElseThrow();
+                    .orElseThrow(() -> new AppException(ErrorCode.SET_NOT_FOUND));
 
-            // update teams
-            for (Team team : match.getTeams()) {
-                for (GameSet set : match.getSets()) {
-                    if (team.equals(winningTeam)) {
-                        team.setStatus(ResultStatus.win);
-                        if (set == currentSet) {
-                            teamSetService.updateTeamSet(team.getTeamID(), set.getGameSetID(), team.getTotalScore());
-                        } else if (set.getStatus().equals(MatchStatus.pending)) {
-                            teamSetService.updateTeamSet(team.getTeamID(), set.getGameSetID(), set.getRaceTo());
-                        }
-                        int total = team.getTss().stream()
-                                .mapToInt(ts -> ts.getTotalScore() != null ? ts.getTotalScore() : 0)
-                                .sum();
-                        team.setTotalScore(total);
-                        teamRepo.save(team);
-                        // player status
-                        for (Player p : team.getPlayers()) {
-                            p.setStatus(team.getStatus());
-                            playerRepo.save(p);
-                        }
-                    }else{
-                        team.setStatus(ResultStatus.lose);
-                        if (set == currentSet || set.getStatus().equals(MatchStatus.pending)) {
-                            teamSetService.updateTeamSet(team.getTeamID(), set.getGameSetID(), 0);
-                        }
-                        int total = team.getTss().stream()
-                                .mapToInt(ts -> ts.getTotalScore() != null ? ts.getTotalScore() : 0)
-                                .sum();
-                        team.setTotalScore(total);
-                        teamRepo.save(team);
-                        // player status
-                        for (Player p : team.getPlayers()) {
-                            p.setStatus(team.getStatus());
-                            playerRepo.save(p);
+            if (match.getTeams().size() == 2) {
+                Team winningTeam = match.getTeams().stream()
+                        .filter(t -> !t.equals(forfeitedTeam))
+                        .findFirst()
+                        .orElseThrow();
+
+                // update teams
+                for (Team team : match.getTeams()) {
+                    for (GameSet set : match.getSets()) {
+                        if (team.equals(winningTeam)) {
+                            team.setStatus(ResultStatus.win);
+                            if (set == currentSet) {
+                                teamSetService.updateTeamSet(team.getTeamID(), set.getGameSetID(), team.getTotalScore());
+                            } else if (set.getStatus().equals(MatchStatus.pending)) {
+                                teamSetService.updateTeamSet(team.getTeamID(), set.getGameSetID(), set.getRaceTo());
+                            }
+                            int total = team.getTss().stream()
+                                    .mapToInt(ts -> ts.getTotalScore() != null ? ts.getTotalScore() : 0)
+                                    .sum();
+                            team.setTotalScore(total);
+                            teamRepo.save(team);
+                            // player status
+                            for (Player p : team.getPlayers()) {
+                                p.setStatus(team.getStatus());
+                                playerRepo.save(p);
+                            }
+                        }else{
+                            team.setStatus(ResultStatus.lose);
+                            if (set == currentSet) {
+                                teamSetService.updateTeamSet(team.getTeamID(), set.getGameSetID(), team.getTotalScore());
+                            } else if (set.getStatus().equals(MatchStatus.pending)) {
+                                teamSetService.updateTeamSet(team.getTeamID(), set.getGameSetID(), 0);
+                            }
+                            int total = team.getTss().stream()
+                                    .mapToInt(ts -> ts.getTotalScore() != null ? ts.getTotalScore() : 0)
+                                    .sum();
+                            team.setTotalScore(total);
+                            teamRepo.save(team);
+                            // player status
+                            for (Player p : team.getPlayers()) {
+                                p.setStatus(team.getStatus());
+                                playerRepo.save(p);
+                            }
                         }
                     }
                 }
-            }
 
-            // update sets
-            for (GameSet set : match.getSets()) {
-                if (set == currentSet) {
-                    currentSet.setStatus(MatchStatus.forfeited);
-                    currentSet.setEndTime(LocalDateTime.now());
-                    currentSet.setWinner(winningTeam.getName());
-                    setRepo.save(currentSet);
+                // update sets
+                for (GameSet set : match.getSets()) {
+                    if (set == currentSet) {
+                        currentSet.setStatus(MatchStatus.cancelled);
+                        currentSet.setEndTime(LocalDateTime.now());
+                        currentSet.setWinner(winningTeam.getName());
+                        setRepo.save(currentSet);
+                    }
+                    if (set.getStatus() == MatchStatus.pending) {
+                        set.setStatus(MatchStatus.cancelled);
+                        set.setStartTime(LocalDateTime.now());
+                        set.setEndTime(LocalDateTime.now());
+                        set.setWinner(winningTeam.getName());
+                        setRepo.save(set);
+                    }
                 }
-                if (set.getStatus() == MatchStatus.pending) {
-                    set.setStatus(MatchStatus.forfeited);
-                    set.setStartTime(LocalDateTime.now());
-                    set.setEndTime(LocalDateTime.now());
-                    set.setWinner(winningTeam.getName());
-                    setRepo.save(set);
-                }
+
+                match.setWinner(winningTeam.getName());
+                match.setEndTime(LocalDateTime.now());
+                match.setStatus(MatchStatus.cancelled);
+                repository.save(match);
+            } else {
+                // match > 2 team
             }
-           
-            match.setWinner(winningTeam.getName());
-            match.setEndTime(LocalDateTime.now());
-            match.setStatus(MatchStatus.forfeited);
-            repository.save(match);
-        } else {
-            // match > 2 team
         }
-        return billiardMatchMapper.toBilliardMatchResponse(match);
-    }
-
-    @Override
-    public BilliardMatchResponse cancel(Integer id) {
-        BilliardMatch match = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
-        match.setStatus(MatchStatus.cancelled);
-        repository.save(match);
         return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 

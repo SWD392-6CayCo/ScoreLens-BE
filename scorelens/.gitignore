@@ -55,6 +55,13 @@ certs/*
 !certs/client.truststore.jks
 
 # ===================== #
+#   Firebase            #
+# ===================== #
+firebase-service-account.json
+**/firebase-service-account.json
+firebase-adminsdk-*.json
+
+# ===================== #
 #   OS Specific         #
 # ===================== #
 .DS_Store

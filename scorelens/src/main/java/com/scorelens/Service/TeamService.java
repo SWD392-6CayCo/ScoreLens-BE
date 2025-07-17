@@ -4,10 +4,9 @@ import com.scorelens.DTOs.Request.PlayerCreateRequest;
 import com.scorelens.DTOs.Request.ScoreRequest;
 import com.scorelens.DTOs.Request.TeamCreateRequest;
 import com.scorelens.DTOs.Request.TeamUpdateRequest;
+import com.scorelens.DTOs.Response.PlayerResponse;
 import com.scorelens.DTOs.Response.TeamResponse;
-import com.scorelens.Entity.BilliardMatch;
-import com.scorelens.Entity.Player;
-import com.scorelens.Entity.Team;
+import com.scorelens.Entity.*;
 import com.scorelens.Enums.ResultStatus;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
@@ -38,6 +37,14 @@ public class TeamService implements ITeamService {
 
     @Autowired
     TeamMapper teamMapper;
+    @Autowired
+    private TeamSetService teamSetService;
+
+    @Override
+    public List<TeamResponse> getAllTeams() {
+        List<Team> ts = teamRepository.findAll();
+        return teamMapper.toTeamResponseList(ts);
+    }
 
     @Override
     public TeamResponse getById(Integer id) {
@@ -81,6 +88,34 @@ public class TeamService implements ITeamService {
             team.addPlayer(player);
         }
         return teamRepository.save(team);
+    }
+
+    @Override
+    public TeamResponse addTeam(TeamCreateRequest request) {
+        BilliardMatch match = matchRepository.findById(request.getBilliardMatchID())
+                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+
+        Team team = new Team();
+        team.setName(request.getName());
+        team.setTotalMember(request.getTotalMember());
+        team.setTotalScore(0);
+        team.setCreateAt(LocalDateTime.now());
+        team.setStatus(ResultStatus.draw);
+        team.setBilliardMatch(match);
+        teamRepository.save(team);
+        for (String name : request.getMemberNames()) {
+            PlayerCreateRequest playerCreateRequest = new PlayerCreateRequest();
+            playerCreateRequest.setName(name);
+            playerCreateRequest.setTeamID(team.getTeamID());
+            Player player = playerService.createPlayer(playerCreateRequest);
+            player.setTeam(team);
+            team.addPlayer(player);
+        }
+        for (GameSet gs : match.getSets()) {
+            TeamSet ts = teamSetService.createTeamSet(team.getTeamID(), gs.getGameSetID());
+            team.addTeamSet(ts);
+        }
+        return teamMapper.toTeamResponse(teamRepository.save(team));
     }
 
     @Override
