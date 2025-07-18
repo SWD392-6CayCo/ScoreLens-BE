@@ -60,6 +60,7 @@ public enum ErrorCode {
     //-------------------------- PLAYER  -----------------------------------
     PLAYER_NOT_FOUND(1017, "Player not found", HttpStatus.NOT_FOUND),
     PLAYER_SAVED(1017, "Player was saved as the other customer", HttpStatus.BAD_REQUEST),
+    CUSTOMER_SAVED(1017, "Customer was saved as one of the player in this match", HttpStatus.BAD_REQUEST),
     //-------------------------- EVENT  -----------------------------------
     NULL_EVENT(1018, "Event is null", HttpStatus.BAD_REQUEST),
     NULL_EVENT_PLAYERID(1019, "No data matched with this player", HttpStatus.BAD_REQUEST),

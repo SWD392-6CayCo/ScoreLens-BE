@@ -4,9 +4,7 @@ import com.scorelens.DTOs.Request.CustomerSaveRequest;
 import com.scorelens.DTOs.Request.PlayerCreateRequest;
 import com.scorelens.DTOs.Request.PlayerUpdateRequest;
 import com.scorelens.DTOs.Response.PlayerResponse;
-import com.scorelens.Entity.Customer;
-import com.scorelens.Entity.Player;
-import com.scorelens.Entity.Team;
+import com.scorelens.Entity.*;
 import com.scorelens.Enums.ResultStatus;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
@@ -103,8 +101,18 @@ public class PlayerService implements IPlayerService {
     public PlayerResponse updateCustomer(Integer id, CustomerSaveRequest request) {   // email or phone number
         Player player = playerRepo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PLAYER_NOT_FOUND));
+        Team team = player.getTeam();
+        BilliardMatch match = team.getBilliardMatch();
         if (player.getCustomer() != null) {
             throw new AppException(ErrorCode.PLAYER_SAVED);
+        }
+        for (Team t : match.getTeams()) {
+            for (Player p : t.getPlayers()) {
+                if (p.getCustomer().getEmail().equals(request.getInfo()) ||
+                    p.getCustomer().getPhoneNumber().equals(request.getInfo())) {
+                    throw new AppException(ErrorCode.CUSTOMER_SAVED);
+                }
+            }
         }
         if (request.getInfo().matches("\\d+")){
             Customer c = customerRepo.findByPhoneNumber(request.getInfo())
