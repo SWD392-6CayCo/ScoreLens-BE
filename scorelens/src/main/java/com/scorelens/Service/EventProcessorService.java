@@ -79,10 +79,10 @@ public class EventProcessorService {
             int modeID = player.getTeam().getBilliardMatch().getMode().getModeID();
 
             switch (modeID) {
-                case 2: //9 ball
+                case 3: //9 ball
                     //1 round đấu kết thúc => update match score
                     //bi 9 potted && !isFoul && scored
-                    //16: 'yellow_striped_9'
+                    //9: 'yellow_striped_9'
                     if (event.isScoreValue() && !event.isFoul() && lmr.getTargetBallId() == 9) {
                         //update match score
                         updateMatch(player);

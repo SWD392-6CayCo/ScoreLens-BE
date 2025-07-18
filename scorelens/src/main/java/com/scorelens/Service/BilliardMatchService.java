@@ -278,7 +278,7 @@ public class BilliardMatchService implements IBilliardMatchService {
 
             //push noti
             webSocketService.sendToWebSocket(
-                    WebSocketTopic.NOTI_NOTIFICATION.getValue() + match.getBillardTable().getBillardTableID(),
+                    WebSocketTopic.NOTI_MOBILE.getValue() + match.getBillardTable().getBillardTableID(),
                     new WebsocketReq(WSFCMCode.WINNING_SET, tmp)
             );
             fcmService.sendNotification(
@@ -326,7 +326,7 @@ public class BilliardMatchService implements IBilliardMatchService {
                 log.info("Failed to send notification: " + e.getMessage());
             }
             webSocketService.sendToWebSocket(
-                    WebSocketTopic.NOTI_NOTIFICATION.getValue() + match.getBillardTable().getBillardTableID(),
+                    WebSocketTopic.NOTI_MOBILE.getValue() + match.getBillardTable().getBillardTableID(),
                     new WebsocketReq(WSFCMCode.WINNING_MATCH, tmp)
             );
 
