@@ -2,8 +2,10 @@ package com.scorelens.Controller.v3;
 
 import com.scorelens.DTOs.Request.ShotEvent;
 import com.scorelens.DTOs.Request.WebSocketV3Request;
+import com.scorelens.DTOs.Request.WebsocketReq;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.MessageType;
+import com.scorelens.Enums.WSFCMCode;
 import com.scorelens.Enums.WebSocketTopic;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,6 +50,9 @@ public class WebSocketV3Controller {
     @Operation(summary = "Send unified WebSocket message", description = "Unified API that combines notification, logging, and shot_event message types")
     @PostMapping()
     public ResponseObject sendMessage(@RequestBody WebSocketV3Request request) {
+
+        WebsocketReq websocketReq;
+
         try {
             MessageType messageType = request.getMessageType();
             String tableID = request.getTableID();
@@ -80,7 +85,7 @@ public class WebSocketV3Controller {
                                 .build();
                     }
                     topic = "/topic/notification/" + tableID;
-                    data = request.getMessage();
+                    websocketReq = new WebsocketReq(WSFCMCode.NOTIFICATION, request.getMessage().trim());
                     successMessage = "Notification sent successfully";
                     log.info("Sending notification from table {}: {}", tableID, request.getMessage());
                     break;
@@ -93,7 +98,7 @@ public class WebSocketV3Controller {
                                 .build();
                     }
                     topic = "/topic/logging_notification/" + tableID;
-                    data = request.getMessage();
+                    websocketReq = new WebsocketReq(WSFCMCode.LOGGING, request.getMessage());
                     successMessage = "Logging message sent successfully";
                     log.info("Sending logging from table {}: {}", tableID, request.getMessage());
                     break;
@@ -107,6 +112,7 @@ public class WebSocketV3Controller {
                     }
                     topic = "/topic/shot_event/" + tableID;
                     data = request.getShotEvent();
+                    websocketReq = new WebsocketReq(WSFCMCode.SHOT, request.getShotEvent());
                     successMessage = "Shot event sent successfully";
                     log.info("Sending shot_event from table {}: {}", tableID, request.getShotEvent());
                     break;
@@ -119,12 +125,13 @@ public class WebSocketV3Controller {
             }
 
             // Send message to WebSocket topic
-            messagingTemplate.convertAndSend(topic, data);
+
+            messagingTemplate.convertAndSend(topic, websocketReq);
 
             return ResponseObject.builder()
                     .status(1000)
                     .message(successMessage)
-                    .data(data)
+                    .data(websocketReq)
                     .build();
 
         } catch (Exception e) {
