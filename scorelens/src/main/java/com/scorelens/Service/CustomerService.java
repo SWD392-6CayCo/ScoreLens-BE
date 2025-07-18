@@ -54,7 +54,7 @@ public class CustomerService implements ICustomerService {
 
     //-------------------------------- GET ---------------------------------
     @Override
-    @PreAuthorize("hasAuthority('GET_CUSTOMER_LIST')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_CUSTOMER_LIST')")
     public List<CustomerResponseDto> findAll() {
         List<Customer> customers = customerRepo.findAll();
         if(customers.isEmpty()){
@@ -64,7 +64,7 @@ public class CustomerService implements ICustomerService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('GET_CUSTOMER_DETAIL')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_CUSTOMER_DETAIL')")
     public CustomerResponseDto findById(String id) {
                 Optional<Customer> optionalCus = customerRepo.findById(id);
         if (optionalCus.isEmpty()) {
