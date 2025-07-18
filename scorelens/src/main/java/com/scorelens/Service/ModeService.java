@@ -9,6 +9,7 @@ import com.scorelens.Mapper.ModeMapper;
 import com.scorelens.Repository.ModeRepository;
 import com.scorelens.Service.Interface.IModeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class ModeService implements IModeService {
     private ModeMapper modeMapper;
 
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE_GAME_MODE')")
     public ModeResponse createMode(ModeRequest request) {
         Mode mode = new Mode();
         mode.setName(request.getName());
