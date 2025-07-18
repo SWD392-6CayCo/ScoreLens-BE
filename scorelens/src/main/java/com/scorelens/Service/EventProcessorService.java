@@ -68,7 +68,7 @@ public class EventProcessorService {
             Integer gameSetID = event.getGameSetID();
 
             //xử lí shot và gửi msg qua websocket
-            handlingEvent(event, tableID);
+            handlingEvent(event, tableID, lmr.getShotCount());
 
             // Thêm event vào DB
             EventResponse e = eventService.addEvent(event);
@@ -83,7 +83,7 @@ public class EventProcessorService {
                     //1 round đấu kết thúc => update match score
                     //bi 9 potted && !isFoul && scored
                     //16: 'yellow_striped_9'
-                    if (event.isScoreValue() && !event.isFoul() && lmr.getTargetBallId() == 16) {
+                    if (event.isScoreValue() && !event.isFoul() && lmr.getTargetBallId() == 9) {
                         //update match score
                         updateMatch(player);
                     }
@@ -115,7 +115,7 @@ public class EventProcessorService {
         }
     }
 
-    private void updateMatch(Player player) {
+    private void updateMatch(Player player) throws FirebaseMessagingException {
         matchService.updateScore(
                 new ScoreRequest(
                         player.getTeam().getBilliardMatch().getBilliardMatchID(),
@@ -142,13 +142,10 @@ public class EventProcessorService {
 
 
     // xác định shot event
-    public void handlingEvent(EventRequest request, String tableID) throws FirebaseMessagingException {
+    public void handlingEvent(EventRequest request, String tableID, int shotCount) throws FirebaseMessagingException {
         boolean isFoul = request.isFoul();
         boolean scoreValue = request.isScoreValue();
         boolean isUncertain = request.isUncertain();
-        //lấy ds event theo gameset để đếm số shot đã đánh
-        int tmp = eventService.countEventsGameSetID(request.getGameSetID());
-        int shotCount = tmp == 0 ? 1 : tmp;
 
         ShotEvent shot = new ShotEvent();
         // nếu AI k chắc chắn => undetected

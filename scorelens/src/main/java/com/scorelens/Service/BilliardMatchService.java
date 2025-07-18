@@ -1,5 +1,6 @@
 package com.scorelens.Service;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.Entity.*;
@@ -10,6 +11,7 @@ import com.scorelens.Mapper.BilliardMatchMapper;
 import com.scorelens.Repository.*;
 import com.scorelens.Service.Interface.IBilliardMatchService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+@Slf4j
 @Service
 public class BilliardMatchService implements IBilliardMatchService {
     @Autowired
@@ -59,6 +62,7 @@ public class BilliardMatchService implements IBilliardMatchService {
     private WebSocketService webSocketService;
 
     NotificationService notificationService;
+
 
     @Override
     public BilliardMatchResponse getById(Integer id) {
@@ -224,7 +228,7 @@ public class BilliardMatchService implements IBilliardMatchService {
     }
 
     @Override
-    public BilliardMatchResponse updateScore(ScoreRequest request) {
+    public BilliardMatchResponse updateScore(ScoreRequest request) throws FirebaseMessagingException {
         BilliardMatch match = repository.findById(request.getMatchID())
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         if (match.getStatus().equals(MatchStatus.pending)) {
@@ -275,8 +279,14 @@ public class BilliardMatchService implements IBilliardMatchService {
             //push noti
             webSocketService.sendToWebSocket(
                     WebSocketTopic.NOTI_NOTIFICATION.getValue() + match.getBillardTable().getBillardTableID(),
-                    new WebsocketReq(WSFCMCode.NOTIFICATION, tmp)
+                    new WebsocketReq(WSFCMCode.WINNING_SET, tmp)
             );
+            fcmService.sendNotification(
+                    match.getBillardTable().getBillardTableID(),
+                    WSFCMCode.WINNING_SET.toString(),
+                    tmp
+            );
+
 
 
             // Update team scores into TeamSet
@@ -309,15 +319,15 @@ public class BilliardMatchService implements IBilliardMatchService {
             try {
                 fcmService.sendNotification(
                         match.getBillardTable().getBillardTableID(),
-                        String.valueOf(WSFCMCode.SHOT),
+                        String.valueOf(WSFCMCode.WINNING_MATCH),
                         tmp
                 );
             } catch ( Exception e ) {
-                e.printStackTrace();
+                log.info("Failed to send notification: " + e.getMessage());
             }
             webSocketService.sendToWebSocket(
                     WebSocketTopic.NOTI_NOTIFICATION.getValue() + match.getBillardTable().getBillardTableID(),
-                    new WebsocketReq(WSFCMCode.NOTIFICATION, tmp)
+                    new WebsocketReq(WSFCMCode.WINNING_MATCH, tmp)
             );
 
 

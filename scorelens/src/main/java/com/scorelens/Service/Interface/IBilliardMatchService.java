@@ -1,6 +1,7 @@
 package com.scorelens.Service.Interface;
 
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.BilliardMatchCreateRequest;
 import com.scorelens.DTOs.Request.BilliardMatchUpdateRequest;
 import com.scorelens.DTOs.Request.MatchFilterRequest;
@@ -23,7 +24,7 @@ public interface IBilliardMatchService {
         List<BilliardMatchResponse> getByStaff(String id);
         BilliardMatchResponse getByPlayerID(Integer id);
         List<BilliardMatchResponse> getByCustomerID(String id);
-        BilliardMatchResponse updateScore(ScoreRequest request);
+        BilliardMatchResponse updateScore(ScoreRequest request) throws FirebaseMessagingException;
         BilliardMatchResponse cancelMatch(Integer id, Integer teamID);
         //BilliardMatchResponse cancel(Integer id);
         void deleteAll();
