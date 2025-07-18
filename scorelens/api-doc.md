@@ -5,7 +5,7 @@
   "tableID": "23374e21-2391-41b0-b275-651df88b3b04",
   "modeID": 2,
   "data": {
-    "cameraUrl": "C:/Users/dinhc/Downloads/vid_3867.mp4",
+    "cameraUrl": "C:/Users/ADMIN/Downloads/one_round.mp4",
     "totalSet": 1,
     "sets": [
       {

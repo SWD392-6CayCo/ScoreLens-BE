@@ -122,26 +122,26 @@ public class WebSocketV3Controller {
                     break;
 
                 case set_event:
-                    if (request.getShotEvent() == null) {
+                    if (request.getMessage() == null) {
                         return ResponseObject.builder()
                                 .status(400)
                                 .message("Message data is required for set_event type")
                                 .build();
                     }
-                    topic = WebSocketTopic.NOTI_MOBILE + tableID;
+                    topic = "/topic/match_event/" + tableID;
                     websocketReq = new WebsocketReq((WSFCMCode.WINNING_SET), request.getMessage());
                     successMessage = "Set event sent successfully";
                     log.info("Sending set_event from table {}: {}", tableID, request.getShotEvent());
                     break;
 
                 case match_event:
-                    if (request.getShotEvent() == null) {
+                    if (request.getMessage() == null) {
                         return ResponseObject.builder()
                                 .status(400)
                                 .message("Message data is required for set_event type")
                                 .build();
                     }
-                    topic = WebSocketTopic.NOTI_MOBILE + tableID;
+                    topic = "/topic/match_event/" + tableID;
                     websocketReq = new WebsocketReq((WSFCMCode.WINNING_MATCH), request.getMessage());
                     successMessage = "Match event sent successfully";
                     log.info("Sending match_event from table {}: {}", tableID, request.getShotEvent());
