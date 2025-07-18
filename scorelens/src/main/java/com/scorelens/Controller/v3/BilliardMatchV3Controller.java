@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 @Tag(name = "Billiard Match V3", description = "Unified Billiard Match API")
 @RestController
-@RequestMapping("v3/billiardmatches")
+@RequestMapping("v3/billiard-matches")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

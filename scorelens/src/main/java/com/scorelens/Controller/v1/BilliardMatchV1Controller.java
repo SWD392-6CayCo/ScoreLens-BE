@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Tag(name = "Billiard Match", description = "Manage Billiard Match")
 @RestController
-@RequestMapping("v1/billiardmatches")
+@RequestMapping("v1/billiard-matches")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
