@@ -398,7 +398,7 @@ public class BilliardMatchV3Controller {
 
     private NotificationResponse newNoti(int matchID, String msg, NotificationType type) {
         //add info into notification
-        return notificationService.sendNotification(
+        return notificationService.saveNotification(
                 new NotificationRequest(
                         matchID,
                         msg,

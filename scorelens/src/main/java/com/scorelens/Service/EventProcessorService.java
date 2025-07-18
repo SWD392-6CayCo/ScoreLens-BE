@@ -74,13 +74,23 @@ public class EventProcessorService {
             EventResponse e = eventService.addEvent(event);
             log.info("New event is added: {}", e);
 
-            //1 round đấu kết thúc => update match score
-            //bi 9 potted && !isFoul && scored
-            if (event.isScoreValue() && !event.isFoul() && lmr.getTargetBallId() == 9) {
-                //update match score
-                updateMatch(event.getPlayerID());
-            }
+            Player player = playerService.getPlayer(event.getPlayerID());
 
+            int modeID = player.getTeam().getBilliardMatch().getMode().getModeID();
+
+            switch (modeID) {
+                case 2: //9 ball
+                    //1 round đấu kết thúc => update match score
+                    //bi 9 potted && !isFoul && scored
+                    //16: 'yellow_striped_9'
+                    if (event.isScoreValue() && !event.isFoul() && lmr.getTargetBallId() == 16) {
+                        //update match score
+                        updateMatch(player);
+                    }
+                    break;
+
+
+            }
             // Nếu gameSet chưa start thì start
             if (!gameSetStartedMap.containsKey(gameSetID)) {
                 //update game_set status
@@ -105,9 +115,7 @@ public class EventProcessorService {
         }
     }
 
-    private void updateMatch(int playerID) {
-        Player player = playerService.getPlayer(playerID);
-
+    private void updateMatch(Player player) {
         matchService.updateScore(
                 new ScoreRequest(
                         player.getTeam().getBilliardMatch().getBilliardMatchID(),
