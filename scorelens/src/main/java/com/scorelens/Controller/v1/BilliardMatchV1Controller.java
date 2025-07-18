@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BilliardMatchV1Controller {
-    @Autowired
     BilliardMatchService billiardMatchService;
 
     BilliardTableService billiardTableService;

@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -42,6 +43,7 @@ public class BilliardTableService implements IBilliardTableService {
 
     String webUrl = "https://score-lens.vercel.app/";
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE_TABLE')")
     @Override
     @Transactional
     public BilliardTableResponse createBilliardTable(BilliardTableRequest request) {
