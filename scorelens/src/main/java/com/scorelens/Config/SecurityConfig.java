@@ -131,6 +131,7 @@ public class SecurityConfig {
                 "https://localhost:5173",
                 "https://score-lens.vercel.app",
                 "exp://192.168.90.68:8081",
+                "exp://**",
                 "https://scorelens.onrender.com"
         ));
         //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost

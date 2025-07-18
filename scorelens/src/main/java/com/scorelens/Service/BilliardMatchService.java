@@ -273,15 +273,6 @@ public class BilliardMatchService implements IBilliardMatchService {
                 ));
 
             //push noti
-            try {
-                fcmService.sendNotification(
-                        match.getBillardTable().getBillardTableID(),
-                        String.valueOf(WSFCMCode.SHOT),
-                        tmp
-                );
-            } catch ( Exception e ) {
-               e.printStackTrace(); 
-            }
             webSocketService.sendToWebSocket(
                     WebSocketTopic.NOTI_NOTIFICATION.getValue() + match.getBillardTable().getBillardTableID(),
                     new WebsocketReq(WSFCMCode.NOTIFICATION, tmp)
@@ -312,7 +303,7 @@ public class BilliardMatchService implements IBilliardMatchService {
             match.setEndTime(LocalDateTime.now());
             match.setStatus(MatchStatus.completed);
 
-            String tmp = ""  ;
+            String tmp = "Match " + match.getCode() + "has ended";
 
             //push noti
             try {
