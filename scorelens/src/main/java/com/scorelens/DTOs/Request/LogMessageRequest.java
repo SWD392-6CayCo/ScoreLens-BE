@@ -9,6 +9,6 @@ public class LogMessageRequest {
     private int cueBallId;
     private int targetBallId;
     private int modeID;
-    private int shotCount;
+    private String message;
     private EventRequest details;
 }
