@@ -77,7 +77,12 @@ public enum ErrorCode {
     ALL_NOT_VALUE(1025, "Either staffID or customerID is not null", HttpStatus.BAD_REQUEST),
 
     KAFKA_SEND_FAILED(1005, "Send kafka message failed", HttpStatus.BAD_REQUEST),
-    MIN_SCORE(1026, "Score is zero. Can not minus!", HttpStatus.BAD_REQUEST)
+    MIN_SCORE(1026, "Score is zero. Can not minus!", HttpStatus.BAD_REQUEST),
+
+    //-------------------------- EMAIL -----------------------------------
+    EMAIL_SEND_FAILED(1027, "Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
+    PASSWORD_MISMATCH(1028, "Password and confirm password do not match", HttpStatus.BAD_REQUEST),
+    INVALID_RESET_TOKEN(1029, "Invalid or expired reset token", HttpStatus.BAD_REQUEST)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

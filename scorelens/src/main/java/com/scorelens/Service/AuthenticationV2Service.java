@@ -13,6 +13,8 @@ import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDtoV2;
 import com.scorelens.DTOs.Response.IntrospectResponseDto;
 import com.scorelens.DTOs.Response.IntrospectV2ResponseDto;
+import com.scorelens.Service.Email.EmailService;
+import jakarta.mail.MessagingException;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.InvalidatedToken;
 import com.scorelens.Entity.Staff;
@@ -56,7 +58,8 @@ public class AuthenticationV2Service implements IAuthenticationService {
     CustomerRepo customerRepo;
     StaffRepository staffRepo;
     InvalidatedTokenRepository invalidatedTokenRepository;
-    private final PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
+    EmailService emailService;
 
     @NonFinal
     @Value("${jwt.signerKey}") //Đọc từ file application.yaml
@@ -449,7 +452,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
     }
 
     /**
-     * Extract role from scope string
+     * Giải mã role từ scope string
      * Input: "ROLE_ADMIN DELETE_CUSTOMER GET_STAFF_LIST UPDATE_STAFF_DETAIL..."
      * Output: "ADMIN"
      */
@@ -470,10 +473,8 @@ public class AuthenticationV2Service implements IAuthenticationService {
         return null;
     }
 
-    /**
-     * Determine user type based on userID
-     * Check if userID exists in Customer or Staff table
-     */
+     //Kiểm tra userType dựa trên userId
+     // kiểm tra nếu userId tồn tại trên table Customer hoặc Staff
     private UserType determineUserType(String userID) {
         if (userID == null || userID.isEmpty()) {
             return null;
@@ -490,5 +491,149 @@ public class AuthenticationV2Service implements IAuthenticationService {
         }
 
         return null;
+    }
+
+    //--------------------------------------- FORGOT PASSWORD --------------------------------------------------
+
+    //Gửi mail reset password
+    public void forgotPassword(ForgotPasswordRequestDto request) {
+        String email = request.getEmail();
+        log.info("Processing forgot password request for email: {}", email);
+
+        // Tìm user theo email (Customer hoặc Staff)
+        Customer customer = customerRepo.findByEmail(email).orElse(null);
+        Staff staff = staffRepo.findByEmail(email).orElse(null);
+
+        if (customer == null && staff == null) {
+            log.warn("No user found with email: {}", email);
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        // Tạo reset token (JWT với thời hạn 5 phút)
+        String resetToken = generateResetToken(email);
+        String userName = customer != null ? customer.getName() : staff.getName();
+
+        try {
+            // Gửi email
+            emailService.sendForgotPasswordEmail(email, resetToken, userName);
+            log.info("Forgot password email sent successfully to: {}", email);
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+            log.error("Failed to send forgot password email to: {}", email, e);
+            throw new AppException(ErrorCode.EMAIL_SEND_FAILED);
+        }
+    }
+
+    //reset password với token
+    public void resetPassword(ResetPasswordRequestDto request) {
+        String resetToken = request.getResetToken();
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        log.info("Processing reset password request");
+
+        // Validate password confirmation
+        if (!newPassword.equals(confirmPassword)) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        // Verify reset token
+        String email = verifyResetToken(resetToken);
+        if(email == null){
+            throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
+        }
+
+        // Tìm user và update password
+        Customer customer = customerRepo.findByEmail(email).orElse(null);
+        Staff staff = staffRepo.findByEmail(email).orElse(null);
+
+        if (customer != null) {
+            // Update customer password
+            customer.setPassword(passwordEncoder.encode(newPassword));
+            customerRepo.save(customer);
+            log.info("Password reset successfully for customer: {}", email);
+
+            // Gửi email xác nhận
+            try {
+                emailService.sendPasswordResetSuccessEmail(email, customer.getName());
+            } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+                log.warn("Failed to send password reset success email to: {}", email, e);
+            }
+
+        } else if (staff != null) {
+            // Update staff password
+            staff.setPassword(passwordEncoder.encode(newPassword));
+            staffRepo.save(staff);
+            log.info("Password reset successfully for staff: {}", email);
+
+            // Gửi email xác nhận
+            try {
+                emailService.sendPasswordResetSuccessEmail(email, staff.getName());
+            } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+                log.warn("Failed to send password reset success email to: {}", email, e);
+            }
+
+        } else {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+    }
+
+//Tạo reset token (JWT với thời hạn 5 phút)
+    private String generateResetToken(String email) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(email)
+                .issuer("scorelens.com")
+                .issueTime(new Date())
+                //set expiryTime là 5 phút
+                .expirationTime(new Date(
+                        Instant.now().plus(5, ChronoUnit.MINUTES).toEpochMilli()
+                ))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("type", "reset_password")
+                .build();
+
+        SignedJWT signedJWT = new SignedJWT(header, jwtClaimsSet);
+
+        try {
+            signedJWT.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return signedJWT.serialize();
+        } catch (JOSEException e) {
+            log.error("Cannot create reset token", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Verify reset token và trả về email
+     */
+    private String verifyResetToken(String token) {
+        try {
+            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+            SignedJWT signedJWT = SignedJWT.parse(token);
+
+            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+            boolean verified = signedJWT.verify(verifier);
+            // hết hạn
+            if (!(verified && expiryTime.after(new Date()))) {
+                //log.warn("Reset token is invalid or expired");
+                //return null;
+                throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
+            }
+
+            // Kiểm tra type claim
+            String type = signedJWT.getJWTClaimsSet().getStringClaim("type");
+            if (!"reset_password".equals(type)) {
+                log.warn("Invalid token type: {}", type);
+                return null;
+            }
+
+            return signedJWT.getJWTClaimsSet().getSubject();
+
+        } catch (Exception e) {
+            log.error("Cannot verify reset token", e);
+            return null;
+        }
     }
 }
