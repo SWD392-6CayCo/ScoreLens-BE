@@ -168,7 +168,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- UPDATE STAFF-----------------------------------
     @Override
-    @PostAuthorize("hasAuthority('UPDATE_STAFF_DETAIL') or returnObject.email == authentication.name")
+    @PostAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_STAFF_DETAIL') or returnObject.email == authentication.name")
         public StaffResponseDto updateStaff(String id, StaffUpdateRequestDto requestDto) {
         // Tìm nhân viên theo ID
         Staff existingStaff = staffRepository.findById(id).orElseThrow(
@@ -232,7 +232,7 @@ public class StaffService implements IStaffService {
 
     //    ---------------------------- DELETE STAFF-----------------------------------
     @Override
-    @PreAuthorize("hasAuthority('DELETE_STAFF')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE_STAFF')")
     public boolean deleteStaff(String id) {
         if(staffRepository.existsById(id)) {
             staffRepository.deleteById(id);
