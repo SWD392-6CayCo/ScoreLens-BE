@@ -3,14 +3,14 @@
 {
   "code": "START_STREAM",
   "tableID": "23374e21-2391-41b0-b275-651df88b3b04",
+  "modeID": 2,
   "data": {
-    "cameraUrl": "rtsp://192.168.1.100/stream",
+    "cameraUrl": "C:/Users/dinhc/Downloads/vid_3867.mp4",
+    "totalSet": 1,
     "sets": [
       {
-        "gameSetID": 1
-      },
-      {
-        "gameSetID": 2
+        "gameSetID": 1,
+        "raceTo": 1
       }
     ],
     "teams": [
@@ -20,10 +20,6 @@
           {
             "playerID": 0,
             "name": "Player A"
-          },
-          {
-            "playerID": 1,
-            "name": "Player B"
           }
         ]
       },
@@ -33,10 +29,6 @@
           {
             "playerID": 2,
             "name": "Player C"
-          },
-          {
-            "playerID": 3,
-            "name": "Player D"
           }
         ]
       }

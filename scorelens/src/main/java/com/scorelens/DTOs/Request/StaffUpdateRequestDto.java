@@ -15,7 +15,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * DTO for {@link com.scorelens.Entity.Staff}
@@ -46,7 +45,7 @@ public class StaffUpdateRequestDto implements Serializable {
     String address;
     StatusType status;
 
-    List<String> roles;
+    String role;
 
     String managerID;
     String storeID;

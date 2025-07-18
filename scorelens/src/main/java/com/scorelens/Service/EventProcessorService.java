@@ -1,6 +1,7 @@
 package com.scorelens.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.EventResponse;
 import com.scorelens.Entity.GameSet;
@@ -33,6 +34,7 @@ public class EventProcessorService {
     final EventService eventService;
     final WebSocketService webSocketService;
     final ObjectMapper mapper;
+    final FCMService fcmService;
 
     /**
      * Xử lý 1 Kafka message gửi về, parse thành event, log, start gameSet & match nếu cần
@@ -108,7 +110,7 @@ public class EventProcessorService {
 
 
     // xác định shot event
-    public void handlingEvent(EventRequest request, String tableID) {
+    public void handlingEvent(EventRequest request, String tableID) throws FirebaseMessagingException {
         boolean isFoul = request.isFoul();
         boolean scoreValue = request.isScoreValue();
         boolean isUncertain = request.isUncertain();
@@ -130,6 +132,12 @@ public class EventProcessorService {
 
 //        gửi thông báo qua web socket bằng topic: shot_event
         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue() + tableID, shot);
+        fcmService.sendNotification(
+                tableID,
+                "shot",
+                String.valueOf(shot)
+        );
+
         log.info("Send websocket to: /topic/shot_event/" + tableID);
         log.info(shot.toString());
 

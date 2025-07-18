@@ -14,6 +14,7 @@ public class InformationRequest {
 
     private KafkaCode code;
     private String tableID;
+    private Integer modeID;
     private Information data;
 
     @Data
@@ -21,6 +22,7 @@ public class InformationRequest {
     @NoArgsConstructor
     public static class Information {
         private String cameraUrl;
+        private Integer totalSet;
         private List<GameSet> sets;
         private List<Team> teams;
     }
@@ -30,6 +32,7 @@ public class InformationRequest {
     @NoArgsConstructor
     public static class GameSet{
         private int gameSetID;
+        private int raceTo;
     }
 
     @Data

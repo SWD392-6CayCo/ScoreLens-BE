@@ -10,7 +10,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Set;
 
 /**
  * DTO for {@link com.scorelens.Entity.Staff}
@@ -28,8 +27,7 @@ public class StaffResponseDto implements Serializable {
     @JsonFormat(pattern = "dd-MM-yyyy")
     LocalDate dob;
     String address;
-//    StaffRole role;
-    Set<RoleResponse> roles;
+    String role;
 
 
     @JsonFormat(pattern = "dd-MM-yyyy")

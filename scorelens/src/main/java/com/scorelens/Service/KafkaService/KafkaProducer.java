@@ -3,6 +3,7 @@ package com.scorelens.Service.KafkaService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.InformationRequest;
 import com.scorelens.DTOs.Request.ProducerRequest;
@@ -13,7 +14,9 @@ import com.scorelens.DTOs.Response.PlayerResponse;
 import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Enums.KafkaCode;
 import com.scorelens.Enums.WebSocketCode;
+import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.BilliardTableService;
+import com.scorelens.Service.FCMService;
 import com.scorelens.Service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +42,8 @@ public class KafkaProducer {
     private final KafKaHeartBeat kafKaHeartBeat;
 
     private final HeartbeatService heartbeatService;
+
+    private final FCMService fcmService;
 
     //    @Value("${spring.kafka.producer.topic}")
     private final String ja_to_py_topic = "ja_to_py";
@@ -81,12 +86,17 @@ public class KafkaProducer {
                 String message = objectMapper.writeValueAsString(new ProducerRequest(KafkaCode.RUNNING, tableID, "Heart beat checking"));
                 sendEvent(tableID, message);
                 webSocketService.sendToWebSocket(
-                        "/topic/notification",
+                        WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                         new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")
+                );
+                fcmService.sendNotification(
+                        tableID,
+                        "Connecting to AI Camera...",
+                        "noti"
                 );
 
                 //sau 10s neu py k gui msg
-                CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking();
+                CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking(tableID);
                 future.thenAccept(result -> {
                     if (result) {
                         log.info("Heartbeat OK");
@@ -96,6 +106,8 @@ public class KafkaProducer {
                 });
             } catch (JsonProcessingException e) {
                 log.error("Failed to serialize heartbeat message", e);
+            } catch (FirebaseMessagingException e) {
+                throw new RuntimeException(e);
             }
         } else {
             if (kafKaHeartBeat.timeSinceLastConfirm().getSeconds() > 30) {
@@ -112,18 +124,25 @@ public class KafkaProducer {
         req.setCode(KafkaCode.START_STREAM);
 
         //set tableID
-         req.setTableID(response.getBilliardTableID());
+        req.setTableID(response.getBilliardTableID());
+
+        //SET MODE ID
+        req.setModeID(response.getModeID());
 
         //set camera url
         InformationRequest.Information info = new InformationRequest.Information();
         String cameraUrl = billiardTableService.findBilliardTableById(response.getBilliardTableID()).getCameraUrl();
         info.setCameraUrl(cameraUrl);
 
+        //set totalSet
+        info.setTotalSet(response.getTotalSet());
+
         //map game set
         List<InformationRequest.GameSet> gsList = new ArrayList<>();
         for (GameSetResponse g : response.getSets()) {
             InformationRequest.GameSet gs = new InformationRequest.GameSet();
             gs.setGameSetID(g.getGameSetID());
+            gs.setRaceTo(g.getRaceTo());
             gsList.add(gs);
         }
         info.setSets(gsList);
@@ -146,6 +165,7 @@ public class KafkaProducer {
             for (PlayerResponse p : t.getPlayers()) {
                 InformationRequest.Player tmpP = new InformationRequest.Player();
                 tmpP.setPlayerID(p.getPlayerID());
+                tmpP.setName(p.getName());
                 player.add(tmpP);
             }
             tmp.setPlayers(player);

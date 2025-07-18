@@ -55,4 +55,8 @@ public class BilliardTable {
     @OneToMany(mappedBy = "billardTable", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BilliardMatch> matches = new ArrayList<>();
 
+    @OneToMany(mappedBy = "billardTable", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FCMToken> tokens = new ArrayList<>();
+
+
 }
