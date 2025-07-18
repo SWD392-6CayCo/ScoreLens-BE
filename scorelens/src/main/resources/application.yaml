@@ -15,6 +15,9 @@ spring:
       add-mappings: true
   config:
     import: optional:file:.env[.properties]
+  # Cache Configuration
+  cache:
+    type: redis
   jpa:
     hibernate:
       ddl-auto: update
@@ -25,6 +28,37 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+  #Email:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE}
+      timeout: 10000ms
+      ssl:
+        enabled: false
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+        shutdown-timeout: 100ms
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     ssl:
@@ -68,14 +102,21 @@ aws:
     avt-folder-prefix: ${AWS_AVT_FOLDER_PREFIX}
 
 firebase:
-  type: ${FIREBASE_TYPE:}
-  project-id: ${FIREBASE_PROJECT_ID:}
-  private-key-id: ${FIREBASE_PRIVATE_KEY_ID:}
-  private-key: ${FIREBASE_PRIVATE_KEY:}
-  client-email: ${FIREBASE_CLIENT_EMAIL:}
-  client-id: ${FIREBASE_CLIENT_ID:}
-  auth-uri: ${FIREBASE_AUTH_URI:}
-  token-uri: ${FIREBASE_TOKEN_URI:}
-  auth-provider-x509-cert-url: ${FIREBASE_AUTH_PROVIDER_X509_CERT_URL:}
-  client-x509-cert-url: ${FIREBASE_CLIENT_X509_CERT_URL:}
-  universe-domain: ${FIREBASE_UNIVERSE_DOMAIN:}
+  type: ${FIREBASE_TYPE}
+  project-id: ${FIREBASE_PROJECT_ID}
+  private-key-id: ${FIREBASE_PRIVATE_KEY_ID}
+  private-key: ${FIREBASE_PRIVATE_KEY}
+  client-email: ${FIREBASE_CLIENT_EMAIL}
+  client-id: ${FIREBASE_CLIENT_ID}
+  auth-uri: ${FIREBASE_AUTH_URI}
+  token-uri: ${FIREBASE_TOKEN_URI}
+  auth-provider-x509-cert-url: ${FIREBASE_AUTH_PROVIDER_X509_CERT_URL}
+  client-x509-cert-url: ${FIREBASE_CLIENT_X509_CERT_URL}
+  universe-domain: ${FIREBASE_UNIVERSE_DOMAIN}
+
+app:
+  frontend:
+    url: ${FRONTEND_URL}
+
+
+

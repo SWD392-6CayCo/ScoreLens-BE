@@ -13,6 +13,8 @@ import com.scorelens.DTOs.Response.AuthenticationResponseDto;
 import com.scorelens.DTOs.Response.AuthenticationResponseDtoV2;
 import com.scorelens.DTOs.Response.IntrospectResponseDto;
 import com.scorelens.DTOs.Response.IntrospectV2ResponseDto;
+import com.scorelens.Service.Email.EmailService;
+import jakarta.mail.MessagingException;
 import com.scorelens.Entity.Customer;
 import com.scorelens.Entity.InvalidatedToken;
 import com.scorelens.Entity.Staff;
@@ -32,6 +34,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -41,8 +44,11 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -56,7 +62,10 @@ public class AuthenticationV2Service implements IAuthenticationService {
     CustomerRepo customerRepo;
     StaffRepository staffRepo;
     InvalidatedTokenRepository invalidatedTokenRepository;
-    private final PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
+    EmailService emailService;
+    RedisTokenService redisTokenService;
+    RedisTemplate<String, Object> redisTemplate;
 
     @NonFinal
     @Value("${jwt.signerKey}") //Đọc từ file application.yaml
@@ -140,7 +149,10 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        // Chỉ blacklist nếu chưa hết hạn
+        // Sử dụng Redis để blacklist token (nhanh hơn database)
+        redisTokenService.invalidateToken(jti, expiryTime);
+
+        // Backup: Vẫn lưu vào database để đảm bảo (optional)
         if (!invalidatedTokenRepository.existsById(jti)) {
             InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                     .id(jti)
@@ -166,8 +178,17 @@ public class AuthenticationV2Service implements IAuthenticationService {
         if(!(verified && expiryTime.after(new Date())))
             throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-        if(invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+
+        // Check Redis first (faster than database)
+        if(redisTokenService.isTokenInvalidated(jti)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        // Fallback: Check database if Redis is down
+        if(invalidatedTokenRepository.existsById(jti)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
 
         return signedJWT;
     }
@@ -449,7 +470,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
     }
 
     /**
-     * Extract role from scope string
+     * Giải mã role từ scope string
      * Input: "ROLE_ADMIN DELETE_CUSTOMER GET_STAFF_LIST UPDATE_STAFF_DETAIL..."
      * Output: "ADMIN"
      */
@@ -470,10 +491,8 @@ public class AuthenticationV2Service implements IAuthenticationService {
         return null;
     }
 
-    /**
-     * Determine user type based on userID
-     * Check if userID exists in Customer or Staff table
-     */
+     //Kiểm tra userType dựa trên userId
+     // kiểm tra nếu userId tồn tại trên table Customer hoặc Staff
     private UserType determineUserType(String userID) {
         if (userID == null || userID.isEmpty()) {
             return null;
@@ -490,5 +509,132 @@ public class AuthenticationV2Service implements IAuthenticationService {
         }
 
         return null;
+    }
+
+    //--------------------------------------- FORGOT PASSWORD --------------------------------------------------
+
+    //Gửi mail reset password
+    public void forgotPassword(ForgotPasswordRequestDto request) {
+        String email = request.getEmail();
+        log.info("Processing forgot password request for email: {}", email);
+
+        // Tìm user theo email (Customer hoặc Staff)
+        Customer customer = customerRepo.findByEmail(email).orElse(null);
+        Staff staff = staffRepo.findByEmail(email).orElse(null);
+
+        if (customer == null && staff == null) {
+            log.warn("No user found with email: {}", email);
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+
+        // Tạo reset token và lưu vào Redis (thay thế JWT)
+        String resetToken = generateSimpleResetToken();
+        String userName = customer != null ? customer.getName() : staff.getName();
+
+        try {
+            redisTokenService.saveResetToken(email, resetToken);
+            log.info("Reset token saved to Redis for email: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to save reset token to Redis for email: {}", email, e);
+            throw new AppException(ErrorCode.REDIS_CONNECTION_FAILED);
+        }
+
+        try {
+            // Gửi email
+            emailService.sendForgotPasswordEmail(email, resetToken, userName);
+            log.info("Forgot password email sent successfully to: {}", email);
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+            log.error("Failed to send forgot password email to: {}", email, e);
+            throw new AppException(ErrorCode.EMAIL_SEND_FAILED);
+        }
+    }
+
+    //reset password với token
+    public void resetPassword(ResetPasswordRequestDto request) {
+        String resetToken = request.getResetToken();
+        String newPassword = request.getNewPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        log.info("Processing reset password request");
+
+        // Validate password confirmation
+        if (!newPassword.equals(confirmPassword)) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        // Verify reset token từ Redis (one-time use)
+        String email = verifyResetTokenFromRedis(resetToken);
+        if(email == null){
+            throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
+        }
+
+        // Tìm user và update password
+        Customer customer = customerRepo.findByEmail(email).orElse(null);
+        Staff staff = staffRepo.findByEmail(email).orElse(null);
+
+        if (customer != null) {
+            // Update customer password
+            customer.setPassword(passwordEncoder.encode(newPassword));
+            customerRepo.save(customer);
+            log.info("Password reset successfully for customer: {}", email);
+
+            // Gửi email xác nhận
+            try {
+                emailService.sendPasswordResetSuccessEmail(email, customer.getName());
+            } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+                log.warn("Failed to send password reset success email to: {}", email, e);
+            }
+
+        } else if (staff != null) {
+            // Update staff password
+            staff.setPassword(passwordEncoder.encode(newPassword));
+            staffRepo.save(staff);
+            log.info("Password reset successfully for staff: {}", email);
+
+            // Gửi email xác nhận
+            try {
+                emailService.sendPasswordResetSuccessEmail(email, staff.getName());
+            } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+                log.warn("Failed to send password reset success email to: {}", email, e);
+            }
+
+        } else {
+            throw new AppException(ErrorCode.USER_NOT_EXIST);
+        }
+    }
+
+    /**
+     * Tạo simple reset token (thay thế JWT)
+     */
+    private String generateSimpleResetToken() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    /**
+     * Verify reset token từ Redis và trả về email (one-time use)
+     */
+    private String verifyResetTokenFromRedis(String resetToken) {
+        try {
+            // Tìm email theo token trong Redis (và xóa token sau khi dùng)
+            Set<String> keys = redisTemplate.keys("reset_token:*");
+            if (keys != null) {
+                for (String key : keys) {
+                    String storedToken = (String) redisTemplate.opsForValue().get(key);
+                    if (resetToken.equals(storedToken)) {
+                        // Extract email from key
+                        String email = key.replace("reset_token:", "");
+                        // Delete token after use (one-time use)
+                        redisTemplate.delete(key);
+                        log.info("Reset token verified and deleted for email: {}", email);
+                        return email;
+                    }
+                }
+            }
+            log.warn("Reset token not found or expired: {}", resetToken);
+            return null;
+        } catch (Exception e) {
+            log.error("Error verifying reset token from Redis", e);
+            return null;
+        }
     }
 }
