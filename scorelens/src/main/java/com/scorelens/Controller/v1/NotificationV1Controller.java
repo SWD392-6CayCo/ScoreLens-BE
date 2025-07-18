@@ -27,7 +27,7 @@ public class NotificationV1Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .message("New Notification")
-                .data(notificationService.sendNotification(request))
+                .data(notificationService.saveNotification(request))
                 .build();
     }
 

@@ -1,15 +1,15 @@
 package com.scorelens.Controller.v3;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.Controller.v1.GameSetV1Controller;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.DTOs.Response.GameSetResponse;
+import com.scorelens.DTOs.Response.NotificationResponse;
 import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.ResponseObject;
-import com.scorelens.Enums.MatchStatus;
-import com.scorelens.Service.BilliardMatchService;
-import com.scorelens.Service.BilliardTableService;
-import com.scorelens.Service.EventProcessorService;
+import com.scorelens.Enums.*;
+import com.scorelens.Service.*;
 import com.scorelens.Service.KafkaService.KafkaProducer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -49,50 +49,56 @@ public class BilliardMatchV3Controller {
     @Autowired
     EventProcessorService eventProcessorService;
 
-    @Operation(summary = "Get billiard matches with unified parameters", 
-               description = "Unified API that combines all GET operations from v1 controller")
+    WebSocketService webSocketService;
+
+    NotificationService notificationService;
+
+    FCMService fcmService;
+
+    @Operation(summary = "Get billiard matches with unified parameters",
+            description = "Unified API that combines all GET operations from v1 controller")
     @GetMapping
     public ResponseObject getBilliardMatches(
             @Parameter(description = "Query type: byId, byCustomer, byStaff, byPlayer, byCreatorCustomer, byCreatorStaff, filter")
             @RequestParam(required = false, defaultValue = "filter") String queryType,
-            
+
             @Parameter(description = "Match ID (required for queryType=byId)")
             @RequestParam(required = false) Integer matchId,
-            
+
             @Parameter(description = "Customer ID (required for queryType=byCustomer or byCreatorCustomer)")
             @RequestParam(required = false) String customerId,
-            
+
             @Parameter(description = "Staff ID (required for queryType=byStaff or byCreatorStaff)")
             @RequestParam(required = false) String staffId,
-            
+
             @Parameter(description = "Player ID (required for queryType=byPlayer)")
             @RequestParam(required = false) Integer playerId,
-            
+
             @Parameter(description = "Filter by date (for queryType=filter)")
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date,
-            
+
             @Parameter(description = "Filter by status (for queryType=filter)")
             @RequestParam(required = false) String status,
-            
+
             @Parameter(description = "Filter by mode ID (for queryType=filter)")
             @RequestParam(required = false) Integer modeID,
-            
+
             @Parameter(description = "Page number (1-based)")
             @RequestParam(required = false, defaultValue = "1") Integer page,
-            
+
             @Parameter(description = "Page size")
             @RequestParam(required = false, defaultValue = "10") Integer size,
-            
+
             @Parameter(description = "Sort field")
             @RequestParam(required = false, defaultValue = "startTime") String sortBy,
-            
+
             @Parameter(description = "Sort direction (asc/desc)")
             @RequestParam(required = false, defaultValue = "desc") String sortDirection
     ) {
         try {
             Object data;
             String message;
-            
+
             switch (queryType.toLowerCase()) {
                 case "byid":
                     if (matchId == null) {
@@ -104,7 +110,7 @@ public class BilliardMatchV3Controller {
                     data = billiardMatchService.getById(matchId);
                     message = "Get Match information successfully";
                     break;
-                    
+
                 case "bycustomer":
                     if (customerId == null) {
                         return ResponseObject.builder()
@@ -115,7 +121,7 @@ public class BilliardMatchV3Controller {
                     data = billiardMatchService.getByCustomerID(customerId);
                     message = "Get Matches by customer successfully";
                     break;
-                    
+
                 case "bycreatorcustomer":
                     if (customerId == null) {
                         return ResponseObject.builder()
@@ -126,7 +132,7 @@ public class BilliardMatchV3Controller {
                     data = billiardMatchService.getByCustomer(customerId);
                     message = "Get Matches by creator customer successfully";
                     break;
-                    
+
                 case "bystaff":
                 case "bycreatorstaff":
                     if (staffId == null) {
@@ -138,7 +144,7 @@ public class BilliardMatchV3Controller {
                     data = billiardMatchService.getByStaff(staffId);
                     message = "Get Matches by staff successfully";
                     break;
-                    
+
                 case "byplayer":
                     if (playerId == null) {
                         return ResponseObject.builder()
@@ -149,7 +155,7 @@ public class BilliardMatchV3Controller {
                     data = billiardMatchService.getByPlayerID(playerId);
                     message = "Get Match by player successfully";
                     break;
-                    
+
                 case "filter":
                 default:
                     MatchFilterRequest filterRequest = new MatchFilterRequest();
@@ -160,13 +166,13 @@ public class BilliardMatchV3Controller {
                     message = "Get filtered Matches successfully";
                     break;
             }
-            
+
             return ResponseObject.builder()
                     .status(1000)
                     .message(message)
                     .data(data)
                     .build();
-                    
+
         } catch (Exception e) {
             log.error("Error in getBilliardMatches: ", e);
             return ResponseObject.builder()
@@ -177,8 +183,9 @@ public class BilliardMatchV3Controller {
     }
 
     @PostMapping
-    public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
+    public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) throws FirebaseMessagingException {
         BilliardMatchResponse response = billiardMatchService.createMatch(request);
+        String tableCode = billiardTableService.findBilliardTableById(response.getBilliardTableID()).getTableCode();
         String tableID = response.getBilliardTableID();
         //cam ai check
         producer.sendHeartbeat(tableID);
@@ -189,6 +196,25 @@ public class BilliardMatchV3Controller {
 
         //set table status: inUse
         billiardTableService.setInUse(String.valueOf(response.getBilliardTableID()));
+
+        //add info into notification
+        NotificationResponse tmp = newNoti(
+                response.getBilliardMatchID(),
+                "Match" + response.getBilliardMatchID() + "is created on table " + tableCode,
+                NotificationType.created
+        );
+
+        //send to fcm & websocket
+        webSocketService.sendToWebSocket(
+                WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
+                new WebsocketReq(WSFCMCode.MATCH_START, tmp)
+                );
+        fcmService.sendNotification(
+                tableID,
+                String.valueOf(WSFCMCode.MATCH_START),
+                String.valueOf(tmp)
+        );
+
         return ResponseObject.builder()
                 .status(1000)
                 .message("Create new Match successfully")
@@ -197,11 +223,11 @@ public class BilliardMatchV3Controller {
     }
 
     @Operation(summary = "Update billiard match with unified parameters",
-               description = "Unified API that combines all PUT operations from v1 controller")
+            description = "Unified API that combines all PUT operations from v1 controller")
     @PutMapping
     public ResponseObject updateBilliardMatch(@RequestBody BilliardMatchV3UpdateRequest request) {
         try {
-            String updateType = request.getUpdateType();
+            MatchUpdateType updateType = request.getUpdateType();
             if (updateType == null) {
                 return ResponseObject.builder()
                         .status(400)
@@ -209,16 +235,16 @@ public class BilliardMatchV3Controller {
                         .build();
             }
 
-            switch (updateType.toLowerCase()) {
-                case "update":
+            switch (updateType) {
+                case update:
                     return handleUpdateMatch(request);
-                case "score":
+                case score:
                     return handleUpdateScore(request);
-                case "cancel":
+                case cancel:
                     return handleCancel(request);
-                case "complete":
+                case complete:
                     return handleComplete(request);
-                case "manual":
+                case manual:
                     return handleManualUpdate(request);
                 default:
                     return ResponseObject.builder()
@@ -269,17 +295,29 @@ public class BilliardMatchV3Controller {
 
         BilliardMatchResponse rs = billiardMatchService.updateScore(scoreRequest);
 
-        //free matchID & gameSetID in queue
-        eventProcessorService.resetMatchState(rs.getBilliardMatchID());
-        List<Integer> gameSetIDList = rs.getSets()
-                .stream()
-                .map(GameSetResponse::getGameSetID)
-                .toList();
-        eventProcessorService.resetGameSetState(gameSetIDList);
 
-        if (rs.getStatus().equals(MatchStatus.completed))
+        NotificationResponse tmp = newNoti(
+                request.getMatchID(),
+                "",
+                NotificationType.score
+        );
+
+
+        if (rs.getStatus().equals(MatchStatus.completed)) {
+
+            //free matchID & gameSetID in queue
+            eventProcessorService.resetMatchState(rs.getBilliardMatchID());
+            List<Integer> gameSetIDList = rs.getSets()
+                    .stream()
+                    .map(GameSetResponse::getGameSetID)
+                    .toList();
+            eventProcessorService.resetGameSetState(gameSetIDList);
+
             //free table
             billiardTableService.setAvailable(String.valueOf(rs.getBilliardMatchID()));
+
+        }
+
 
         return ResponseObject.builder()
                 .status(1000)
@@ -357,4 +395,16 @@ public class BilliardMatchV3Controller {
     public void deleteAll() {
         billiardMatchService.deleteAll();
     }
+
+    private NotificationResponse newNoti(int matchID, String msg, NotificationType type) {
+        //add info into notification
+        return notificationService.saveNotification(
+                new NotificationRequest(
+                        matchID,
+                        msg,
+                        type
+                ));
+    }
+
+
 }

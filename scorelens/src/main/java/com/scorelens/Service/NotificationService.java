@@ -33,7 +33,7 @@ public class NotificationService implements INotificationService {
     SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public NotificationResponse sendNotification(NotificationRequest notificationRequest) {
+    public NotificationResponse saveNotification(NotificationRequest notificationRequest) {
         if (!billiardMatchRepo.existsById(notificationRequest.getBilliardMatchID()))
             throw new AppException(ErrorCode.MATCH_NOT_FOUND);
         Notification noti = notificationMapper.toNotiRequest(notificationRequest);

@@ -3,15 +3,12 @@ package com.scorelens.Service;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.Entity.*;
-import com.scorelens.Enums.MatchStatus;
-import com.scorelens.Enums.ResultStatus;
-import com.scorelens.Enums.TableStatus;
+import com.scorelens.Enums.*;
 import com.scorelens.Exception.AppException;
 import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.BilliardMatchMapper;
 import com.scorelens.Repository.*;
 import com.scorelens.Service.Interface.IBilliardMatchService;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +52,13 @@ public class BilliardMatchService implements IBilliardMatchService {
 
     @Autowired
     BilliardMatchMapper billiardMatchMapper;
+
+    @Autowired
+    FCMService fcmService;
+    @Autowired
+    private WebSocketService webSocketService;
+
+    NotificationService notificationService;
 
     @Override
     public BilliardMatchResponse getById(Integer id) {
@@ -258,6 +262,23 @@ public class BilliardMatchService implements IBilliardMatchService {
             currentSet.setWinner(team.getName());
             setRepo.save(currentSet);
 
+            String tmp = "Team" + team.getName() + "has win game set no" + currentSet.getGameSetNo();
+
+            //save noti
+            notificationService.saveNotification(
+                new NotificationRequest(
+                        match.getBilliardMatchID(),
+                        tmp,
+                        NotificationType.score
+                ));
+
+            //push noti
+            webSocketService.sendToWebSocket(
+                    WebSocketTopic.NOTI_NOTIFICATION.getValue() + match.getBillardTable().getBillardTableID(),
+                    new WebsocketReq(WSFCMCode.NOTIFICATION, tmp)
+            );
+
+
             // Update team scores into TeamSet
             for (Team t : match.getTeams()) {
                 teamSetService.updateTeamSet(t.getTeamID(), currentSet.getGameSetID(), t.getTotalScore());
@@ -281,6 +302,24 @@ public class BilliardMatchService implements IBilliardMatchService {
         if (noPendingOrOngoing) {
             match.setEndTime(LocalDateTime.now());
             match.setStatus(MatchStatus.completed);
+
+            String tmp = "Match " + match.getCode() + "has ended";
+
+            //push noti
+            try {
+                fcmService.sendNotification(
+                        match.getBillardTable().getBillardTableID(),
+                        String.valueOf(WSFCMCode.SHOT),
+                        tmp
+                );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
+            webSocketService.sendToWebSocket(
+                    WebSocketTopic.NOTI_NOTIFICATION.getValue() + match.getBillardTable().getBillardTableID(),
+                    new WebsocketReq(WSFCMCode.NOTIFICATION, tmp)
+            );
+
 
             // sum totalScore moi team tu teamSet
             for (Team t : match.getTeams()) {

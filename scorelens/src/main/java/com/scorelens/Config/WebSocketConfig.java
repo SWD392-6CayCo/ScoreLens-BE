@@ -23,7 +23,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         "https://scorelens.onrender.com",
                         "https://score-lens.vercel.app")
                 .withSockJS(); // Web sẽ fallback nếu cần
+
+        //mobile
+        registry.addEndpoint("/ws-native")
+                .setAllowedOrigins("*");
+
     }
+
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
