@@ -314,7 +314,7 @@ public class BilliardMatchV3Controller {
             eventProcessorService.resetGameSetState(gameSetIDList);
 
             //free table
-            billiardTableService.setAvailable(String.valueOf(rs.getBilliardMatchID()));
+            billiardTableService.setAvailable(String.valueOf(rs.getBilliardTableID()));
 
         }
 
