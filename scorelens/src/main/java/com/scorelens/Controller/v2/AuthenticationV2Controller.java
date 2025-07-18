@@ -56,9 +56,7 @@ public class AuthenticationV2Controller {
                 .message("Register successfully")
                 .build();
     }
-
-
-
+    
     @PostMapping("/introspect")
     ResponseObject introspect(@CookieValue(value = "AccessToken", required = false) String accessToken) {
         var result = authenticationService.introspectV2(accessToken);

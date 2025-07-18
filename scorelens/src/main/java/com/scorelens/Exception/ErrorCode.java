@@ -82,7 +82,10 @@ public enum ErrorCode {
     //-------------------------- EMAIL -----------------------------------
     EMAIL_SEND_FAILED(1027, "Failed to send email", HttpStatus.INTERNAL_SERVER_ERROR),
     PASSWORD_MISMATCH(1028, "Password and confirm password do not match", HttpStatus.BAD_REQUEST),
-    INVALID_RESET_TOKEN(1029, "Invalid or expired reset token", HttpStatus.BAD_REQUEST)
+    INVALID_RESET_TOKEN(1029, "Invalid or expired reset token", HttpStatus.BAD_REQUEST),
+
+    //-------------------------- REDIS -----------------------------------
+    REDIS_CONNECTION_FAILED(1031, "Unable to connect to Redis", HttpStatus.INTERNAL_SERVER_ERROR)
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

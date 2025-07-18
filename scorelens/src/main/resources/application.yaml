@@ -15,6 +15,9 @@ spring:
       add-mappings: true
   config:
     import: optional:file:.env[.properties]
+  # Cache Configuration
+  cache:
+    type: redis
   jpa:
     hibernate:
       ddl-auto: update
@@ -25,7 +28,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
-#Email:
+  #Email:
   mail:
     host: smtp.gmail.com
     port: 587
@@ -37,6 +40,25 @@ spring:
           auth: true
           starttls:
             enable: true
+
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      database: ${REDIS_DATABASE}
+      timeout: 10000ms
+      ssl:
+        enabled: false
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+        shutdown-timeout: 100ms
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     ssl:

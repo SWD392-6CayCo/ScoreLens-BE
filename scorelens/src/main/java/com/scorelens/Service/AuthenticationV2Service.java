@@ -34,6 +34,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -43,8 +44,11 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -60,6 +64,8 @@ public class AuthenticationV2Service implements IAuthenticationService {
     InvalidatedTokenRepository invalidatedTokenRepository;
     PasswordEncoder passwordEncoder;
     EmailService emailService;
+    RedisTokenService redisTokenService;
+    RedisTemplate<String, Object> redisTemplate;
 
     @NonFinal
     @Value("${jwt.signerKey}") //Đọc từ file application.yaml
@@ -143,7 +149,10 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        // Chỉ blacklist nếu chưa hết hạn
+        // Sử dụng Redis để blacklist token (nhanh hơn database)
+        redisTokenService.invalidateToken(jti, expiryTime);
+
+        // Backup: Vẫn lưu vào database để đảm bảo (optional)
         if (!invalidatedTokenRepository.existsById(jti)) {
             InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                     .id(jti)
@@ -169,8 +178,17 @@ public class AuthenticationV2Service implements IAuthenticationService {
         if(!(verified && expiryTime.after(new Date())))
             throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-        if(invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+
+        // Check Redis first (faster than database)
+        if(redisTokenService.isTokenInvalidated(jti)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        // Fallback: Check database if Redis is down
+        if(invalidatedTokenRepository.existsById(jti)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
 
         return signedJWT;
     }
@@ -509,9 +527,17 @@ public class AuthenticationV2Service implements IAuthenticationService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        // Tạo reset token (JWT với thời hạn 5 phút)
-        String resetToken = generateResetToken(email);
+        // Tạo reset token và lưu vào Redis (thay thế JWT)
+        String resetToken = generateSimpleResetToken();
         String userName = customer != null ? customer.getName() : staff.getName();
+
+        try {
+            redisTokenService.saveResetToken(email, resetToken);
+            log.info("Reset token saved to Redis for email: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to save reset token to Redis for email: {}", email, e);
+            throw new AppException(ErrorCode.REDIS_CONNECTION_FAILED);
+        }
 
         try {
             // Gửi email
@@ -536,8 +562,8 @@ public class AuthenticationV2Service implements IAuthenticationService {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
 
-        // Verify reset token
-        String email = verifyResetToken(resetToken);
+        // Verify reset token từ Redis (one-time use)
+        String email = verifyResetTokenFromRedis(resetToken);
         if(email == null){
             throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
         }
@@ -577,62 +603,37 @@ public class AuthenticationV2Service implements IAuthenticationService {
         }
     }
 
-//Tạo reset token (JWT với thời hạn 5 phút)
-    private String generateResetToken(String email) {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(email)
-                .issuer("scorelens.com")
-                .issueTime(new Date())
-                //set expiryTime là 5 phút
-                .expirationTime(new Date(
-                        Instant.now().plus(5, ChronoUnit.MINUTES).toEpochMilli()
-                ))
-                .jwtID(UUID.randomUUID().toString())
-                .claim("type", "reset_password")
-                .build();
-
-        SignedJWT signedJWT = new SignedJWT(header, jwtClaimsSet);
-
-        try {
-            signedJWT.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return signedJWT.serialize();
-        } catch (JOSEException e) {
-            log.error("Cannot create reset token", e);
-            throw new RuntimeException(e);
-        }
+    /**
+     * Tạo simple reset token (thay thế JWT)
+     */
+    private String generateSimpleResetToken() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
     /**
-     * Verify reset token và trả về email
+     * Verify reset token từ Redis và trả về email (one-time use)
      */
-    private String verifyResetToken(String token) {
+    private String verifyResetTokenFromRedis(String resetToken) {
         try {
-            JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-            SignedJWT signedJWT = SignedJWT.parse(token);
-
-            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-            boolean verified = signedJWT.verify(verifier);
-            // hết hạn
-            if (!(verified && expiryTime.after(new Date()))) {
-                //log.warn("Reset token is invalid or expired");
-                //return null;
-                throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
+            // Tìm email theo token trong Redis (và xóa token sau khi dùng)
+            Set<String> keys = redisTemplate.keys("reset_token:*");
+            if (keys != null) {
+                for (String key : keys) {
+                    String storedToken = (String) redisTemplate.opsForValue().get(key);
+                    if (resetToken.equals(storedToken)) {
+                        // Extract email from key
+                        String email = key.replace("reset_token:", "");
+                        // Delete token after use (one-time use)
+                        redisTemplate.delete(key);
+                        log.info("Reset token verified and deleted for email: {}", email);
+                        return email;
+                    }
+                }
             }
-
-            // Kiểm tra type claim
-            String type = signedJWT.getJWTClaimsSet().getStringClaim("type");
-            if (!"reset_password".equals(type)) {
-                log.warn("Invalid token type: {}", type);
-                return null;
-            }
-
-            return signedJWT.getJWTClaimsSet().getSubject();
-
+            log.warn("Reset token not found or expired: {}", resetToken);
+            return null;
         } catch (Exception e) {
-            log.error("Cannot verify reset token", e);
+            log.error("Error verifying reset token from Redis", e);
             return null;
         }
     }

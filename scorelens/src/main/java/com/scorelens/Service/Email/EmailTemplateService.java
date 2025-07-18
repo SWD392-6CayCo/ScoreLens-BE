@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailTemplateService {
 
-    @Value("${app.frontend.url:http://localhost:3000}")
+    @Value("${app.frontend.url}")
     private String frontendUrl;
 
     /**
