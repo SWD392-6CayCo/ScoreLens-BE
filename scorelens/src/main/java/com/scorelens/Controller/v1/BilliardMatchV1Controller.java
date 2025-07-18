@@ -4,12 +4,15 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.DTOs.Response.GameSetResponse;
+import com.scorelens.DTOs.Response.NotificationResponse;
 import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.MatchStatus;
+import com.scorelens.Enums.NotificationType;
 import com.scorelens.Service.BilliardMatchService;
 import com.scorelens.Service.BilliardTableService;
 import com.scorelens.Service.EventProcessorService;
+import com.scorelens.Service.NotificationService;
 import com.scorelens.Service.KafkaService.KafkaProducer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -42,6 +45,8 @@ public class BilliardMatchV1Controller {
     GameSetV1Controller gameSetController;
 
     EventProcessorService eventProcessorService;
+
+    NotificationService notificationService;
 
 
     @GetMapping("/{id}")
@@ -146,6 +151,13 @@ public class BilliardMatchV1Controller {
                 .toList();
         eventProcessorService.resetGameSetState(gameSetIDList);
 
+        // Add notification for score update
+        NotificationResponse tmp = newNoti(
+                request.getMatchID(),
+                "",
+                NotificationType.score
+        );
+
         if (rs.getStatus().equals(MatchStatus.completed))
             //free table
             billiardTableService.setAvailable(String.valueOf(rs.getBilliardMatchID()));
@@ -212,6 +224,16 @@ public class BilliardMatchV1Controller {
     @DeleteMapping()
     public void deleteAll() {
         billiardMatchService.deleteAll();
+    }
+
+    private NotificationResponse newNoti(int matchID, String msg, NotificationType type) {
+        //add info into notification
+        return notificationService.saveNotification(
+                new NotificationRequest(
+                        matchID,
+                        msg,
+                        type
+                ));
     }
 }
 
