@@ -115,7 +115,7 @@ public class EventProcessorService {
         }
     }
 
-    private void updateMatch(Player player) {
+    private void updateMatch(Player player) throws FirebaseMessagingException {
         matchService.updateScore(
                 new ScoreRequest(
                         player.getTeam().getBilliardMatch().getBilliardMatchID(),

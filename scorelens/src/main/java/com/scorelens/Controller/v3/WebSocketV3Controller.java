@@ -7,6 +7,7 @@ import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.MessageType;
 import com.scorelens.Enums.WSFCMCode;
 import com.scorelens.Enums.WebSocketTopic;
+import com.scorelens.Service.WebSocketService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +31,9 @@ import org.springframework.web.bind.annotation.*;
 public class WebSocketV3Controller {
 
     SimpMessagingTemplate messagingTemplate;
+
+    WebSocketService webSocketService;
+
 
     // WebSocket receive → forward to /topic/notification
     @MessageMapping("/noti.send/{tableID}")
