@@ -1,6 +1,7 @@
 package com.scorelens.DTOs.Request;
 
 import com.scorelens.Enums.MatchStatus;
+import com.scorelens.Enums.MatchUpdateType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class BilliardMatchV3UpdateRequest {
     // For specifying the update operation type
-    private String updateType; // "update", "score", "forfeit", "cancel", "complete", "manual"
+    private MatchUpdateType updateType;
     
     // For general match update (updateType = "update")
     private String winner;

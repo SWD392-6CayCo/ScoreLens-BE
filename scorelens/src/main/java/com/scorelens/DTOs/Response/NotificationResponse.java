@@ -12,7 +12,6 @@ public class NotificationResponse {
     private int notificationID;
     private int billiardMatchID;
     private String message;
-    private boolean isRead;
     private NotificationType type;
     private LocalDateTime createAt;
 }

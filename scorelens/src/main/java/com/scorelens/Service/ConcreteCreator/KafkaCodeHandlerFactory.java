@@ -18,25 +18,15 @@ public class KafkaCodeHandlerFactory implements KafkaCodeHandlerCreator{
     @Autowired
     public KafkaCodeHandlerFactory(List<KafkaCodeHandler> handlers) {
 
-//        List<KafkaCodeHandler> handlers = [
-//        RunningHandler instance,
-//        LoggingHandler instance,
-//        DeleteConfirmHandler instance ]
-
-
         for (KafkaCodeHandler handler : handlers) {
             //lay class cua handler
             //lay annotation trong @KafkaCodeMapping
             KafkaCodeMapping annotation = handler.getClass().getAnnotation(KafkaCodeMapping.class);
             if (annotation != null) {
                 handlerMap.put(annotation.value(), handler);
-
-//                handlerMap.put(KafkaCode.RUNNING, RunningHandler instance)
             }
         }
     }
-
-
     //tra ve handler voi KafkaCode tuong ung
     //day la factory method
     @Override

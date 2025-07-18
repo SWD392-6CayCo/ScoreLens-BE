@@ -68,9 +68,9 @@ public class KafkaListeners {
             }
 
         } catch (IllegalArgumentException e) {
-            log.error("Invalid KafkaCode: {}", code, e);
+            System.out.println("Invalid KafkaCode: " + code);
         } catch (FirebaseMessagingException e) {
-            log.error("Firebase messaging error for KafkaCode {}: {}", code, e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 

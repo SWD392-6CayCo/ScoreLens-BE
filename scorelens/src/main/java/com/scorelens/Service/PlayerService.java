@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.eclipse.collections.impl.block.factory.StringPredicates.matches;
 
@@ -118,4 +119,10 @@ public class PlayerService implements IPlayerService {
         }
         return playerMapper.toDto(playerRepo.save(player));
     }
+
+    public Player getPlayer(Integer id) {
+        return playerRepo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PLAYER_NOT_FOUND));
+    }
+
 }
