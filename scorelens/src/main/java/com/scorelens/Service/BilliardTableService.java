@@ -133,6 +133,7 @@ public class BilliardTableService implements IBilliardTableService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE_TABLE')")
     public boolean deleteBilliardTable(String billiardTableID) {
         // Tìm table, nếu không có thì ném exception
         BilliardTable table = billiardTableRepo.findById(billiardTableID)
