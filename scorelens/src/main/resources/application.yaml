@@ -15,9 +15,6 @@ spring:
       add-mappings: true
   config:
     import: optional:file:.env[.properties]
-  # Cache Configuration
-  cache:
-    type: redis
   jpa:
     hibernate:
       ddl-auto: update
@@ -40,7 +37,9 @@ spring:
           auth: true
           starttls:
             enable: true
-
+  # Cache Configuration
+  cache:
+    type: redis
   # Redis Configuration
   data:
     redis:
