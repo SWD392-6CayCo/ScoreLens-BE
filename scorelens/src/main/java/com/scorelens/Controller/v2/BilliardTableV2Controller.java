@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class BilliardTableV2Controller {
 
     BilliardMatchService billiardMatchService;
 
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_TABLE_LIST_BY_STORE')")
     @GetMapping("/list/{id}")
     public ResponseObject getListByStoreID(@PathVariable String id) {
         StoreResponse store = storeService.findStoreById(id);

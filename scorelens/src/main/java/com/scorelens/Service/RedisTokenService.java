@@ -53,7 +53,7 @@ public class RedisTokenService {
     public void saveResetToken(String email, String resetToken) {
         String key = RESET_TOKEN_PREFIX + email;
         
-        // Reset token có thời hạn 5 phút
+        // Reset token có thời hạn 5 phút -> sau đó tự động xóa
         redisTemplate.opsForValue().set(key, resetToken, Duration.ofMinutes(5));
         log.info("Reset token saved for email: {}", email);
     }
@@ -66,7 +66,7 @@ public class RedisTokenService {
         String token = (String) redisTemplate.opsForValue().get(key);
         
         if (token != null) {
-            redisTemplate.delete(key);
+            redisTemplate.delete(key); //xóa ngay sau khi lấy
             log.info("Reset token retrieved and deleted for email: {}", email);
         }
         
