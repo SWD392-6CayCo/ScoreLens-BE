@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class WebSocketV3Request {
     // Required: Type of message to send
-    private MessageType messageType; // "notification", "logging", "shot_event"
+    private MessageType messageType; // "notification", "logging", "shot_event", "set_event", "match_event"
     
     // Required: Table ID for WebSocket topic
     private String tableID;

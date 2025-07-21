@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 @Tag(name = "Billiard Match V3", description = "Unified Billiard Match API")
 @RestController
-@RequestMapping("v3/billiardmatches")
+@RequestMapping("v3/billiard-matches")
 @CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -207,7 +207,7 @@ public class BilliardMatchV3Controller {
         //send to fcm & websocket
         webSocketService.sendToWebSocket(
                 WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                new WebsocketReq(WSFCMCode.MATCH_START, tmp)
+                new WebsocketReq(WSFCMCode.MATCH_START, response)
                 );
         fcmService.sendNotification(
                 tableID,
@@ -280,7 +280,7 @@ public class BilliardMatchV3Controller {
                 .build();
     }
 
-    private ResponseObject handleUpdateScore(BilliardMatchV3UpdateRequest request) {
+    private ResponseObject handleUpdateScore(BilliardMatchV3UpdateRequest request) throws FirebaseMessagingException {
         if (request.getMatchID() == null || request.getTeamID() == null || request.getDelta() == null) {
             return ResponseObject.builder()
                     .status(400)

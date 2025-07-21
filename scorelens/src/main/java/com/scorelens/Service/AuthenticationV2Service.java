@@ -555,16 +555,20 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String newPassword = request.getNewPassword();
         String confirmPassword = request.getConfirmPassword();
 
-        log.info("Processing reset password request");
-
         // Validate password confirmation
         if (!newPassword.equals(confirmPassword)) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
 
-        // Verify reset token từ Redis (one-time use)
-        String email = verifyResetTokenFromRedis(resetToken);
-        if(email == null){
+        // Tìm email từ token bằng cách scan keys (cần optimize)
+        String email = findEmailByResetToken(resetToken);
+        if (email == null) {
+            throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
+        }
+
+        // Verify và xóa token (one-time use)
+        String storedToken = redisTokenService.getAndDeleteResetToken(email);
+        if (!resetToken.equals(storedToken)) {
             throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
         }
 
@@ -636,5 +640,18 @@ public class AuthenticationV2Service implements IAuthenticationService {
             log.error("Error verifying reset token from Redis", e);
             return null;
         }
+    }
+
+    private String findEmailByResetToken(String resetToken) {
+        Set<String> keys = redisTemplate.keys("reset_token:*");
+        if (keys != null) {
+            for (String key : keys) {
+                String storedToken = (String) redisTemplate.opsForValue().get(key);
+                if (resetToken.equals(storedToken)) {
+                    return key.replace("reset_token:", "");
+                }
+            }
+        }
+        return null;
     }
 }

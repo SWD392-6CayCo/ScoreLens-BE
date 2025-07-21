@@ -11,6 +11,7 @@ public enum WebSocketTopic {
     NOTI_LOGGING("/topic/logging_notification/"),
     NOTI_SHOT("/topic/shot_event/"),
     NOTI_NOTIFICATION("/topic/notification/"),
+    NOTI_MOBILE("/topic/match_event/"),
     ;
 
 
