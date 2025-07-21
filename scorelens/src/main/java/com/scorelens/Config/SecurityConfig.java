@@ -3,6 +3,7 @@ package com.scorelens.Config;
 import com.google.api.Http;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.UserType;
+import com.scorelens.Security.CustomAccessDeniedHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,6 +77,9 @@ public class SecurityConfig {
     @Autowired
     private CookieJwtAuthenticationFilter cookieJwtAuthenticationFilter;
 
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
@@ -94,7 +98,8 @@ public class SecurityConfig {
                 oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                        .accessDeniedHandler(customAccessDeniedHandler));
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults());

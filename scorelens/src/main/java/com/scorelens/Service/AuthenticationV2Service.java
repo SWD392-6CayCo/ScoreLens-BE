@@ -181,6 +181,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
 
         // Check Redis first (faster than database)
+        //Kiểm tra xem token này có hợp lệ không
         if(redisTokenService.isTokenInvalidated(jti)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
@@ -549,7 +550,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
             // Update customer password
             customer.setPassword(passwordEncoder.encode(newPassword));
             customerRepo.save(customer);
-            log.info("Password reset successfully for customer: {}", email);
 
             // Gửi email xác nhận
             try {
@@ -562,7 +562,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
             // Update staff password
             staff.setPassword(passwordEncoder.encode(newPassword));
             staffRepo.save(staff);
-            log.info("Password reset successfully for staff: {}", email);
 
             // Gửi email xác nhận
             try {
@@ -570,7 +569,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
             } catch (MessagingException | java.io.UnsupportedEncodingException e) {
                 log.warn("Failed to send password reset success email to: {}", email, e);
             }
-
         } else {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }

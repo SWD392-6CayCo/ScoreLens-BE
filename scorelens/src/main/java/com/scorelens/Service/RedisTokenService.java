@@ -48,7 +48,7 @@ public class RedisTokenService {
     }
 
     /**
-     * Lưu reset password token (thay thế JWT với database)
+     * Lưu token reset password (thay thế JWT với database)
      */
     public void saveResetToken(String email, String resetToken) {
         String key = RESET_TOKEN_PREFIX + email;
