@@ -38,6 +38,7 @@ public class EventProcessorService {
     final FCMService fcmService;
     final BilliardMatchService matchService;
     final PlayerService playerService;
+    final RealTimeNotification realTimeNotification;
 
     /**
      * Xử lý 1 Kafka message gửi về, parse thành event, log, start gameSet & match nếu cần
@@ -115,7 +116,7 @@ public class EventProcessorService {
         }
     }
 
-    private void updateMatch(Player player) throws FirebaseMessagingException {
+    private void updateMatch(Player player) {
         matchService.updateScore(
                 new ScoreRequest(
                         player.getTeam().getBilliardMatch().getBilliardMatchID(),
@@ -142,7 +143,7 @@ public class EventProcessorService {
 
 
     // xác định shot event
-    public void handlingEvent(EventRequest request, String tableID, int shotCount) throws FirebaseMessagingException {
+    public void handlingEvent(EventRequest request, String tableID, int shotCount) {
         boolean isFoul = request.isFoul();
         boolean scoreValue = request.isScoreValue();
         boolean isUncertain = request.isUncertain();
@@ -159,15 +160,12 @@ public class EventProcessorService {
         shot.setPlayer(String.format("PLAYER %d", request.getPlayerID()));
         shot.setResult(result.name());
 
-//        gửi thông báo qua web socket bằng topic: shot_event
-        webSocketService.sendToWebSocket(
-                WebSocketTopic.NOTI_SHOT.getValue() + tableID,
-                new WebsocketReq(WSFCMCode.SHOT, shot)
-        );
-        fcmService.sendNotification(
+//        gửi noti qua topic: shot_event
+        realTimeNotification.sendRealTimeNotification(
+                shot,
+                WebSocketTopic.NOTI_SHOT,
                 tableID,
-                String.valueOf(WSFCMCode.SHOT),
-                String.valueOf(shot)
+                WSFCMCode.SHOT
         );
 
         log.info("Send websocket to: /topic/shot_event/" + tableID);

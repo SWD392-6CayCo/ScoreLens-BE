@@ -1,6 +1,5 @@
 package com.scorelens.Service;
 
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.Entity.*;
@@ -57,11 +56,10 @@ public class BilliardMatchService implements IBilliardMatchService {
     BilliardMatchMapper billiardMatchMapper;
 
     @Autowired
-    FCMService fcmService;
-    @Autowired
-    private WebSocketService webSocketService;
-
     NotificationService notificationService;
+
+    @Autowired
+    RealTimeNotification realTimeNotification;
 
 
     @Override
@@ -228,7 +226,7 @@ public class BilliardMatchService implements IBilliardMatchService {
     }
 
     @Override
-    public BilliardMatchResponse updateScore(ScoreRequest request) throws FirebaseMessagingException {
+    public BilliardMatchResponse updateScore(ScoreRequest request) {
         BilliardMatch match = repository.findById(request.getMatchID())
                 .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
         if (match.getStatus().equals(MatchStatus.pending)) {
@@ -267,27 +265,23 @@ public class BilliardMatchService implements IBilliardMatchService {
             setRepo.save(currentSet);
 
             String tmp = "Team " + team.getName() + " has win game set no " + currentSet.getGameSetNo();
+            log.info(tmp);
 
 //            //save noti
-//            notificationService.saveNotification(
-//                new NotificationRequest(
-//                        match.getBilliardMatchID(),
-//                        tmp,
-//                        NotificationType.score
-//                ));
+            notificationService.saveNotification(
+                new NotificationRequest(
+                        match.getBilliardMatchID(),
+                        tmp,
+                        NotificationType.score
+                ));
 
             //push noti
-            webSocketService.sendToWebSocket(
-                    WebSocketTopic.NOTI_MOBILE.getValue() + match.getBillardTable().getBillardTableID(),
-                    new WebsocketReq(WSFCMCode.WINNING_SET, tmp)
-            );
-            fcmService.sendNotification(
+            realTimeNotification.sendRealTimeNotification(
+                    tmp,
+                    WebSocketTopic.NOTI_MOBILE,
                     match.getBillardTable().getBillardTableID(),
-                    WSFCMCode.WINNING_SET.toString(),
-                    tmp
+                    WSFCMCode.WINNING_SET
             );
-
-
 
             // Update team scores into TeamSet
             for (Team t : match.getTeams()) {
@@ -313,23 +307,23 @@ public class BilliardMatchService implements IBilliardMatchService {
             match.setEndTime(LocalDateTime.now());
             match.setStatus(MatchStatus.completed);
 
-            String tmp = "Match " + match.getCode() + " has ended";
+            String tmp = "Match " + match.getBilliardMatchID() + " has ended";
+            log.info(tmp);
+
+            notificationService.saveNotification(
+                    new NotificationRequest(
+                            match.getBilliardMatchID(),
+                            tmp,
+                            NotificationType.end
+                    ));
 
             //push noti
-            try {
-                fcmService.sendNotification(
-                        match.getBillardTable().getBillardTableID(),
-                        String.valueOf(WSFCMCode.WINNING_MATCH),
-                        tmp
-                );
-            } catch ( Exception e ) {
-                log.info("Failed to send notification via FCM: " + e.getMessage());
-            }
-            webSocketService.sendToWebSocket(
-                    WebSocketTopic.NOTI_MOBILE.getValue() + match.getBillardTable().getBillardTableID(),
-                    new WebsocketReq(WSFCMCode.WINNING_MATCH, tmp)
+            realTimeNotification.sendRealTimeNotification(
+                    tmp,
+                    WebSocketTopic.NOTI_MOBILE,
+                    match.getBillardTable().getBillardTableID(),
+                    WSFCMCode.WINNING_MATCH
             );
-
 
             // sum totalScore moi team tu teamSet
             for (Team t : match.getTeams()) {
@@ -495,6 +489,26 @@ public class BilliardMatchService implements IBilliardMatchService {
                 // match > 2 team
             }
         }
+
+        String tmp = "Match " + match.getBilliardMatchID() + " has been canceled";
+        log.info(tmp);
+
+//            //save noti
+        notificationService.saveNotification(
+                new NotificationRequest(
+                        match.getBilliardMatchID(),
+                        tmp,
+                        NotificationType.special
+                ));
+
+        //push noti
+        realTimeNotification.sendRealTimeNotification(
+                tmp,
+                WebSocketTopic.NOTI_MOBILE,
+                match.getBillardTable().getBillardTableID(),
+                WSFCMCode.NOTIFICATION
+        );
+
         return billiardMatchMapper.toBilliardMatchResponse(match);
     }
 
