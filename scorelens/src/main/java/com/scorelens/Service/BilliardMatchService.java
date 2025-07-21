@@ -12,6 +12,7 @@ import com.scorelens.Service.Interface.IBilliardMatchService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -62,6 +63,7 @@ public class BilliardMatchService implements IBilliardMatchService {
     RealTimeNotification realTimeNotification;
 
     @Autowired
+    @Lazy
     EventProcessorService eventProcessorService;
 
     @Autowired
