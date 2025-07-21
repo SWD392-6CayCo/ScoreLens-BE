@@ -279,7 +279,7 @@ public class BilliardMatchV3Controller {
 
         if (rs.getStatus().equals(MatchStatus.completed))
             //free table
-            billiardTableService.setAvailable(String.valueOf(rs.getBilliardMatchID()));
+            billiardTableService.setAvailable(String.valueOf(rs.getBilliardTableID()));
 
         return ResponseObject.builder()
                 .status(1000)

@@ -132,11 +132,11 @@ public class EventProcessorService {
 
 //        gửi thông báo qua web socket bằng topic: shot_event
         webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue() + tableID, shot);
-        fcmService.sendNotification(
-                tableID,
-                "shot",
-                String.valueOf(shot)
-        );
+//        fcmService.sendNotification(
+//                tableID,
+//                "shot",
+//                String.valueOf(shot)
+//        );
 
         log.info("Send websocket to: /topic/shot_event/" + tableID);
         log.info(shot.toString());

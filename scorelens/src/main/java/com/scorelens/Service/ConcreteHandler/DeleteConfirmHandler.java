@@ -34,10 +34,10 @@ public class DeleteConfirmHandler implements KafkaCodeHandler {
                 WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                 new WebsocketReq(WebSocketCode.WARNING, "Delete Event count: " + deleteCount)
         );
-        fcmService.sendNotification(
-                tableID,
-                "Delete Event count: " + deleteCount,
-                "noti"
-        );
+//        fcmService.sendNotification(
+//                tableID,
+//                "Delete Event count: " + deleteCount,
+//                "noti"
+//        );
     }
 }

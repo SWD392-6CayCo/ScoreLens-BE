@@ -48,10 +48,10 @@ public class RunningHandler implements KafkaCodeHandler {
                 WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                 new WebsocketReq(WebSocketCode.NOTIFICATION, "AI Camera Connected")
         );
-        fcmService.sendNotification(
-                tableID,
-                "AI Camera Connected",
-                "noti"
-        );
+//        fcmService.sendNotification(
+//                tableID,
+//                "AI Camera Connected",
+//                "noti"
+//        );
     }
 }

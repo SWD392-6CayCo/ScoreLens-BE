@@ -89,11 +89,11 @@ public class KafkaProducer {
                         WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                         new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")
                 );
-                fcmService.sendNotification(
-                        tableID,
-                        "Connecting to AI Camera...",
-                        "noti"
-                );
+//                fcmService.sendNotification(
+//                        tableID,
+//                        "Connecting to AI Camera...",
+//                        "noti"
+//                );
 
                 //sau 10s neu py k gui msg
                 CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking(tableID);
@@ -106,8 +106,9 @@ public class KafkaProducer {
                 });
             } catch (JsonProcessingException e) {
                 log.error("Failed to serialize heartbeat message", e);
-            } catch (FirebaseMessagingException e) {
-                throw new RuntimeException(e);
+//            } catch (FirebaseMessagingException e) {
+//                throw new RuntimeException(e);
+//            }
             }
         } else {
             if (kafKaHeartBeat.timeSinceLastConfirm().getSeconds() > 30) {
