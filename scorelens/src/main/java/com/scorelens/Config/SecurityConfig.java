@@ -42,11 +42,16 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-            "/v*/auth/login", "/v*/auth/login-google", "/v*/auth/introspect", "/v*/auth/register", "/v*/auth/logout", "/v*/auth/refresh",
+            "/v*/auth/login", "/v*/auth/login-google", "/v*/auth/introspect",
+            "/v*/auth/register", "/v*/auth/logout", "/v*/auth/refresh",
+            "/v*/auth/password-forgot", "/v*/auth/password-reset",
+
 //            "/v*/",
             "/v*/ping",
             "/index.html",
-            "/ws/**"
+            "/ws/**",
+            "/ws-native", "/ws-native/**"
+
 
 
     };
@@ -80,8 +85,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/v*/teams/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
-                .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/tables").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches", "/v3/fcm/operation").permitAll()
 
                 .anyRequest().authenticated());
 
@@ -129,6 +134,7 @@ public class SecurityConfig {
                 "https://localhost:5173",
                 "https://score-lens.vercel.app",
                 "exp://192.168.90.68:8081",
+                "exp://**",
                 "https://scorelens.onrender.com"
         ));
         //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost

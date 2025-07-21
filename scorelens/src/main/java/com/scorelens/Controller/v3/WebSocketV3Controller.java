@@ -3,109 +3,137 @@ package com.scorelens.Controller.v3;
 import com.scorelens.DTOs.Request.ShotEvent;
 import com.scorelens.DTOs.Request.WebSocketV3Request;
 import com.scorelens.Entity.ResponseObject;
+import com.scorelens.Enums.MessageType;
+import com.scorelens.Enums.WebSocketTopic;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
-@Tag(name = "WebSocket V3", description = "Unified WebSocket API")
-@RestController
-@RequestMapping("v3/websockets")
-@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
+@Slf4j
+@Tag(name = "Web Socket", description = "Manage Noti")
+@RestController
+@RequestMapping("/v3/web_socket")
+@CrossOrigin(origins = { "http://localhost:5173", "exp://192.168.90.68:8081", "https://scorelens.onrender.com",
+        "http://localhost:8080" })
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class WebSocketV3Controller {
-    
+
     SimpMessagingTemplate messagingTemplate;
 
-    @Operation(summary = "Send WebSocket messages with unified parameters", 
-               description = "Unified API that combines all POST operations from v1 controller")
-    @PostMapping("/send")
-    public ResponseObject sendWebSocketMessage(@RequestBody WebSocketV3Request request) {
+    // WebSocket receive → forward to /topic/notification
+    @MessageMapping("/noti.send/{tableID}")
+    public void handleNotification(String message, @DestinationVariable String tableID) {
+        log.info("Received noti from table {}: {}", tableID, message);
+        messagingTemplate.convertAndSend("/topic/notification/" + tableID, message);
+    }
+
+    // WebSocket receive → forward to /topic/logging_notification
+    @MessageMapping("/log.send")
+    public void handleLoggingNotification(String message, @DestinationVariable String tableID) {
+        log.info("Received log from table {}: {}", tableID, message);
+        messagingTemplate.convertAndSend("/topic/logging_notification/" + tableID, message);
+
+    }
+
+    // Unified REST API for all WebSocket message types
+    @Operation(summary = "Send unified WebSocket message", description = "Unified API that combines notification, logging, and shot_event message types")
+    @PostMapping()
+    public ResponseObject sendMessage(@RequestBody WebSocketV3Request request) {
         try {
-            String messageType = request.getMessageType();
-            if (messageType == null) {
+            MessageType messageType = request.getMessageType();
+            String tableID = request.getTableID();
+
+            // Validate required fields
+            if (messageType == null ) {
                 return ResponseObject.builder()
                         .status(400)
-                        .message("messageType is required. Valid values: notification, logging, shotEvent")
+                        .message("Message type is required")
                         .build();
             }
-            
-            switch (messageType.toLowerCase()) {
-                case "notification":
-                    return handleSendNotification(request);
-                case "logging":
-                    return handleSendLogging(request);
-                case "shotevent":
-                    return handleSendShotEvent(request);
+
+            if (tableID == null || tableID.trim().isEmpty()) {
+                return ResponseObject.builder()
+                        .status(400)
+                        .message("Table ID is required")
+                        .build();
+            }
+
+            Object data;
+            String topic;
+            String successMessage;
+
+            switch (messageType) {
+                case notification:
+                    if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
+                        return ResponseObject.builder()
+                                .status(400)
+                                .message("Message content is required for notification type")
+                                .build();
+                    }
+                    topic = "/topic/notification/" + tableID;
+                    data = request.getMessage();
+                    successMessage = "Notification sent successfully";
+                    log.info("Sending notification from table {}: {}", tableID, request.getMessage());
+                    break;
+
+                case logging:
+                    if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
+                        return ResponseObject.builder()
+                                .status(400)
+                                .message("Message content is required for logging type")
+                                .build();
+                    }
+                    topic = "/topic/logging_notification/" + tableID;
+                    data = request.getMessage();
+                    successMessage = "Logging message sent successfully";
+                    log.info("Sending logging from table {}: {}", tableID, request.getMessage());
+                    break;
+
+                case shot_event:
+                    if (request.getShotEvent() == null) {
+                        return ResponseObject.builder()
+                                .status(400)
+                                .message("Shot event data is required for shot_event type")
+                                .build();
+                    }
+                    topic = "/topic/shot_event/" + tableID;
+                    data = request.getShotEvent();
+                    successMessage = "Shot event sent successfully";
+                    log.info("Sending shot_event from table {}: {}", tableID, request.getShotEvent());
+                    break;
+
                 default:
                     return ResponseObject.builder()
                             .status(400)
-                            .message("Invalid messageType. Valid values: notification, logging, shotEvent")
+                            .message("Invalid message type. Supported types: notification, logging, shot_event")
                             .build();
             }
+
+            // Send message to WebSocket topic
+            messagingTemplate.convertAndSend(topic, data);
+
+            return ResponseObject.builder()
+                    .status(1000)
+                    .message(successMessage)
+                    .data(data)
+                    .build();
+
         } catch (Exception e) {
-            log.error("Error in sendWebSocketMessage: ", e);
+            log.error("Error in sendMessage: ", e);
             return ResponseObject.builder()
                     .status(500)
                     .message("Internal server error: " + e.getMessage())
                     .build();
         }
     }
-    
-    private ResponseObject handleSendNotification(WebSocketV3Request request) {
-        if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
-            return ResponseObject.builder()
-                    .status(400)
-                    .message("Message is required for notification operation")
-                    .build();
-        }
-        
-        log.info("Sending notification: " + request.getMessage());
-        messagingTemplate.convertAndSend("/topic/notification/23374e21-2391-41b0-b275-651df88b3b04", request.getMessage());
-        return ResponseObject.builder()
-                .status(1000)
-                .message(request.getMessage())
-                .data(request.getMessage())
-                .build();
-    }
-    
-    private ResponseObject handleSendLogging(WebSocketV3Request request) {
-        if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
-            return ResponseObject.builder()
-                    .status(400)
-                    .message("Message is required for logging operation")
-                    .build();
-        }
-        
-        log.info("Sending logging message: " + request.getMessage());
-        messagingTemplate.convertAndSend("/topic/logging_notification/23374e21-2391-41b0-b275-651df88b3b04", request.getMessage());
-        return ResponseObject.builder()
-                .status(1000)
-                .message(request.getMessage())
-                .data(request.getMessage())
-                .build();
-    }
-    
-    private ResponseObject handleSendShotEvent(WebSocketV3Request request) {
-        if (request.getShotEvent() == null) {
-            return ResponseObject.builder()
-                    .status(400)
-                    .message("ShotEvent is required for shot event operation")
-                    .build();
-        }
-        
-        log.info("Sending shot event: " + request.getShotEvent());
-        messagingTemplate.convertAndSend("/topic/shot_event/23374e21-2391-41b0-b275-651df88b3b04", request.getShotEvent());
-        return ResponseObject.builder()
-                .status(1000)
-                .message("shot event")
-                .data(request.getShotEvent())
-                .build();
-    }
+
 }

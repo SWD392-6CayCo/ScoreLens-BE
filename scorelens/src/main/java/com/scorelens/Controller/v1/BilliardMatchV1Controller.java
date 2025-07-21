@@ -1,5 +1,6 @@
 package com.scorelens.Controller.v1;
 
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.DTOs.Response.GameSetResponse;
@@ -134,7 +135,7 @@ public class BilliardMatchV1Controller {
     }
 
     @PutMapping("/score")
-    public ResponseObject updateScore(@RequestBody ScoreRequest request) {
+    public ResponseObject updateScore(@RequestBody ScoreRequest request) throws FirebaseMessagingException {
         BilliardMatchResponse rs = billiardMatchService.updateScore(request);
 
         //free matchID & gameSetID in queue

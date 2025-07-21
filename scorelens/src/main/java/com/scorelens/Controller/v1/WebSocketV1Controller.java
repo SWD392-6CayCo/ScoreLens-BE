@@ -7,11 +7,8 @@
     import lombok.RequiredArgsConstructor;
     import lombok.experimental.FieldDefaults;
     import lombok.extern.slf4j.Slf4j;
-    import org.checkerframework.checker.units.qual.A;
-    import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.messaging.handler.annotation.DestinationVariable;
     import org.springframework.messaging.handler.annotation.MessageMapping;
-    import org.springframework.messaging.handler.annotation.SendTo;
     import org.springframework.messaging.simp.SimpMessagingTemplate;
     import org.springframework.web.bind.annotation.*;
 
@@ -26,21 +23,6 @@
     public class WebSocketV1Controller {
 
         SimpMessagingTemplate messagingTemplate;
-
-        // WebSocket receive → forward to /topic/notification
-        @MessageMapping("/noti.send/{tableID}")
-        public void handleNotification(String message, @DestinationVariable String tableID) {
-            log.info("Received noti from table {}: {}", tableID, message);
-            messagingTemplate.convertAndSend("/topic/notification/" + tableID, message);
-        }
-
-        // WebSocket receive → forward to /topic/logging_notification
-        @MessageMapping("/log.send")
-        public void handleLoggingNotification(String message, @DestinationVariable String tableID) {
-            log.info("Received log from table {}: {}", tableID, message);
-            messagingTemplate.convertAndSend("/topic/logging_notification/" + tableID, message);
-
-        }
 
         // REST API forward to notification topic
         @PostMapping("/send-notification")

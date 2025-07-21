@@ -1,19 +1,21 @@
 package com.scorelens.DTOs.Request;
 
+import com.scorelens.Enums.MessageType;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class WebSocketV3Request {
-    // For specifying the WebSocket operation type
-    private String messageType; // "notification", "logging", "shotEvent"
+    // Required: Type of message to send
+    private MessageType messageType; // "notification", "logging", "shot_event"
     
-    // For notification and logging operations (messageType = "notification" or "logging")
+    // Required: Table ID for WebSocket topic
+    private String tableID;
+    
+    // For notification and logging messages
     private String message;
     
-    // For shot event operation (messageType = "shotEvent")
+    // For shot event messages
     private ShotEvent shotEvent;
-    
-    // Note: Each operation sends to a different WebSocket topic
 }

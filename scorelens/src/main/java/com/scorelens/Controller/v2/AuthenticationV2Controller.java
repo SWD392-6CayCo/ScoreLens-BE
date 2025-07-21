@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -25,6 +26,7 @@ import java.text.ParseException;
 @RequestMapping("v2/auth")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class AuthenticationV2Controller {
 
     TokenCookieManager tokenCookieManager;
@@ -54,9 +56,7 @@ public class AuthenticationV2Controller {
                 .message("Register successfully")
                 .build();
     }
-
-
-
+    
     @PostMapping("/introspect")
     ResponseObject introspect(@CookieValue(value = "AccessToken", required = false) String accessToken) {
         var result = authenticationService.introspectV2(accessToken);
@@ -146,6 +146,26 @@ public class AuthenticationV2Controller {
         return ResponseObject.builder()
                 .status(1000)
                 .message("Logout successfully")
+                .data(null)
+                .build();
+    }
+
+    @PostMapping("/password-forgot")
+    public ResponseObject forgotPassword(@RequestBody ForgotPasswordRequestDto request) {
+        authenticationService.forgotPassword(request);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Password reset email sent successfully")
+                .data(null)
+                .build();
+    }
+
+    @PostMapping("/password-reset")
+    public ResponseObject resetPassword(@RequestBody ResetPasswordRequestDto request) {
+        authenticationService.resetPassword(request);
+        return ResponseObject.builder()
+                .status(1000)
+                .message("Password reset successfully")
                 .data(null)
                 .build();
     }

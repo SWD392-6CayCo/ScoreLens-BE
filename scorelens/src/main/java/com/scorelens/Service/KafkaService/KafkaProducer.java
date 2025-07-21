@@ -13,7 +13,7 @@ import com.scorelens.DTOs.Response.GameSetResponse;
 import com.scorelens.DTOs.Response.PlayerResponse;
 import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Enums.KafkaCode;
-import com.scorelens.Enums.WebSocketCode;
+import com.scorelens.Enums.WSFCMCode;
 import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.BilliardTableService;
 import com.scorelens.Service.FCMService;
@@ -87,7 +87,7 @@ public class KafkaProducer {
                 sendEvent(tableID, message);
                 webSocketService.sendToWebSocket(
                         WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                        new WebsocketReq(WebSocketCode.NOTIFICATION, "Connecting to AI Camera...")
+                        new WebsocketReq(WSFCMCode.NOTIFICATION, "Connecting to AI Camera...")
                 );
 //                fcmService.sendNotification(
 //                        tableID,

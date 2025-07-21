@@ -5,14 +5,15 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.EventResponse;
 import com.scorelens.Entity.GameSet;
+import com.scorelens.Entity.Player;
 import com.scorelens.Enums.ShotResult;
+import com.scorelens.Enums.WSFCMCode;
 import com.scorelens.Enums.WebSocketTopic;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
@@ -35,6 +36,8 @@ public class EventProcessorService {
     final WebSocketService webSocketService;
     final ObjectMapper mapper;
     final FCMService fcmService;
+    final BilliardMatchService matchService;
+    final PlayerService playerService;
 
     /**
      * Xử lý 1 Kafka message gửi về, parse thành event, log, start gameSet & match nếu cần
@@ -50,7 +53,10 @@ public class EventProcessorService {
             log.info("LogMessageRequest converted: {}", lmr);
 
             // Push message lên WebSocket topic "/topic/logging_notification"
-            webSocketService.sendToWebSocket(WebSocketTopic.NOTI_LOGGING.getValue() + tableID, lmr);
+            webSocketService.sendToWebSocket(
+                    WebSocketTopic.NOTI_LOGGING.getValue() + tableID,
+                    new WebsocketReq(WSFCMCode.LOGGING, lmr)
+            );
 
             // Lấy event detail trong log
             EventRequest event = lmr.getDetails();
@@ -59,6 +65,8 @@ public class EventProcessorService {
                 return;
             }
 
+            Integer gameSetID = event.getGameSetID();
+
             //xử lí shot và gửi msg qua websocket
             handlingEvent(event, tableID);
 
@@ -66,13 +74,29 @@ public class EventProcessorService {
             EventResponse e = eventService.addEvent(event);
             log.info("New event is added: {}", e);
 
-            Integer gameSetID = event.getGameSetID();
+            Player player = playerService.getPlayer(event.getPlayerID());
 
+            int modeID = player.getTeam().getBilliardMatch().getMode().getModeID();
+
+            switch (modeID) {
+                case 2: //9 ball
+                    //1 round đấu kết thúc => update match score
+                    //bi 9 potted && !isFoul && scored
+                    //16: 'yellow_striped_9'
+                    if (event.isScoreValue() && !event.isFoul() && lmr.getTargetBallId() == 16) {
+                        //update match score
+                        updateMatch(player);
+                    }
+                    break;
+
+
+            }
             // Nếu gameSet chưa start thì start
             if (!gameSetStartedMap.containsKey(gameSetID)) {
                 //update game_set status
                 GameSet startedGameSet = gameSetService.startSet(gameSetID);
                 log.info("Started gameSet with id: {}", startedGameSet.getGameSetID());
+                //set ongoing cho từng gameSet
                 gameSetStartedMap.put(gameSetID, true);
 
                 Integer matchID = startedGameSet.getBilliardMatch().getBilliardMatchID();
@@ -91,6 +115,15 @@ public class EventProcessorService {
         }
     }
 
+    private void updateMatch(Player player) {
+        matchService.updateScore(
+                new ScoreRequest(
+                        player.getTeam().getBilliardMatch().getBilliardMatchID(),
+                        player.getTeam().getTeamID(),
+                        "+1"
+                ));
+    }
+
     /**
      * Reset trạng thái gameSet và match đã start — dùng khi kết thúc match
      */
@@ -106,7 +139,6 @@ public class EventProcessorService {
         matchStartedMap.remove(matchID);
         log.info("Removed matchID: {} from matchStartedMap", matchID);
     }
-
 
 
     // xác định shot event
@@ -131,12 +163,15 @@ public class EventProcessorService {
         shot.setResult(result.name());
 
 //        gửi thông báo qua web socket bằng topic: shot_event
-        webSocketService.sendToWebSocket(WebSocketTopic.NOTI_SHOT.getValue() + tableID, shot);
-//        fcmService.sendNotification(
-//                tableID,
-//                "shot",
-//                String.valueOf(shot)
-//        );
+        webSocketService.sendToWebSocket(
+                WebSocketTopic.NOTI_SHOT.getValue() + tableID,
+                new WebsocketReq(WSFCMCode.SHOT, shot)
+        );
+        fcmService.sendNotification(
+                tableID,
+                String.valueOf(WSFCMCode.SHOT),
+                String.valueOf(shot)
+        );
 
         log.info("Send websocket to: /topic/shot_event/" + tableID);
         log.info(shot.toString());

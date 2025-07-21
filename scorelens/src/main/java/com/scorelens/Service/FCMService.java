@@ -45,11 +45,12 @@ public class FCMService {
         // Check if tableID already exists in the map
         if (fcmTokens.containsKey(tableID)) {
             String existingToken = fcmTokens.get(tableID);
+            FCMToken oldToken = fcmTokenRepo.findByBillardTable_BillardTableID(tableID);
             // If tableID exists, check if the token is different
             if (!token.equals(existingToken)) {
                 fcmTokens.put(tableID, token); // Update the token
                 log.info("FCM token updated for tableID {}: Old token: {}, New token: {}", tableID, existingToken, token);
-                saveFCMToken(tableID, token);
+                saveFCMToken(oldToken, token);
                 return true; // Token was updated
             } else {
                 log.info("FCM token for tableID {} already registered and is the same: {}", tableID, token);
@@ -66,13 +67,20 @@ public class FCMService {
         }
     }
 
+    private void saveFCMToken(FCMToken fcmToken, String token) {
+        fcmToken.setTargetToken(token);
+        fcmTokenRepo.save(fcmToken);
+        log.info("FCM token saved to db for tableID {}: {}", fcmToken.getBillardTable().getBillardTableID(), token);
+    }
+
+
     private void saveFCMToken(String tableID, String token) {
         BilliardTable table = billiardTableService.findBilliardTable(tableID);
         FCMToken fcmToken = new FCMToken();
         fcmToken.setTargetToken(token);
         fcmToken.setBillardTable(table);
         fcmTokenRepo.save(fcmToken);
-        log.info("FCM token saved to db for tableID {}: {}", tableID, token);
+        log.info("FCM token saved to db for tableID {}: {}", fcmToken.getBillardTable().getBillardTableID(), token);
     }
 
     @PostConstruct
