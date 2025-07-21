@@ -296,11 +296,11 @@ public class BilliardMatchV3Controller {
         BilliardMatchResponse rs = billiardMatchService.updateScore(scoreRequest);
 
 
-        NotificationResponse tmp = newNoti(
-                request.getMatchID(),
-                "",
-                NotificationType.score
-        );
+//        NotificationResponse tmp = newNoti(
+//                request.getMatchID(),
+//                "",
+//                NotificationType.score
+//        );
 
 
         if (rs.getStatus().equals(MatchStatus.completed)) {

@@ -266,15 +266,15 @@ public class BilliardMatchService implements IBilliardMatchService {
             currentSet.setWinner(team.getName());
             setRepo.save(currentSet);
 
-            String tmp = "Team" + team.getName() + "has win game set no" + currentSet.getGameSetNo();
+            String tmp = "Team " + team.getName() + " has win game set no " + currentSet.getGameSetNo();
 
-            //save noti
-            notificationService.saveNotification(
-                new NotificationRequest(
-                        match.getBilliardMatchID(),
-                        tmp,
-                        NotificationType.score
-                ));
+//            //save noti
+//            notificationService.saveNotification(
+//                new NotificationRequest(
+//                        match.getBilliardMatchID(),
+//                        tmp,
+//                        NotificationType.score
+//                ));
 
             //push noti
             webSocketService.sendToWebSocket(
@@ -313,7 +313,7 @@ public class BilliardMatchService implements IBilliardMatchService {
             match.setEndTime(LocalDateTime.now());
             match.setStatus(MatchStatus.completed);
 
-            String tmp = "Match " + match.getCode() + "has ended";
+            String tmp = "Match " + match.getCode() + " has ended";
 
             //push noti
             try {
@@ -323,7 +323,7 @@ public class BilliardMatchService implements IBilliardMatchService {
                         tmp
                 );
             } catch ( Exception e ) {
-                log.info("Failed to send notification: " + e.getMessage());
+                log.info("Failed to send notification via FCM: " + e.getMessage());
             }
             webSocketService.sendToWebSocket(
                     WebSocketTopic.NOTI_MOBILE.getValue() + match.getBillardTable().getBillardTableID(),
