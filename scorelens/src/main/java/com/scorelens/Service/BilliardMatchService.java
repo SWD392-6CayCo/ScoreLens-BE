@@ -12,6 +12,7 @@ import com.scorelens.Service.Interface.IBilliardMatchService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -60,6 +61,13 @@ public class BilliardMatchService implements IBilliardMatchService {
 
     @Autowired
     RealTimeNotification realTimeNotification;
+
+    @Autowired
+    @Lazy
+    EventProcessorService eventProcessorService;
+
+    @Autowired
+    BilliardTableService billiardTableService;
 
 
     @Override
@@ -324,6 +332,19 @@ public class BilliardMatchService implements IBilliardMatchService {
                     match.getBillardTable().getBillardTableID(),
                     WSFCMCode.WINNING_MATCH
             );
+
+
+            //free matchID & gameSetID in queue
+            eventProcessorService.resetMatchState(matchID);
+            List<Integer> gameSetIDList = match.getSets()
+                    .stream()
+                    .map(GameSet::getGameSetID)
+                    .toList();
+            eventProcessorService.resetGameSetState(gameSetIDList);
+
+            //free table
+            billiardTableService.setAvailable(String.valueOf(match.getBillardTable().getBillardTableID()));
+
 
             // sum totalScore moi team tu teamSet
             for (Team t : match.getTeams()) {
