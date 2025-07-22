@@ -289,6 +289,7 @@ public class StaffService implements IStaffService {
     //    --------------------------------------------------------------------------
 
     //-------------------------------- PAGINATION ---------------------------------
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_STAFF_LIST')")
     public PageableResponseDto<StaffResponseDto> getStaffsWithPagination(PageableRequestDto request, String storeId, String role) {
         // Create sort
         Sort sort = Sort.by(

@@ -196,6 +196,7 @@ public class CustomerService implements ICustomerService {
     //    --------------------------------------------------------------------------
 
     //-------------------------------- PAGINATION ---------------------------------
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_CUSTOMER_LIST')")
     public PageableResponseDto<CustomerResponseDto> getCustomersWithPagination(PageableRequestDto request) {
         // Create sort
         Sort sort = Sort.by(

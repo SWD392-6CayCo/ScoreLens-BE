@@ -3,6 +3,7 @@ package com.scorelens.Config;
 import com.google.api.Http;
 import com.scorelens.Enums.StaffRole;
 import com.scorelens.Enums.UserType;
+import com.scorelens.Security.CustomAccessDeniedHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,6 +77,9 @@ public class SecurityConfig {
     @Autowired
     private CookieJwtAuthenticationFilter cookieJwtAuthenticationFilter;
 
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
@@ -85,16 +89,18 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/v*/teams/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/tables").permitAll()
-                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches", "/v3/fcm/operation").permitAll()
-
+                .requestMatchers(HttpMethod.POST, "/v*/billiard-matches", "/v3/fcm/operation").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v*/billiard-matches").hasRole("CUSTOMER")
                 .anyRequest().authenticated());
 
         http.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                        .accessDeniedHandler(customAccessDeniedHandler));
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults());
@@ -133,9 +139,18 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "https://localhost:5173",
                 "https://score-lens.vercel.app",
-                "exp://192.168.90.68:8081",
-                "exp://**",
                 "https://scorelens.onrender.com"
+        ));
+
+        // Thêm pattern cho mobile apps
+        corsConfiguration.setAllowedOriginPatterns(Arrays.asList(
+                "exp://*",           // Expo mobile apps
+                "capacitor://*",     // Capacitor apps
+                "ionic://*",         // Ionic apps
+                "file://*",          // Local file protocol
+                "*://192.168.*.*:*", // Local network IPs
+                "*://10.*.*.*:*",    // Private network IPs
+                "*://172.*.*.*:*"    // Private network IPs
         ));
         //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
         corsConfiguration.setAllowCredentials(true);

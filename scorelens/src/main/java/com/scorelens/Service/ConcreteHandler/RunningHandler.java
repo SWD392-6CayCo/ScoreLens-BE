@@ -11,6 +11,7 @@ import com.scorelens.Service.FCMService;
 import com.scorelens.Service.Interface.KafkaCodeHandler;
 import com.scorelens.Service.Interface.customAnnotation.KafkaCodeMapping;
 import com.scorelens.Service.KafkaService.HeartbeatService;
+import com.scorelens.Service.RealTimeNotification;
 import com.scorelens.Service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,31 +27,26 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class RunningHandler implements KafkaCodeHandler {
 
-    private KafKaHeartBeat kafkaHeartBeat;
 
-    @Autowired
-    private HeartbeatService heartbeatService;
+    private final KafKaHeartBeat kafkaHeartBeat;
 
-    @Autowired
-    private WebSocketService webSocketService;
+    private final HeartbeatService heartbeatService;
 
-    private final FCMService fcmService;
+    private final RealTimeNotification realTimeNotification;
 
     @Override
-    public void handle(ProducerRequest request) throws FirebaseMessagingException {
+    public void handle(ProducerRequest request) {
         String tableID = request.getTableID();
         kafkaHeartBeat.stop();
         kafkaHeartBeat.updateLastConfirmedTime();
         CompletableFuture<Boolean> tmp = heartbeatService.confirmHeartbeat();
         log.info("CompletableFuture: {}", tmp);
-        webSocketService.sendToWebSocket(
-                WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                new WebsocketReq(WSFCMCode.NOTIFICATION, "AI Camera Connected")
-        );
-        fcmService.sendNotification(
+        realTimeNotification.sendRealTimeNotification(
+                "AI Camera Connected",
+                WebSocketTopic.NOTI_NOTIFICATION,
                 tableID,
-                String.valueOf(WSFCMCode.NOTIFICATION),
-                "Ai Camera Connected"
+                WSFCMCode.NOTIFICATION
         );
+
     }
 }

@@ -3,7 +3,6 @@ package com.scorelens.Service.KafkaService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.Config.KafKaHeartBeat;
 import com.scorelens.DTOs.Request.InformationRequest;
 import com.scorelens.DTOs.Request.ProducerRequest;
@@ -17,6 +16,7 @@ import com.scorelens.Enums.WSFCMCode;
 import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.BilliardTableService;
 import com.scorelens.Service.FCMService;
+import com.scorelens.Service.RealTimeNotification;
 import com.scorelens.Service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +37,14 @@ public class KafkaProducer {
 
     private final int partition = 0;
 
-    private final WebSocketService webSocketService;
 
     private final KafKaHeartBeat kafKaHeartBeat;
 
     private final HeartbeatService heartbeatService;
 
     private final FCMService fcmService;
+
+    private final RealTimeNotification realTimeNotification;
 
     //    @Value("${spring.kafka.producer.topic}")
     private final String ja_to_py_topic = "ja_to_py";
@@ -85,15 +86,14 @@ public class KafkaProducer {
             try {
                 String message = objectMapper.writeValueAsString(new ProducerRequest(KafkaCode.RUNNING, tableID, "Heart beat checking"));
                 sendEvent(tableID, message);
-                webSocketService.sendToWebSocket(
-                        WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                        new WebsocketReq(WSFCMCode.NOTIFICATION, "Connecting to AI Camera...")
+
+                //sending noti via websocket & firebase
+                realTimeNotification.sendRealTimeNotification(
+                        "Connecting to AI Camera...",
+                        WebSocketTopic.NOTI_NOTIFICATION,
+                        tableID,
+                        WSFCMCode.NOTIFICATION
                 );
-//                fcmService.sendNotification(
-//                        tableID,
-//                        "Connecting to AI Camera...",
-//                        "noti"
-//                );
 
                 //sau 10s neu py k gui msg
                 CompletableFuture<Boolean> future = heartbeatService.onHeartbeatChecking(tableID);
@@ -106,9 +106,6 @@ public class KafkaProducer {
                 });
             } catch (JsonProcessingException e) {
                 log.error("Failed to serialize heartbeat message", e);
-//            } catch (FirebaseMessagingException e) {
-//                throw new RuntimeException(e);
-//            }
             }
         } else {
             if (kafKaHeartBeat.timeSinceLastConfirm().getSeconds() > 30) {

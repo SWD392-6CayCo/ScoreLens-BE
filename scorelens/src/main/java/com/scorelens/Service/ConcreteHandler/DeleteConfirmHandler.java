@@ -9,6 +9,7 @@ import com.scorelens.Enums.WebSocketTopic;
 import com.scorelens.Service.FCMService;
 import com.scorelens.Service.Interface.KafkaCodeHandler;
 import com.scorelens.Service.Interface.customAnnotation.KafkaCodeMapping;
+import com.scorelens.Service.RealTimeNotification;
 import com.scorelens.Service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,23 +20,18 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DeleteConfirmHandler implements KafkaCodeHandler {
 
-    @Autowired
-    private WebSocketService webSocketService;
-
-    final FCMService fcmService;
+    final RealTimeNotification realTimeNotification;
 
     @Override
-    public void handle(ProducerRequest request) throws FirebaseMessagingException {
+    public void handle(ProducerRequest request){
         String tableID = request.getTableID();
         int deleteCount = (Integer) request.getData();
-        webSocketService.sendToWebSocket(
-                WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
-                new WebsocketReq(WSFCMCode.WARNING, "Delete Event count: " + deleteCount)
-        );
-        fcmService.sendNotification(
+        realTimeNotification.sendRealTimeNotification(
+                "Delete Event count: " + deleteCount,
+                WebSocketTopic.NOTI_NOTIFICATION,
                 tableID,
-                String.valueOf(WSFCMCode.WARNING),
-                "Delete Event count: " + deleteCount
+                WSFCMCode.WARNING
         );
+
     }
 }

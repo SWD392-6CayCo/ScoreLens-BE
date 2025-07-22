@@ -181,6 +181,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
 
         // Check Redis first (faster than database)
+        //Kiểm tra xem token này có hợp lệ không
         if(redisTokenService.isTokenInvalidated(jti)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
@@ -192,38 +193,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
 
         return signedJWT;
     }
-
-//    public AuthTokens refreshTokenV2(RefreshV2Request request) throws ParseException, JOSEException {
-//        SignedJWT signedJWT = verifyToken(request.getRefreshToken(), true);
-//
-//        String jti = signedJWT.getJWTClaimsSet().getJWTID();
-//        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-//
-//        //Blacklist refresh token cũ
-//        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-//                .id(jti)
-//                .expiryTime(expiryTime)
-//                .build();
-//        invalidatedTokenRepository.save(invalidatedToken);
-//
-//        String email = signedJWT.getJWTClaimsSet().getSubject();
-//        AppUser user = staffRepo.findByEmail(email)
-//                .map(s -> (AppUser) s)
-//                .orElseGet(() -> customerRepo.findByEmail(email)
-//                        .map(c -> (AppUser) c)
-//                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST)));
-//
-//        String newAccessToken = generateTokenV2(user, VALID_DURATION);
-//        String newRefreshToken = generateTokenV2(user, REFRESHABLE_DURATION);
-//
-//        AuthenticationResponseDtoV2 responseDto = AuthenticationResponseDtoV2.builder()
-//                .authenticated(true)
-////                .accessToken(newAccessToken)
-////                .refreshToken(newRefreshToken)
-//                .build();
-//
-//        return new AuthTokens(responseDto, newAccessToken, newRefreshToken);
-//    }
 
     public AuthTokens refreshTokenV2(String refreshToken) throws ParseException, JOSEException {
         SignedJWT signedJWT = verifyToken(refreshToken, true);
@@ -527,11 +496,12 @@ public class AuthenticationV2Service implements IAuthenticationService {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }
 
-        // Tạo reset token và lưu vào Redis (thay thế JWT)
+        // Tạo reset token
         String resetToken = generateSimpleResetToken();
         String userName = customer != null ? customer.getName() : staff.getName();
 
         try {
+            //lưu vào Redis (thay thế JWT)
             redisTokenService.saveResetToken(email, resetToken);
             log.info("Reset token saved to Redis for email: {}", email);
         } catch (Exception e) {
@@ -567,7 +537,7 @@ public class AuthenticationV2Service implements IAuthenticationService {
         }
 
         // Verify và xóa token (one-time use)
-        String storedToken = redisTokenService.getAndDeleteResetToken(email);
+        String storedToken = redisTokenService.getAndDeleteResetToken(email); //xóa reset token sau khi dùng
         if (!resetToken.equals(storedToken)) {
             throw new AppException(ErrorCode.INVALID_RESET_TOKEN);
         }
@@ -580,7 +550,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
             // Update customer password
             customer.setPassword(passwordEncoder.encode(newPassword));
             customerRepo.save(customer);
-            log.info("Password reset successfully for customer: {}", email);
 
             // Gửi email xác nhận
             try {
@@ -593,7 +562,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
             // Update staff password
             staff.setPassword(passwordEncoder.encode(newPassword));
             staffRepo.save(staff);
-            log.info("Password reset successfully for staff: {}", email);
 
             // Gửi email xác nhận
             try {
@@ -601,7 +569,6 @@ public class AuthenticationV2Service implements IAuthenticationService {
             } catch (MessagingException | java.io.UnsupportedEncodingException e) {
                 log.warn("Failed to send password reset success email to: {}", email, e);
             }
-
         } else {
             throw new AppException(ErrorCode.USER_NOT_EXIST);
         }

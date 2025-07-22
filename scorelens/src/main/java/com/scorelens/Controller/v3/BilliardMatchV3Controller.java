@@ -1,11 +1,11 @@
 package com.scorelens.Controller.v3;
 
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.scorelens.Controller.v1.GameSetV1Controller;
 import com.scorelens.DTOs.Request.*;
 import com.scorelens.DTOs.Response.BilliardMatchResponse;
 import com.scorelens.DTOs.Response.GameSetResponse;
 import com.scorelens.DTOs.Response.NotificationResponse;
+import com.scorelens.DTOs.Response.TeamResponse;
 import com.scorelens.Entity.BilliardMatch;
 import com.scorelens.Entity.ResponseObject;
 import com.scorelens.Enums.*;
@@ -53,7 +53,7 @@ public class BilliardMatchV3Controller {
 
     NotificationService notificationService;
 
-    FCMService fcmService;
+    RealTimeNotification realTimeNotification;
 
     @Operation(summary = "Get billiard matches with unified parameters",
             description = "Unified API that combines all GET operations from v1 controller")
@@ -183,7 +183,7 @@ public class BilliardMatchV3Controller {
     }
 
     @PostMapping
-    public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) throws FirebaseMessagingException {
+    public ResponseObject createMatch(@RequestBody BilliardMatchCreateRequest request) {
         BilliardMatchResponse response = billiardMatchService.createMatch(request);
         String tableCode = billiardTableService.findBilliardTableById(response.getBilliardTableID()).getTableCode();
         String tableID = response.getBilliardTableID();
@@ -200,19 +200,21 @@ public class BilliardMatchV3Controller {
         //add info into notification
         NotificationResponse tmp = newNoti(
                 response.getBilliardMatchID(),
-                "Match" + response.getBilliardMatchID() + "is created on table " + tableCode,
+                "Match " + response.getBilliardMatchID() + " is created on table " + tableCode,
                 NotificationType.created
         );
 
         //send to fcm & websocket
+        //send match information to mobile
         webSocketService.sendToWebSocket(
                 WebSocketTopic.NOTI_NOTIFICATION.getValue() + tableID,
                 new WebsocketReq(WSFCMCode.MATCH_START, response)
-                );
-        fcmService.sendNotification(
+        );
+        realTimeNotification.sendRealTimeNotification(
+                tmp.getMessage(),
+                WebSocketTopic.NOTI_NOTIFICATION,
                 tableID,
-                String.valueOf(WSFCMCode.MATCH_START),
-                String.valueOf(tmp)
+                WSFCMCode.NOTIFICATION
         );
 
         return ResponseObject.builder()
@@ -280,7 +282,7 @@ public class BilliardMatchV3Controller {
                 .build();
     }
 
-    private ResponseObject handleUpdateScore(BilliardMatchV3UpdateRequest request) throws FirebaseMessagingException {
+    private ResponseObject handleUpdateScore(BilliardMatchV3UpdateRequest request) {
         if (request.getMatchID() == null || request.getTeamID() == null || request.getDelta() == null) {
             return ResponseObject.builder()
                     .status(400)
@@ -294,14 +296,6 @@ public class BilliardMatchV3Controller {
         scoreRequest.setDelta(request.getDelta());
 
         BilliardMatchResponse rs = billiardMatchService.updateScore(scoreRequest);
-
-
-//        NotificationResponse tmp = newNoti(
-//                request.getMatchID(),
-//                "",
-//                NotificationType.score
-//        );
-
 
         if (rs.getStatus().equals(MatchStatus.completed)) {
 
