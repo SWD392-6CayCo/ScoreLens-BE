@@ -91,7 +91,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/v*/modes/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/tables").permitAll()
-                .requestMatchers(HttpMethod.POST, "/v*/billiardmatches", "/v3/fcm/operation").permitAll()
+                .requestMatchers(HttpMethod.POST, "/v*/billiard-matches", "/v3/fcm/operation").permitAll()
 
                 .anyRequest().authenticated());
 
