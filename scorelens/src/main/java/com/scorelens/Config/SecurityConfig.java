@@ -92,7 +92,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/v*/tables/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/v*/tables").permitAll()
                 .requestMatchers(HttpMethod.POST, "/v*/billiard-matches", "/v3/fcm/operation").permitAll()
-
+                .requestMatchers(HttpMethod.POST, "/v*/billiard-matches").hasRole("CUSTOMER")
                 .anyRequest().authenticated());
 
         http.oauth2ResourceServer(oauth2 ->
@@ -139,9 +139,18 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "https://localhost:5173",
                 "https://score-lens.vercel.app",
-                "exp://192.168.90.68:8081",
-                "exp://**",
                 "https://scorelens.onrender.com"
+        ));
+
+        // Thêm pattern cho mobile apps
+        corsConfiguration.setAllowedOriginPatterns(Arrays.asList(
+                "exp://*",           // Expo mobile apps
+                "capacitor://*",     // Capacitor apps
+                "ionic://*",         // Ionic apps
+                "file://*",          // Local file protocol
+                "*://192.168.*.*:*", // Local network IPs
+                "*://10.*.*.*:*",    // Private network IPs
+                "*://172.*.*.*:*"    // Private network IPs
         ));
         //corsConfiguration.addAllowedOriginPattern("*"); // mở rộng cho tất cả các port localhost
         corsConfiguration.setAllowCredentials(true);
