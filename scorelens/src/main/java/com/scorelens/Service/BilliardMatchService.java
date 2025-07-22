@@ -9,6 +9,7 @@ import com.scorelens.Exception.ErrorCode;
 import com.scorelens.Mapper.BilliardMatchMapper;
 import com.scorelens.Repository.*;
 import com.scorelens.Service.Interface.IBilliardMatchService;
+import com.scorelens.Service.KafkaService.KafkaProducer;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,9 @@ public class BilliardMatchService implements IBilliardMatchService {
 
     @Autowired
     BilliardTableService billiardTableService;
+
+    @Autowired
+    KafkaProducer producer;
 
 
     @Override
@@ -289,6 +293,15 @@ public class BilliardMatchService implements IBilliardMatchService {
                     WebSocketTopic.NOTI_MOBILE,
                     match.getBillardTable().getBillardTableID(),
                     WSFCMCode.WINNING_SET
+            );
+
+            //stop stream
+            producer.sendEvent(
+                    match.getBillardTable().getBillardTableID(),
+                    new ProducerRequest(
+                            KafkaCode.STOP_STREAM,
+                            match.getBillardTable().getBillardTableID(),
+                            "Stop stream")
             );
 
             // Update team scores into TeamSet

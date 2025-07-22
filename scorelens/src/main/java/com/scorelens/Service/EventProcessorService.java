@@ -89,8 +89,6 @@ public class EventProcessorService {
                         updateMatch(player);
                     }
                     break;
-
-
             }
             // Nếu gameSet chưa start thì start
             if (!gameSetStartedMap.containsKey(gameSetID)) {

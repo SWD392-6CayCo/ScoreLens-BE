@@ -46,7 +46,7 @@ public class KafkaProducerV3Controller {
                 case "informationwithtableid":
                     return handleInformationWithTableIdSend(request);
                 case "stop":
-                    return handleStopSend();
+                    return handleStopSend(request);
                 default:
                     return ResponseObject.builder()
                             .status(400)
@@ -114,8 +114,11 @@ public class KafkaProducerV3Controller {
                 .build();
     }
     
-    private ResponseObject handleStopSend() {
-        kafkaProducer.sendEvent(new ProducerRequest(KafkaCode.STOP_STREAM, "", "Stop stream"));
+    private ResponseObject handleStopSend(KafkaProducerV3Request request) {
+        kafkaProducer.sendEvent(
+                request.getTableId(),
+                new ProducerRequest(KafkaCode.STOP_STREAM, request.getTableId(), "Stop stream")
+        );
         return ResponseObject.builder()
                 .status(1000)
                 .message("Successfully sent message")

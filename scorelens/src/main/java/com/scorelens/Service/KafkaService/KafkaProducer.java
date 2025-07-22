@@ -42,8 +42,6 @@ public class KafkaProducer {
 
     private final HeartbeatService heartbeatService;
 
-    private final FCMService fcmService;
-
     private final RealTimeNotification realTimeNotification;
 
     //    @Value("${spring.kafka.producer.topic}")
