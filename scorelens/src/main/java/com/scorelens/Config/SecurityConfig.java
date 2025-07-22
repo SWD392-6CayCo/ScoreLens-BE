@@ -93,6 +93,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/v*/tables").permitAll()
                 .requestMatchers(HttpMethod.POST, "/v*/billiard-matches", "/v3/fcm/operation").permitAll()
                 .requestMatchers(HttpMethod.POST, "/v*/billiard-matches").hasRole("CUSTOMER")
+                .requestMatchers(HttpMethod.PUT, "/v*/billiard-matches").permitAll()
                 .anyRequest().authenticated());
 
         http.oauth2ResourceServer(oauth2 ->
