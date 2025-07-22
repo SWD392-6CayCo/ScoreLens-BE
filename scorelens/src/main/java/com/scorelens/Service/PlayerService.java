@@ -108,8 +108,9 @@ public class PlayerService implements IPlayerService {
         }
         for (Team t : match.getTeams()) {
             for (Player p : t.getPlayers()) {
-                if (p.getCustomer().getEmail().equals(request.getInfo()) ||
-                    p.getCustomer().getPhoneNumber().equals(request.getInfo())) {
+                if (p.getCustomer() != null &&
+                        (request.getInfo().equals(p.getCustomer().getEmail()) ||
+                                request.getInfo().equals(p.getCustomer().getPhoneNumber()))) {
                     throw new AppException(ErrorCode.CUSTOMER_SAVED);
                 }
             }
