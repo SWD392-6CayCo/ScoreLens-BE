@@ -295,15 +295,6 @@ public class BilliardMatchService implements IBilliardMatchService {
                     WSFCMCode.WINNING_SET
             );
 
-            //stop stream
-            producer.sendEvent(
-                    match.getBillardTable().getBillardTableID(),
-                    new ProducerRequest(
-                            KafkaCode.STOP_STREAM,
-                            match.getBillardTable().getBillardTableID(),
-                            "Stop stream")
-            );
-
             // Update team scores into TeamSet
             for (Team t : match.getTeams()) {
                 teamSetService.updateTeamSet(t.getTeamID(), currentSet.getGameSetID(), t.getTotalScore());
@@ -312,13 +303,12 @@ public class BilliardMatchService implements IBilliardMatchService {
             }
         }
         // Check if match should end
-        checkMatchEnd(request.getMatchID());
+        checkMatchEnd(match, request.getMatchID());
         return billiardMatchMapper.toBilliardMatchResponse(repository.save(match));
     }
 
-    public void checkMatchEnd(Integer matchID) {
-        BilliardMatch match = repository.findById(matchID)
-                .orElseThrow(() -> new AppException(ErrorCode.MATCH_NOT_FOUND));
+    public void checkMatchEnd(BilliardMatch match, Integer matchID) {
+
 
         boolean noPendingOrOngoing = match.getSets().stream()
                 .noneMatch(set -> set.getStatus() == MatchStatus.pending || set.getStatus() == MatchStatus.ongoing);
@@ -344,6 +334,15 @@ public class BilliardMatchService implements IBilliardMatchService {
                     WebSocketTopic.NOTI_MOBILE,
                     match.getBillardTable().getBillardTableID(),
                     WSFCMCode.WINNING_MATCH
+            );
+
+            //stop stream
+            producer.sendEvent(
+                    match.getBillardTable().getBillardTableID(),
+                    new ProducerRequest(
+                            KafkaCode.STOP_STREAM,
+                            match.getBillardTable().getBillardTableID(),
+                            "Stop stream")
             );
 
 
