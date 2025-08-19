@@ -15,7 +15,7 @@ public class TokenCookieManager {
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(60*60);
         // Thay đổi SameSite policy cho iOS Safari compatibility
-        accessTokenCookie.setAttribute("SameSite", "Lax");
+        accessTokenCookie.setAttribute("SameSite", "None");
 
         Cookie refreshTokenCookie = new Cookie("RefreshToken", refreshToken);
         refreshTokenCookie.setHttpOnly(true);
@@ -23,7 +23,7 @@ public class TokenCookieManager {
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(60*60*24*7);
         // Thay đổi SameSite policy cho iOS Safari compatibility
-        refreshTokenCookie.setAttribute("SameSite", "Lax");
+        refreshTokenCookie.setAttribute("SameSite", "None");
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
@@ -34,14 +34,14 @@ public class TokenCookieManager {
         accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(0);
-        accessTokenCookie.setAttribute("SameSite", "Lax");
+        accessTokenCookie.setAttribute("SameSite", "None");
 
         Cookie refreshTokenCookie = new Cookie("RefreshToken", "");
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(0);
-        refreshTokenCookie.setAttribute("SameSite", "Lax");
+        refreshTokenCookie.setAttribute("SameSite", "None");
 
         // QUAN TRỌNG: Phải add cookies vào response
         response.addCookie(accessTokenCookie);
